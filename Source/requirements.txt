@@ -1,0 +1,3 @@
+# Contract v1: full dependency baseline, Python 3.11.
+# Standard library: tkinter, ttk, json, dataclasses, enum, csv, time.
+-r requirements.lock.txt

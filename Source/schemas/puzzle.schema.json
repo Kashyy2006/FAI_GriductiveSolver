@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Griductive Puzzle v1.0",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "puzzle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "size": {
+      "type": "integer",
+      "enum": [3, 4, 5]
+    },
+    "characters": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 25,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-E][1-5]$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "profession": {
+            "type": "string",
+            "minLength": 1
+          },
+          "row": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          },
+          "col": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          },
+          "hidden_status": {
+            "enum": ["CRIMINAL", "INNOCENT"]
+          },
+          "clue": {
+            "$ref": "#/$defs/clue"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "profession",
+          "row",
+          "col",
+          "hidden_status",
+          "clue"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "initially_revealed": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-E][1-5]$"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "puzzle_id",
+    "size",
+    "characters",
+    "initially_revealed"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "region": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ROW"
+            },
+            "index": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            }
+          },
+          "required": ["kind", "index"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "COLUMN"
+            },
+            "index": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            }
+          },
+          "required": ["kind", "index"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "NEIGHBORS"
+            },
+            "cell": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            }
+          },
+          "required": ["kind", "cell"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EXPLICIT"
+            },
+            "cells": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-E][1-5]$"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": ["kind", "cells"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "COMMON_NEIGHBORS"
+            },
+            "first": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            },
+            "second": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            }
+          },
+          "required": ["kind", "first", "second"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "clue": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "FACT"
+            },
+            "person": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            },
+            "status": {
+              "enum": ["CRIMINAL", "INNOCENT"]
+            }
+          },
+          "required": ["id", "type", "person", "status"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "SAME"
+            },
+            "first": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            },
+            "second": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            }
+          },
+          "required": ["id", "type", "first", "second"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "DIFFERENT"
+            },
+            "first": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            },
+            "second": {
+              "type": "string",
+              "pattern": "^[A-E][1-5]$"
+            }
+          },
+          "required": ["id", "type", "first", "second"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "EXACTLY"
+            },
+            "region": {
+              "$ref": "#/$defs/region"
+            },
+            "k": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 25
+            }
+          },
+          "required": ["id", "type", "region", "k"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "AT_LEAST"
+            },
+            "region": {
+              "$ref": "#/$defs/region"
+            },
+            "k": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 25
+            }
+          },
+          "required": ["id", "type", "region", "k"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "AT_MOST"
+            },
+            "region": {
+              "$ref": "#/$defs/region"
+            },
+            "k": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 25
+            }
+          },
+          "required": ["id", "type", "region", "k"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "EVEN"
+            },
+            "region": {
+              "$ref": "#/$defs/region"
+            }
+          },
+          "required": ["id", "type", "region"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "type": {
+              "const": "ODD"
+            },
+            "region": {
+              "$ref": "#/$defs/region"
+            }
+          },
+          "required": ["id", "type", "region"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

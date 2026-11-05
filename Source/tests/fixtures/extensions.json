@@ -1,0 +1,98 @@
+{
+  "assignment": {
+    "A1": "CRIMINAL",
+    "B1": "INNOCENT",
+    "C1": "CRIMINAL",
+    "A2": "INNOCENT",
+    "B2": "CRIMINAL",
+    "C2": "INNOCENT",
+    "A3": "CRIMINAL",
+    "B3": "INNOCENT",
+    "C3": "CRIMINAL"
+  },
+  "regions": [
+    {
+      "region": {
+        "kind": "COMMON_NEIGHBORS",
+        "first": "A1",
+        "second": "C1"
+      },
+      "expected": [
+        "B1",
+        "B2"
+      ]
+    },
+    {
+      "region": {
+        "kind": "COMMON_NEIGHBORS",
+        "first": "A1",
+        "second": "C3"
+      },
+      "expected": [
+        "B2"
+      ]
+    }
+  ],
+  "clues": [
+    {
+      "id": "same",
+      "type": "SAME",
+      "first": "A1",
+      "second": "C1"
+    },
+    {
+      "id": "different",
+      "type": "DIFFERENT",
+      "first": "A1",
+      "second": "B1"
+    },
+    {
+      "id": "exactly",
+      "type": "EXACTLY",
+      "region": {
+        "kind": "COMMON_NEIGHBORS",
+        "first": "A1",
+        "second": "C1"
+      },
+      "k": 1
+    },
+    {
+      "id": "least",
+      "type": "AT_LEAST",
+      "region": {
+        "kind": "ROW",
+        "index": 0
+      },
+      "k": 2
+    },
+    {
+      "id": "most",
+      "type": "AT_MOST",
+      "region": {
+        "kind": "COLUMN",
+        "index": 1
+      },
+      "k": 1
+    },
+    {
+      "id": "even",
+      "type": "EVEN",
+      "region": {
+        "kind": "EXPLICIT",
+        "cells": [
+          "A1",
+          "C1"
+        ]
+      }
+    },
+    {
+      "id": "odd",
+      "type": "ODD",
+      "region": {
+        "kind": "COMMON_NEIGHBORS",
+        "first": "A1",
+        "second": "C1"
+      }
+    }
+  ]
+}
