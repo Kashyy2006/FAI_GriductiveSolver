@@ -6,9 +6,8 @@ from game.models import Clue, ClueType, ContractError, PublicState, Status
 from logic.regions import _validated_cells, resolve_region
 
 
-def evaluate_clue(clue: Clue, assignment: Mapping[str, Status], state: PublicState) -> bool:
-    """Evaluate against a complete character-ID assignment, not SAT variable IDs."""
-    cells = _validated_cells(state)
+def _validate_clue_fields(clue: Clue) -> None:
+    """Validate the clue tag and allowed fields without evaluating its truth."""
     if not isinstance(clue, Clue) or not isinstance(clue.type, ClueType):
         raise ContractError("Expected a Clue with a ClueType tag")
     if not isinstance(clue.id, str) or not clue.id:
@@ -26,6 +25,12 @@ def evaluate_clue(clue: Clue, assignment: Mapping[str, Status], state: PublicSta
     for name in ("person", "status", "first", "second", "region", "k"):
         if name not in allowed_fields[clue.type] and getattr(clue, name) is not None:
             raise ContractError(f"Unexpected {name} parameter for {clue.type.value}")
+
+
+def evaluate_clue(clue: Clue, assignment: Mapping[str, Status], state: PublicState) -> bool:
+    """Evaluate against a complete character-ID assignment, not SAT variable IDs."""
+    cells = _validated_cells(state)
+    _validate_clue_fields(clue)
     if (
         not isinstance(assignment, Mapping)
         or set(assignment) != {item.id for item in cells}

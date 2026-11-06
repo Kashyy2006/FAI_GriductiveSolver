@@ -10,9 +10,9 @@
 ## Trạng thái triển khai
 
 - `regions.py`: resolve đủ năm loại vùng, kiểm tra geometry và tham số theo tag;
-  kết quả không trùng, theo row-major, không sửa đầu vào.
+kết quả không trùng, theo row-major, không sửa đầu vào.
 - `clue_evaluator.py`: đánh giá độc lập sáu clue core và EVEN/ODD từ assignment
-  đầy đủ theo ID; kiểm tra kiểu, tham số và biên k, không gọi encoder.
+đầy đủ theo ID; kiểm tra kiểu, tham số và biên k, không gọi encoder.
 - `cnf_encoder.py`: còn stub, chưa mã hóa CNF.
 
 ## Nhật ký AI
@@ -32,6 +32,30 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
   - Giữ quy tắc neighbors tám hướng, COMMON_NEIGHBORS đối xứng/không chứa đầu mút, kết quả row-major, counting/parity trên vùng rỗng và không mutate đầu vào. Giữ nguyên chữ ký API, model, schema và dependency.
 - Kiểm tra:
   - Test regions/contract trước sửa: 28 failed, 44 passed; sau sửa: 72 passed. Test evaluator trước sửa: 17 failed, 57 passed; sau sửa: 74 passed.
-  - Đã chạy lại trên Python 3.11.9 từ Source/, dùng ..\.venv\py311\Scripts\python.exe: `-m pytest tests -q -p no:cacheprovider` đạt 146 test, gồm test loader/schema/contract hiện có; `-m ruff check . --no-cache` và `-m ruff format --check . --no-cache` đạt, 25 file đã đúng format; `-m pip check` không có dependency hỏng.
-  - Môi trường Windows, Python 3.11.9; tạo .venv\py311 và cài đúng phiên bản trong requirements.txt/requirements.lock.txt.
+  - Đã chạy lại trên Python 3.11.9 từ Source/, dùng ...venv\\py311\\Scripts\\python.exe: `-m pytest tests -q -p no:cacheprovider` đạt 146 test, gồm test loader/schema/contract hiện có; `-m ruff check . --no-cache` và `-m ruff format --check . --no-cache` đạt, 25 file đã đúng format; `-m pip check` không có dependency hỏng.
+  - Môi trường Windows, Python 3.11.9; tạo .venv\\py311 và cài đúng phiên bản trong requirements.txt/requirements.lock.txt.
 - Còn thiếu: CNFEncoder còn stub. Chưa triển khai DPLL/Agent/GUI hoặc kiểm thử tích hợp; không commit/push.
+
+### 2026-11-06 — Triển khai encoder cho ba clue cơ bản
+
+- Thành viên: TV2.
+
+- AI: Codex.
+
+- Yêu cầu: Ánh xạ biến và mã hóa FACT/SAME/DIFFERENT thành CNF.
+
+- File thay đổi: cnf_encoder.py, clue_evaluator.py.
+
+- Nội dung và lý do:
+
+  - Ánh xạ toàn bộ ô theo row\*N+col+1; thêm unit clause đúng dấu cho status công khai.
+
+  - Encode FACT/SAME/DIFFERENT; xử lý clue theo ID và status theo row-major.
+
+  - Trả đầy đủ EncodingResult, không dùng biến phụ; rebuild mỗi snapshot và không sửa đầu vào.
+
+  - Tách validator cấu trúc clue để dùng chung, không dùng evaluator để tạo CNF.
+
+- Kiểm tra: Python 3.11.9 đạt 191 test; Ruff check/format, pip check và git diff --check đạt.
+
+- Còn thiếu: Counting/parity vẫn raise NotImplementedError; chưa kiểm thử tích hợp.
