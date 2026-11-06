@@ -3,21 +3,50 @@
 from collections.abc import Mapping
 
 from game.models import Clue, ClueType, ContractError, PublicState, Status
-from logic.regions import resolve_region
+from logic.regions import _validated_cells, resolve_region
 
 
 def evaluate_clue(clue: Clue, assignment: Mapping[str, Status], state: PublicState) -> bool:
     """Evaluate against a complete character-ID assignment, not SAT variable IDs."""
-    if set(assignment) != {item.id for item in state.characters} or any(
-        not isinstance(value, Status) for value in assignment.values()
+    cells = _validated_cells(state)
+    if not isinstance(clue, Clue) or not isinstance(clue.type, ClueType):
+        raise ContractError("Expected a Clue with a ClueType tag")
+    if not isinstance(clue.id, str) or not clue.id:
+        raise ContractError("Clue ID must be a nonempty string")
+    allowed_fields = {
+        ClueType.FACT: ("person", "status"),
+        ClueType.SAME: ("first", "second"),
+        ClueType.DIFFERENT: ("first", "second"),
+        ClueType.EXACTLY: ("region", "k"),
+        ClueType.AT_LEAST: ("region", "k"),
+        ClueType.AT_MOST: ("region", "k"),
+        ClueType.EVEN: ("region",),
+        ClueType.ODD: ("region",),
+    }
+    for name in ("person", "status", "first", "second", "region", "k"):
+        if name not in allowed_fields[clue.type] and getattr(clue, name) is not None:
+            raise ContractError(f"Unexpected {name} parameter for {clue.type.value}")
+    if (
+        not isinstance(assignment, Mapping)
+        or set(assignment) != {item.id for item in cells}
+        or any(not isinstance(value, Status) for value in assignment.values())
     ):
         raise ContractError("Expected a complete assignment of Status values")
     if clue.type == ClueType.FACT:
-        if clue.person not in assignment or clue.status is None:
+        if (
+            not isinstance(clue.person, str)
+            or clue.person not in assignment
+            or not isinstance(clue.status, Status)
+        ):
             raise ContractError("Invalid FACT parameters")
         return assignment[clue.person] == clue.status
     if clue.type in (ClueType.SAME, ClueType.DIFFERENT):
-        if clue.first not in assignment or clue.second not in assignment:
+        if (
+            not isinstance(clue.first, str)
+            or not isinstance(clue.second, str)
+            or clue.first not in assignment
+            or clue.second not in assignment
+        ):
             raise ContractError("Unknown binary-clue character")
         same = assignment[clue.first] == assignment[clue.second]
         return same if clue.type == ClueType.SAME else not same

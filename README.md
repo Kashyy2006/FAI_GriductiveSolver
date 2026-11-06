@@ -33,4 +33,38 @@ Report.pdf và video tạo sau khi hoàn thành; không đưa số liệu giả 
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo append theo AGENTS.md.
+Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo append theo [AGENTS.md](http://AGENTS.md)
+
+### 2026-11-06 — Hoàn thiện validation và kiểm thử regions/evaluator
+
+- Thành viên: TV2.
+
+- AI: Codex.
+
+- Yêu cầu: Rà soát xử lý vùng và ngữ nghĩa clue; bổ sung validation và kiểm thử độc lập.
+
+- File thay đổi: logic/[regions.py](http://regions.py), logic/clue\_[evaluator.py](http://evaluator.py), tests/[conftest.py](http://conftest.py), tests/test\_[regions.py](http://regions.py), tests/test\_clue\_[evaluator.py](http://evaluator.py) và README của hai thư mục.
+
+- Nội dung và lý do:
+
+  - Kiểm tra kích thước board, tọa độ, ID ô, ô thiếu/trùng và tham chiếu không tồn tại.
+
+  - Từ chối tham số thiếu/thừa hoặc sai kiểu theo từng loại region/clue bằng ContractError.
+
+  - Kiểm tra assignment đầy đủ với giá trị Status và k là integer trong giới hạn vùng.
+
+  - Kiểm chứng ROW, COLUMN, NEIGHBORS, EXPLICIT và COMMON\_NEIGHBORS; bảo đảm kết quả row-major, không trùng ô.
+
+  - Tạo fixture công khai cho board 3×3/4×4/5×5; thêm truth table, vét cạn assignment trên các vùng thử, ca vùng rỗng và kiểm tra không sửa đầu vào.
+
+  - Evaluator được kiểm thử độc lập, không gọi CNF encoder hoặc SAT solver; giữ nguyên model/API/schema.
+
+- Kiểm tra:
+
+  - Viết test tái hiện lỗi trước khi sửa.
+
+  - Chạy bằng Python 3.11.9 trong .venv\\py311: 146/146 test đạt, gồm 130 test mới và 16 test hiện có.
+
+  - Ruff check, Ruff format --check và pip check đều đạt.
+
+- Còn thiếu: CNFEncoder còn stub; chưa kiểm thử tích hợp hệ thống; chưa commit/push.
