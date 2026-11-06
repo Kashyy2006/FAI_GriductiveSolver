@@ -10,10 +10,14 @@
 ## Trạng thái triển khai
 
 - `regions.py`: resolve đủ năm loại vùng, kiểm tra geometry và tham số theo tag;
-kết quả không trùng, theo row-major, không sửa đầu vào.
+  kết quả không trùng, theo row-major, không sửa đầu vào.
 - `clue_evaluator.py`: đánh giá độc lập sáu clue core và EVEN/ODD từ assignment
-đầy đủ theo ID; kiểm tra kiểu, tham số và biên k, không gọi encoder.
-- `cnf_encoder.py`: còn stub, chưa mã hóa CNF.
+  đầy đủ theo ID; kiểm tra kiểu, tham số và biên k, không gọi encoder.
+- `cnf_encoder.py`: đã mã hóa đủ FACT, SAME, DIFFERENT, EXACTLY, AT_LEAST và AT_MOST.
+  Ánh xạ biến deterministic, thêm unit clause cho status công khai, rebuild mỗi snapshot
+  và trả đầy đủ EncodingResult. Counting dùng tổ hợp trực tiếp, xử lý biên k và vùng rỗng;
+  không dùng biến phụ hoặc sửa đầu vào. Các vùng, gồm COMMON_NEIGHBORS, dùng chung resolver.
+- Mã hóa CNF cho EVEN/ODD chưa triển khai, vẫn raise NotImplementedError.
 
 ## Nhật ký AI
 
