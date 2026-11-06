@@ -87,3 +87,16 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo a
   - Python 3.11.9: 191/191 test đạt; Ruff check/format, pip check và git diff --check đạt.
 
 - Còn thiếu: Counting/parity vẫn raise NotImplementedError; chưa kiểm thử tích hợp.
+
+### 2026-11-06 — Hoàn thiện CNF encoder cho sáu clue core
+
+- Thành viên: TV2.
+- AI: Codex.
+- Yêu cầu: Bổ sung mã hóa EXACTLY/AT_LEAST/AT_MOST và kiểm thử độc lập.
+- File thay đổi: Source/logic/cnf_encoder.py, Source/tests/test_cnf_encoder.py.
+- Nội dung và lý do:
+  - Hoàn thiện sáu clue core bằng encoding tổ hợp trực tiếp, không thêm dependency hoặc biến phụ.
+  - Kiểm tra tham số, biên k và vùng rỗng; giữ nguyên model/API/schema.
+  - Bổ sung kiểm thử đối chiếu CNF với evaluator bằng vét cạn, gồm KB kết hợp sáu clue và unit verdict.
+- Kiểm tra: Python 3.11.9 đạt 274/274 test, gồm 128 test encoder; Ruff check/format, pip check và git diff --check đều đạt.
+- Còn thiếu: Encoding parity còn NotImplementedError; chưa kiểm thử tích hợp hệ thống; chưa commit/push.

@@ -65,3 +65,19 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Kiểm tra: Python 3.11.9 đạt 191/191 test, gồm 45 test mới; Ruff check/format đạt.
 
 - Còn thiếu: Chưa kiểm thử encoding counting/parity hoặc tích hợp hệ thống.
+
+### 2026-11-06 — Kiểm chứng counting encoder bằng vét cạn
+
+- Thành viên: TV2.
+- AI: Codex.
+- Yêu cầu: Đối chiếu CNF counting với evaluator độc lập.
+- File thay đổi: test_cnf_encoder.py.
+- Nội dung và lý do:
+  - Bổ sung 86 ca test; thay ba ca counting chưa triển khai bằng kiểm thử hành vi, giữ kiểm tra parity chưa hỗ trợ.
+  - Với mỗi ca counting 3×3, kiểm tra mọi k hợp lệ trên toàn bộ 512 assignment.
+  - Bao phủ bốn vùng cơ bản, common neighbors, vùng rỗng và biên k.
+  - Thêm ca đại diện 4×4/5×5, kiểm tra ô ngoài vùng không ảnh hưởng phép đếm.
+  - Kiểm tra clause cụ thể, số clause, dữ liệu sai và không sửa đầu vào.
+  - Đối chiếu KB chứa đủ sáu clue core cùng unit verdict với evaluator.
+- Kiểm tra: 128 test encoder đạt; toàn bộ 274/274 test đạt trên Python 3.11.9; Ruff check/format đạt.
+- Còn thiếu: Chưa kiểm thử encoding parity hoặc tích hợp hệ thống.

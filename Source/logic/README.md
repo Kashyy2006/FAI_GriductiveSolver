@@ -59,3 +59,22 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Kiểm tra: Python 3.11.9 đạt 191 test; Ruff check/format, pip check và git diff --check đạt.
 
 - Còn thiếu: Counting/parity vẫn raise NotImplementedError; chưa kiểm thử tích hợp.
+
+### 2026-11-06 — Hoàn thiện CNF encoder cho sáu clue core
+
+- Thành viên: TV2.
+- AI: Codex.
+- Yêu cầu: Encode EXACTLY/AT_LEAST/AT_MOST bằng tổ hợp trực tiếp.
+- File thay đổi: cnf_encoder.py.
+- Nội dung và lý do:
+  - AT_MOST(k): cấm từng tổ hợp k+1 biến cùng True.
+  - AT_LEAST(k): tạo clause dương cho từng tổ hợp m-k+1 biến.
+  - EXACTLY(k): kết hợp hai ràng buộc trên.
+  - Tái sử dụng resolver; từ chối k sai kiểu hoặc ngoài giới hạn bằng ContractError.
+  - Xử lý đúng k=0, k=m và vùng rỗng; ràng buộc tautology không sinh clause.
+  - Giữ nguyên mapping, thứ tự deterministic, unit verdict và thống kê; không dùng biến phụ.
+- Kiểm tra: Python 3.11.9 đạt 274 test; Ruff check/format, pip check và git diff --check đạt.
+- Còn thiếu: Parity còn NotImplementedError; chưa kiểm thử tích hợp.
+
+
+&nbsp;
