@@ -2,8 +2,9 @@
 
 Bộ khung được tạo lại theo thiết kế người dùng cung cấp. Lịch sử AI cũ đã xóa.
 Model/Enum, Protocol/API và schema v1 đã định nghĩa; loader, region resolver và
-semantic evaluator có triển khai cơ bản. Engine/CNF/DPLL/Agent/GUI/benchmark
-còn là stub có kiểu và raise NotImplementedError; chưa có game chơi được.
+semantic evaluator có triển khai cơ bản. Engine/CNF/DPLL/Agent/benchmark còn là
+stub có kiểu và raise NotImplementedError. GUI và composition root đã được dựng
+theo contract, nhưng chưa thể chạy game end-to-end khi backend còn stub.
 
 ## Bắt đầu
 
@@ -23,7 +24,7 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
-main.py hiện chỉ thông báo trạng thái, chưa mở GUI. Benchmark chưa chạy được.
+`python main.py` mở GUI sau khi backend được triển khai. Benchmark chưa chạy được.
 Version dependency và giới hạn kiểm tra: docs/dependencies.md, docs/verification.md.
 Không dùng API tự đặt; model chung tại game/models.py, Protocol game/contracts.py.
 
