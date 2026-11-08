@@ -1,6 +1,7 @@
 # Trạng thái kiểm tra bộ khung v1
 
-Đây là kết quả kiểm tra kỹ thuật hiện tại, không phải nhật ký AI.
+Phần dưới ghi kiểm tra khởi tạo bộ khung. Tiến độ TV4 hiện tại được cập nhật
+riêng ở cuối file; đây là kết quả kỹ thuật, không thay nhật ký AI trong README.
 
 Môi trường thực thi: Windows, Python 3.12.6, venv riêng trong .venv. Project
 target Python 3.11; chưa có interpreter 3.11 trên máy nên chưa chạy runtime test
@@ -34,3 +35,18 @@ Chưa triển khai/kiểm thử chức năng Engine, CNF encoder, DPLL, uniquene
 trace exporter, GUI và benchmark. Stub raise NotImplementedError. Chưa có bộ
 puzzle 4x4, số liệu thực nghiệm, báo cáo hoặc video. Chạy lại toàn bộ kiểm tra
 trên Python 3.11 trước mốc tích hợp; thêm test hành vi khi triển khai từng module.
+
+## Bàn giao TV4 — 08/11/2026
+
+Agent và trace exporter đã triển khai; không còn là stub. Model/Protocol/schema
+và dependencies giữ nguyên. 58 test TV4 + 16 test cũ = 74 test đạt trên Windows,
+Python 3.12.6, pytest 8.3.5. Ruff check và format check đạt toàn bộ Source/.
+
+Trace tests dùng I/O thật. Sandbox Windows chặn quyền pytest tmp_path;
+nghiệm thu ngoài sandbox với basetemp riêng nằm trong .venv đạt đầy đủ,
+không bỏ test hoặc mock I/O để che lỗi. Chi tiết hành vi/cách chạy tại
+Source/agent/README.md và Source/tests/README.md.
+
+Chưa kiểm thử Python 3.11 runtime hoặc tích hợp module thật của TV1–TV3/TV5.
+Engine, CNF, DPLL, uniqueness, GUI và benchmark vẫn chưa triển khai ở snapshot
+hiện tại; fake tests chỉ nghiệm thu Agent/trace, không chứng minh hệ thống hoàn chỉnh.
