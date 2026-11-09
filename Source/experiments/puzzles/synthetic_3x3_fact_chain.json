@@ -1,0 +1,136 @@
+{
+  "characters": [
+    {
+      "clue": {
+        "id": "clue_A1",
+        "person": "B1",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A1",
+      "name": "Person 00",
+      "profession": "Researcher",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_B1",
+        "person": "C1",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B1",
+      "name": "Person 01",
+      "profession": "Researcher",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_C1",
+        "person": "A2",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C1",
+      "name": "Person 02",
+      "profession": "Researcher",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_A2",
+        "person": "B2",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A2",
+      "name": "Person 03",
+      "profession": "Researcher",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_B2",
+        "person": "C2",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B2",
+      "name": "Person 04",
+      "profession": "Researcher",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_C2",
+        "person": "A3",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C2",
+      "name": "Person 05",
+      "profession": "Researcher",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_A3",
+        "person": "B3",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A3",
+      "name": "Person 06",
+      "profession": "Researcher",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_B3",
+        "person": "C3",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B3",
+      "name": "Person 07",
+      "profession": "Researcher",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_C3",
+        "person": "A1",
+        "status": "INNOCENT",
+        "type": "FACT"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C3",
+      "name": "Person 08",
+      "profession": "Researcher",
+      "row": 2
+    }
+  ],
+  "initially_revealed": [
+    "A1"
+  ],
+  "puzzle_id": "synthetic_3x3_fact_chain",
+  "schema_version": "1.0",
+  "size": 3
+}

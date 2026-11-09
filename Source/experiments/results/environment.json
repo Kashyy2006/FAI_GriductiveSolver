@@ -1,0 +1,91 @@
+{
+  "python": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "packages": {
+    "pytest": "8.3.5",
+    "ruff": "0.11.13",
+    "jsonschema": "4.24.0",
+    "matplotlib": "3.10.3"
+  },
+  "timeout_seconds_per_phase": 10.0,
+  "repeats": 3,
+  "mode": "uniqueness",
+  "puzzles": [
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\puzzles\\synthetic_3x3_fact_chain.json",
+      "sha256": "2cd5ece00d099c764240d6bea353530cd45eeb3fdde148d61b009992c378d002"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\puzzles\\synthetic_3x3_row_counts.json",
+      "sha256": "03230dd115d4912b62c1d8ea93d8af6b17e87ebd3a505eecf38145a21915acf4"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\puzzles\\synthetic_3x3_stuck_unique.json",
+      "sha256": "b9d3927b5bac12821b761b405209412e7d039a64f280b8226d1ec3ae7a0db0f9"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\puzzles\\synthetic_4x4_fact_chain.json",
+      "sha256": "4e17566a2f7ce7503f0db0907b06b2aed5f78ba9f89562671ace302bf83a7085"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\puzzles\\synthetic_4x4_row_counts.json",
+      "sha256": "b46581d351a31e1c2ebdf43419782e93e29cb3780902fd95ca7db4a03cadc64c"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\puzzles\\synthetic_4x4_stuck_unique.json",
+      "sha256": "2d1802261250833bba70c2d2f635368f86a80fad44c0fc39073bba2058ea839b"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\puzzles\\3x3\\example_01.json",
+      "sha256": "a1cc821196f275bf077a7df58a2904e262b0042590fe36bd37e9823ec3c1e815"
+    }
+  ],
+  "backend_sources": {
+    "encoder": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\logic\\cnf_encoder.py",
+      "sha256": "b46f74969dea933cff14c3352c06fe61261db74994e51e9a7f90a9e60c3dcaad"
+    },
+    "solver": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\solver\\dpll.py",
+      "sha256": "6b9bd34d3b9075d7e084536fa2faae89ecb209a0e98ffb1cb7d2cf28c0130c14"
+    },
+    "agent": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\agent\\agent.py",
+      "sha256": "72654bd39bb68492d4e7ee10d8fcf335b08ac94de82d78bdb21b00b56e03e20d"
+    },
+    "engine": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\game\\engine.py",
+      "sha256": "b61076e5fc8568bb895470ecb908330f3b278f87f2ad95cf6aba49e5b8d036f5"
+    }
+  },
+  "support_sources": [
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\game\\models.py",
+      "sha256": "a12e650959a57f8893eb7813b06c7557a61a219818e5fc77990ca2635a846391"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\game\\contracts.py",
+      "sha256": "387da0864cfcd5f7f89a4b68989214885f23a14225389c24dbc93ec241fbfd81"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\solver\\_timing.py",
+      "sha256": "64887806e82d5407622ec9791883531021f14ba659ac05911f8b813dd3ec730c"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\solver\\uniqueness.py",
+      "sha256": "8d3cf4ad208d5da840571218bdeabb6aa087551b5f36bb616473e42757b54cec"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\benchmark.py",
+      "sha256": "9af3ba8207fc2d3e466a8a11f432768cff4a37e03433ea550fc7cad24a2a2886"
+    }
+  ],
+  "measurement": {
+    "runtime": "Per phase wall time; includes encoding and engine/verifier; excludes loading, GUI and export",
+    "sat_calls": "Actual calls, including calls that raise; no summing nested trace queries",
+    "partial_metrics": "Counters include completed calls only when a call raises",
+    "uniqueness_clauses": "Includes the primary blocking clause in maximum/final counts",
+    "deadline": "Cooperative; checked around dependencies and inside DPLL, not a hard process kill"
+  }
+}
