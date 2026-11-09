@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "puzzle_id": "fixture_ambiguous",
+  "size": 3,
+  "characters": [
+    {
+      "id": "A1",
+      "name": "Person 01",
+      "profession": "Detective",
+      "row": 0,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_01",
+        "type": "SAME",
+        "first": "A1",
+        "second": "A1"
+      }
+    },
+    {
+      "id": "B1",
+      "name": "Person 02",
+      "profession": "Detective",
+      "row": 0,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_02",
+        "type": "SAME",
+        "first": "B1",
+        "second": "B1"
+      }
+    },
+    {
+      "id": "C1",
+      "name": "Person 03",
+      "profession": "Detective",
+      "row": 0,
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_03",
+        "type": "SAME",
+        "first": "C1",
+        "second": "C1"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "Person 04",
+      "profession": "Detective",
+      "row": 1,
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_04",
+        "type": "SAME",
+        "first": "A2",
+        "second": "A2"
+      }
+    },
+    {
+      "id": "B2",
+      "name": "Person 05",
+      "profession": "Detective",
+      "row": 1,
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_05",
+        "type": "SAME",
+        "first": "B2",
+        "second": "B2"
+      }
+    },
+    {
+      "id": "C2",
+      "name": "Person 06",
+      "profession": "Detective",
+      "row": 1,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_06",
+        "type": "SAME",
+        "first": "C2",
+        "second": "C2"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "Person 07",
+      "profession": "Detective",
+      "row": 2,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_07",
+        "type": "SAME",
+        "first": "A3",
+        "second": "A3"
+      }
+    },
+    {
+      "id": "B3",
+      "name": "Person 08",
+      "profession": "Detective",
+      "row": 2,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_08",
+        "type": "SAME",
+        "first": "B3",
+        "second": "B3"
+      }
+    },
+    {
+      "id": "C3",
+      "name": "Person 09",
+      "profession": "Detective",
+      "row": 2,
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_09",
+        "type": "SAME",
+        "first": "C3",
+        "second": "C3"
+      }
+    }
+  ],
+  "initially_revealed": [
+    "A1"
+  ]
+}
