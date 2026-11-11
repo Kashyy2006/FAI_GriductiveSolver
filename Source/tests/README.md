@@ -88,6 +88,16 @@ Các lượt AI phải append mục theo AGENTS.md.
 - Kiểm tra: 128 test encoder đạt; toàn bộ 274/274 test đạt trên Python 3.11.9; Ruff check/format đạt.
 - Còn thiếu: Chưa kiểm thử encoding parity hoặc tích hợp hệ thống.
 
+### 2026-11-07 — Hoàn thành TV1 giai đoạn 2
+
+- Thành viên: TV1 — Dương Thiên Phú.
+- AI: OpenAI Codex.
+- Yêu cầu: Dựa trên hai file phân công và repo, code phần deadline TV1 (Phú).
+- File thay đổi: test_engine.py, test_puzzle_loader.py; README.md.
+- Nội dung và lý do: Thêm test privacy, reveal, từ chối, lỗi proof, token/session, loader và đồng thời bằng verifier giả.
+- Kiểm tra: python -m pytest tests -q (70 passed); Ruff check và format check đạt toàn Source; Python 3.12.14/Linux.
+- Còn thiếu: Tích hợp verifier thật/GUI/SAT uniqueness khi TV2–TV5 hoàn thiện; chưa kiểm tra Python 3.11/Windows.
+
 ### 2026-11-08 — Kiểm thử nghiệm thu Deductive Agent
 
 - Thành viên: TV4 (Tùng).
@@ -97,4 +107,3 @@ Các lượt AI phải append mục theo AGENTS.md.
 - Nội dung và lý do: Thêm 58 ca TV4, không cần Encoder/DPLL/Engine production; không thay model/interface/dependency.
 - Kiểm tra: 74 test toàn project đạt ngoài sandbox (58 mới + 16 cũ), Ruff check/format; Python 3.12.6. Hai lần chạy trace đầu lỗi đường dẫn/quyền môi trường; không bỏ test, nghiệm thu lại toàn bộ đạt.
 - Còn thiếu: Chạy runtime Python 3.11 và kiểm thử tích hợp thật khi các thành viên bàn giao.
-  Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.

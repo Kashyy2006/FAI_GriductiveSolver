@@ -28,3 +28,12 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Giữ kết quả khởi tạo như snapshot cũ, bổ sung trạng thái TV4 và giới hạn chưa tích hợp; không sửa API/schema.
 - Kiểm tra: 74 test đạt và Ruff check/format; test runtime Python 3.12.6, chưa có 3.11.
 - Còn thiếu: Runtime Python 3.11 và nghiệm thu tích hợp thật.
+
+### 2026-11-07 — Hoàn thành TV1 giai đoạn 2
+- Thành viên: TV1 — Dương Thiên Phú.
+- AI: OpenAI Codex.
+- Yêu cầu: Dựa trên hai file phân công và repo, code phần deadline TV1 (Phú).
+- File thay đổi: tv1_handoff.md; README.md.
+- Nội dung và lý do: Ghi phạm vi hoàn thành TV1 giai đoạn 2, cách ghép, kiểm tra và giới hạn tích hợp.
+- Kiểm tra: python -m pytest tests -q (70 passed); Ruff check và format check đạt toàn Source; Python 3.12.14/Linux.
+- Còn thiếu: Tích hợp verifier thật/GUI/SAT uniqueness khi TV2–TV5 hoàn thiện; chưa kiểm tra Python 3.11/Windows.
