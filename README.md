@@ -1,11 +1,19 @@
 # FAI Griductive Solver — contract v1
 
+<<<<<<< HEAD
 Branch TV3 có DPLL, kiểm tra uniqueness và benchmark theo contract v1. Agent/trace
 của TV4 được giữ từ main; core Encoder và test của TV2 được lấy nguyên từ commit
 23955a5 để tích hợp. Model/Enum, Protocol và schema không thay đổi.
 Engine/GUI vẫn là stub; chưa có game chơi được. CNF cho parity vẫn thuộc phần
 TV2 chưa hoàn thiện. Benchmark uniqueness chạy với backend thật; benchmark
 progressive toàn hệ thống cần Engine của TV1.
+=======
+Bộ khung được tạo lại theo thiết kế người dùng cung cấp. Lịch sử AI cũ đã xóa.
+Model/Enum, Protocol/API và schema v1 đã định nghĩa; loader, region resolver và
+semantic evaluator có triển khai cơ bản. Engine/CNF/DPLL/Agent/benchmark còn là
+stub có kiểu và raise NotImplementedError. GUI và composition root đã được dựng
+theo contract, nhưng chưa thể chạy game end-to-end khi backend còn stub.
+>>>>>>> origin/feature/GUI
 
 ## Bắt đầu
 
@@ -25,9 +33,13 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
+<<<<<<< HEAD
 main.py hiện chỉ thông báo trạng thái, chưa mở GUI. Hướng dẫn TV3, lệnh benchmark
 và giới hạn nghiệm thu: Source/solver/README.md, Source/experiments/README.md và
 docs/report/tv3.md. Kết quả uniqueness thật nằm trong Source/experiments/results/.
+=======
+`python main.py` mở GUI sau khi backend được triển khai. Benchmark chưa chạy được.
+>>>>>>> origin/feature/GUI
 Version dependency và giới hạn kiểm tra: docs/dependencies.md, docs/verification.md.
 Không dùng API tự đặt; model chung tại game/models.py, Protocol game/contracts.py.
 
