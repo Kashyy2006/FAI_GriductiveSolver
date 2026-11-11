@@ -1,11 +1,14 @@
 # FAI Griductive Solver — contract v1
 
-Branch TV3 có DPLL, kiểm tra uniqueness và benchmark theo contract v1. Agent/trace
-của TV4 được giữ từ main; core Encoder và test của TV2 được lấy nguyên từ commit
-23955a5 để tích hợp. Model/Enum, Protocol và schema không thay đổi.
-Engine/GUI vẫn là stub; chưa có game chơi được. CNF cho parity vẫn thuộc phần
-TV2 chưa hoàn thiện. Benchmark uniqueness chạy với backend thật; benchmark
-progressive toàn hệ thống cần Engine của TV1.
+Đã tích hợp Engine, CNF Encoder, DPLL, Deductive Agent và GUI Tkinter theo
+contract v1. Encoder hỗ trợ sáu clue core cùng Parity (EVEN/ODD); các vùng gồm
+COMMON_NEIGHBORS. Model/Protocol/schema/dependency không đổi.
+
+Trace đếm đúng calls thực tế kể cả Engine deepcopy proof; Auto Solve gắn với
+session khởi chạy, Load/Restart hủy tác vụ cũ và xóa thông tin sidebar/trace.
+GUI có View Trace và Save Trace. Kiểm tra: 517 test đạt và Ruff đạt; smoke test
+Tkinter thật (ẩn) giải 3x3 trong 8 bước/105 calls. Runtime local Python 3.12.6;
+nhóm vẫn target 3.11 và cần kiểm tra lại trên interpreter đó.
 
 ## Bắt đầu
 
@@ -25,10 +28,11 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
-main.py hiện chỉ thông báo trạng thái, chưa mở GUI. Hướng dẫn TV3, lệnh benchmark
-và giới hạn nghiệm thu: Source/solver/README.md, Source/experiments/README.md và
-docs/report/tv3.md. Kết quả uniqueness thật nằm trong Source/experiments/results/.
-`python main.py` mở GUI sau khi backend được triển khai. Benchmark chưa chạy được.
+`python main.py` mở GUI với puzzle 3x3 mặc định. `python main.py --preview`
+chỉ xem board tĩnh. Hướng dẫn module tại Source/agent/README.md,
+Source/gui/README.md và Source/logic/README.md. Benchmark runner đã triển khai;
+kết quả lưu sẵn trong Source/experiments/results/ là snapshot uniqueness cũ,
+không tự động cập nhật theo các sửa lỗi tích hợp này.
 Version dependency và giới hạn kiểm tra: docs/dependencies.md, docs/verification.md.
 Không dùng API tự đặt; model chung tại game/models.py, Protocol game/contracts.py.
 

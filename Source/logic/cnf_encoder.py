@@ -1,6 +1,6 @@
-"""Deterministic CNF encoding of the six public core clue types."""
+"""Deterministic CNF encoding of public core and parity clues."""
 
-from itertools import combinations
+from itertools import combinations, product
 
 from game.models import CNF, Clue, ClueType, ContractError, EncodingResult, PublicState, Status
 from logic.clue_evaluator import _validate_clue_fields
@@ -63,8 +63,25 @@ class CNFEncoder:
                             region_variables, len(region_variables) - clue.k + 1
                         )
                     )
+            elif clue.type in (ClueType.EVEN, ClueType.ODD):
+                if clue.region is None:
+                    raise ContractError("Parity clue requires a region")
+                region_variables = tuple(
+                    variable_map[cell_id] for cell_id in resolve_region(clue.region, state)
+                )
+                required_parity = 0 if clue.type == ClueType.EVEN else 1
+                # Each clause excludes exactly one assignment of the wrong parity.
+                # Empty EVEN is True ([]); empty ODD is False ([[]]).
+                cnf.extend(
+                    [
+                        -variable if value else variable
+                        for variable, value in zip(region_variables, values)
+                    ]
+                    for values in product((False, True), repeat=len(region_variables))
+                    if sum(values) % 2 != required_parity
+                )
             else:
-                raise NotImplementedError(f"TV2: CNF encoding for {clue.type.value}")
+                raise ContractError(f"Unsupported clue type: {clue.type}")
         for cell in cells:
             if cell.status is not None:
                 variable = variable_map[cell.id]

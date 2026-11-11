@@ -54,8 +54,11 @@ không bị rollback; run bị lỗi không trả AutoSolveResult/partial trace.
 
 Mỗi solve trả kết quả tạo đúng một SATQuery. Không dùng cache; việc đọc lại
 kết quả trong Hint/proof không tạo query mới. ContextVar theo run thu cả calls
-từ callback verify_verdict của cùng Agent; proof từ verifier khác được merge
-theo identity query, không so sánh value (hai calls giống nhau vẫn là hai calls).
+từ callback verify_verdict của cùng Agent. Mỗi submit có mốc recorder riêng:
+proof đã được Engine deepcopy được đối chiếu với đúng chuỗi calls trong lần submit
+đó, không append lại. Verifier khác không có live recording thì lấy queries từ
+receipt. Không dedup toàn cục theo identity hoặc value: calls giống nhau vẫn được
+đếm riêng. Receipt không khớp recording gây ContractError, không im lặng sai số.
 Verifier bên ngoài phải trả queries của các calls thực tế trong lần kiểm chứng
 đó, không clone lịch sử query hoặc báo cache hit như solve mới.
 
@@ -88,9 +91,12 @@ với --basetemp trỏ vào thư mục test riêng trong .venv. Lỗi môi trư�
 không được che bằng mock I/O hoặc bỏ test trace.
 
 FakeEncoder/FakeSolver/FakePublicEngine chỉ trong tests/test_agent.py; FakeSolver
-dùng bảng phản hồi được lập sẵn, không triển khai DPLL thay TV3. Module thật TV1–TV3
-vẫn là stub ở thời điểm bàn giao. Chưa kiểm thử tích hợp thật hoặc hiệu năng;
-không tuyên bố fake tests chứng minh Encoder/Solver/Engine thật đúng.
+dùng bảng phản hồi được lập sẵn, không triển khai DPLL thay TV3. Test tích hợp
+Engine/CNF/DPLL/Agent thật tại tests/test_integration.py kiểm tra cả proof deepcopy,
+verifier cùng/khác Agent và các SAT calls có nội dung giống nhau. Regression 3x3:
+8 bước, 105 calls thực tế và 105 queries; 4x4: 15 bước, 301/301.
+Kết quả toàn project sau sửa tích hợp: 517 test đạt trên Python 3.12.6/Windows;
+cần chạy runtime lại trên Python 3.11 theo target nhóm.
 
 ## Nhật ký AI
 

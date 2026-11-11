@@ -270,26 +270,107 @@ def test_invalid_geometry_is_rejected(public_state: PublicState) -> None:
 
 
 @pytest.mark.parametrize("kind", [ClueType.EVEN, ClueType.ODD])
-def test_unimplemented_parity_raises_instead_of_returning_an_incomplete_kb(
+@pytest.mark.parametrize(
+    "region",
+    [
+        Region(RegionType.ROW, index=0),
+        Region(RegionType.COLUMN, index=1),
+        Region(RegionType.NEIGHBORS, cell="A1"),
+        Region(RegionType.NEIGHBORS, cell="B2"),
+        Region(RegionType.EXPLICIT, cells=("C3", "A1", "B2")),
+        Region(RegionType.EXPLICIT, cells=("B2",)),
+        Region(RegionType.EXPLICIT),
+        Region(RegionType.COMMON_NEIGHBORS, first="A1", second="C1"),
+    ],
+)
+def test_parity_matches_independent_evaluator_for_every_assignment(
+    public_state: PublicState, kind: ClueType, region: Region
+) -> None:
+    state = _with_clue(public_state, Clue("parity", kind, region=region))
+    before = deepcopy(state)
+    result = CNFEncoder().encode(state)
+    assert result.primary_variables == tuple(range(1, 10))
+    assert result.auxiliary_variables == ()
+    assert result.clause_count == len(result.cnf)
+    assert result.active_clue_ids == ("parity",)
+    for values in product((False, True), repeat=9):
+        primary = dict(zip(result.primary_variables, values))
+        assignment = {
+            cell: Status.CRIMINAL if primary[var] else Status.INNOCENT
+            for cell, var in result.variable_map.items()
+        }
+        assert _cnf_value(result.cnf, primary) == evaluate_clue(
+            state.characters[0].clue, assignment, state
+        )
+    assert state == before
+
+
+@pytest.mark.parametrize(
+    ("kind", "region", "expected"),
+    [
+        (ClueType.EVEN, Region(RegionType.EXPLICIT), []),
+        (ClueType.ODD, Region(RegionType.EXPLICIT), [[]]),
+        (ClueType.EVEN, Region(RegionType.EXPLICIT, cells=("A1",)), [[-1]]),
+        (ClueType.ODD, Region(RegionType.EXPLICIT, cells=("A1",)), [[1]]),
+        (ClueType.EVEN, Region(RegionType.EXPLICIT, cells=("A1", "B1")), [[1, -2], [-1, 2]]),
+        (ClueType.ODD, Region(RegionType.EXPLICIT, cells=("A1", "B1")), [[1, 2], [-1, -2]]),
+    ],
+)
+def test_parity_clauses_and_known_status_units(
+    public_state: PublicState, kind: ClueType, region: Region, expected: CNF
+) -> None:
+    state = _with_clue(public_state, Clue("parity", kind, region=region), Status.CRIMINAL)
+    assert CNFEncoder().encode(state).cnf == expected + [[1]]
+
+
+@pytest.mark.parametrize("kind", [ClueType.EVEN, ClueType.ODD])
+@pytest.mark.parametrize("public_state", [4, 5], indirect=True)
+def test_parity_on_larger_board_ignores_outside_cells(
     public_state: PublicState, kind: ClueType
 ) -> None:
-    clue = Clue("z-unimplemented", kind, region=Region(RegionType.EXPLICIT))
-    state = _with_clue(public_state, clue)
-    state = replace(
-        state,
-        characters=(
-            state.characters[0],
-            replace(
-                state.characters[1],
-                clue=Clue("a-fact", ClueType.FACT, person="B1", status=Status.CRIMINAL),
-            ),
-        )
-        + state.characters[2:],
-    )
+    state = _with_clue(public_state, Clue("parity", kind, region=Region(RegionType.ROW, index=0)))
+    result = CNFEncoder().encode(state)
+    assert len(result.cnf) == 2 ** (state.size - 1)
+    for outside in (False, True):
+        for values in product((False, True), repeat=state.size):
+            assignment = dict.fromkeys(result.primary_variables, outside)
+            assignment.update(enumerate(values, 1))
+            assert _cnf_value(result.cnf, assignment) == (sum(values) % 2 == (kind == ClueType.ODD))
+
+
+@pytest.mark.parametrize("kind", [ClueType.EVEN, ClueType.ODD])
+@pytest.mark.parametrize(
+    "bad_region",
+    [
+        None,
+        Region(RegionType.EXPLICIT, cells=("A1", "A1")),
+        Region(RegionType.NEIGHBORS, cell="D1"),
+        Region(RegionType.COMMON_NEIGHBORS, first="A1", second="A1"),
+    ],
+)
+def test_invalid_parity_region_does_not_leave_encoder_state(
+    public_state: PublicState, kind: ClueType, bad_region: Region
+) -> None:
     encoder = CNFEncoder()
-    with pytest.raises(NotImplementedError):
+    state = _with_clue(public_state, Clue("bad", kind, region=bad_region))
+    with pytest.raises(ContractError):
         encoder.encode(state)
     assert encoder.encode(public_state).cnf == []
+
+
+@pytest.mark.parametrize("kind", [ClueType.EVEN, ClueType.ODD])
+def test_parity_is_independent_and_cannot_accept_k(
+    public_state: PublicState, kind: ClueType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail(*args: object, **kwargs: object) -> bool:
+        raise AssertionError("Encoder must not call evaluator")
+
+    monkeypatch.setattr("logic.clue_evaluator.evaluate_clue", fail)
+    state = _with_clue(public_state, Clue("parity", kind, region=Region(RegionType.ROW, index=0)))
+    assert CNFEncoder().encode(state).clause_count == 4
+    invalid = _with_clue(public_state, replace(state.characters[0].clue, k=0))
+    with pytest.raises(ContractError):
+        CNFEncoder().encode(invalid)
 
 
 @pytest.mark.parametrize("kind", [ClueType.EXACTLY, ClueType.AT_LEAST, ClueType.AT_MOST])

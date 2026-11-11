@@ -192,14 +192,24 @@ class DeductiveAgent:
             raise ContractError("Accepted verdict must reveal exactly the submitted card")
 
     @staticmethod
-    def _merge_proof_queries(queries: list[SATQuery], proof: VerdictProof | None) -> None:
-        """Include verifier calls when supplied by another context/agent instance."""
-        if proof is not None:
-            seen = {id(query) for query in queries}
-            for query in proof.queries:
-                if id(query) not in seen:
-                    queries.append(query)
-                    seen.add(id(query))
+    def _merge_proof_queries(
+        queries: list[SATQuery], proof: VerdictProof | None, submit_start: int
+    ) -> None:
+        """Reconcile this submit's receipt with its live recording, not object IDs.
+
+        Engine may deepcopy the proof. Calls made by this Agent are already in
+        the context-local recorder; a foreign verifier has no such recording.
+        Compare only this invocation's ordered sequence, never globally dedup
+        query values: two identical solve calls still count as two calls.
+        """
+        if proof is None:
+            return
+        recorded = tuple(queries[submit_start:])
+        if recorded:
+            if recorded != proof.queries:
+                raise ContractError("Verifier receipt differs from its recorded SAT calls")
+        else:
+            queries.extend(proof.queries)
 
     def auto_solve(
         self, engine: PublicEngine, *, should_cancel: CancelCheck | None = None
@@ -238,10 +248,11 @@ class DeductiveAgent:
                     return finish(SolveOutcome.SOLVED, current)
                 if hint.character_id is None or hint.status is None:
                     return finish(SolveOutcome.STUCK, current)
+                submit_start = len(queries)
                 receipt = engine.submit_verdict(
                     hint.character_id, hint.status, expected_token=hint.token
                 )
-                self._merge_proof_queries(queries, receipt.proof)
+                self._merge_proof_queries(queries, receipt.proof, submit_start)
                 if receipt.outcome in (VerdictOutcome.STALE_STATE, VerdictOutcome.ALREADY_REVEALED):
                     return cancel(receipt.outcome.value, engine.get_public_state())
                 if receipt.state.token.session_id != state.token.session_id:

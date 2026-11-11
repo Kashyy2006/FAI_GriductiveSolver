@@ -7,7 +7,30 @@
   highlight, Load/Restart/Hint/Auto Solve; chỉ luồng chính cập nhật widget, queue + after cho việc nền.
 - `python main.py --preview` mở snapshot PublicState tĩnh; các nút gameplay bị khóa.
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
-- Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
+- GUI đã nối Engine/Encoder/DPLL/Agent thật; các API công khai vẫn giữ nguyên.
+
+## Tác vụ, reset và trace
+
+- Auto Solve gắn với session đã bấm nút và có cancellation Event riêng. Load/Restart
+  hủy tác vụ cũ; worker khởi động trễ hoặc đang tính SAT không được reveal phiên mới.
+- Queue có task ID riêng: thông báo của worker cũ không được mở khóa controls,
+  ghi lỗi hoặc thay kết quả của worker mới. Chỉ main thread cập nhật widget.
+- Reset xóa selection/highlight, sidebar clue, trace đã lưu trong bộ nhớ và đóng
+  cửa sổ trace cũ. refresh đọc lại clue của ô đang chọn từ PublicState hiện tại.
+- Sau Auto Solve, View Trace hiển thị accepted steps, clue trước/sau reveal và
+  mọi SAT call hoàn tất (kể cả kiểm tra cuối). Save Trace xuất steps JSON bằng
+  agent.trace.save_trace. Trace rỗng của STUCK vẫn có thể xem/lưu.
+- Nút trace bị khóa trước run/khi đang chạy/sau reset. Dialog hủy không ghi file;
+  lỗi xuất file được hiển thị, không xóa kết quả. Đóng app cũng hủy worker.
+
+## Kiểm tra
+
+Chạy từ Source/: `python -m pytest tests/test_gui.py tests/test_integration.py -q`.
+Controller test dùng widgets giả nhưng Engine/Encoder/DPLL/Agent thật; scheduler
+điều khiển tình huống queued worker và Event/Barrier cho worker đang chạy, không
+dùng sleep để tạo race. Đã smoke test Tkinter thật ở chế độ ẩn: Auto Solve 3x3,
+8 bước/105 calls, mở popup trace và Restart xóa sidebar/trace. Chưa đánh giá toàn
+bộ layout trực quan trên nhiều kích thước màn hình.
 
 ## Nhật ký AI
 

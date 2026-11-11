@@ -17,7 +17,12 @@
   Ánh xạ biến deterministic, thêm unit clause cho status công khai, rebuild mỗi snapshot
   và trả đầy đủ EncodingResult. Counting dùng tổ hợp trực tiếp, xử lý biên k và vùng rỗng;
   không dùng biến phụ hoặc sửa đầu vào. Các vùng, gồm COMMON_NEIGHBORS, dùng chung resolver.
-- Mã hóa CNF cho EVEN/ODD chưa triển khai, vẫn raise NotImplementedError.
+- EVEN/ODD đã mã hóa bằng clause chặn mỗi assignment sai parity, không gọi
+  evaluator hoặc thêm biến phụ. Dùng cùng resolver cho mọi vùng, kể cả
+  COMMON_NEIGHBORS. Vùng rỗng: EVEN -> [], ODD -> [[]].
+- Test parity đối chiếu độc lập với evaluator trên mọi assignment 3x3, có test
+  4x4/5x5, unit verdict, field/region không hợp lệ và luồng reveal thật. Với vùng
+  m ô (m > 0), parity tạo 2^(m-1) clauses; chưa tối ưu cho explicit region lớn.
 
 ## Nhật ký AI
 

@@ -50,6 +50,17 @@ Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Branch TV3 hiện đã c
 - `test_clue_evaluator.py`: truth table, vét cạn assignment trên các vùng nhỏ,
   counting/parity, dữ liệu sai và không sửa dữ liệu; không gọi encoder.
 
+## Regression tích hợp
+
+- test_integration.py dùng Engine/CNF/DPLL/Agent thật để kiểm tra proof deepcopy,
+  số SAT calls (3x3 105/105, 4x4 301/301), verifier cùng/khác Agent, parity reveal,
+  rejected verdict giữ nguyên state và session sau Restart.
+- test_gui.py điều khiển worker trước/sau reset, khi SAT đang chạy và queue cũ;
+  kiểm tra sidebar/highlight/trace bị xóa, popup, JSON export và lỗi I/O.
+- test_cnf_encoder.py thay kỳ vọng NotImplementedError của parity bằng truth
+  tables độc lập, vùng rỗng, COMMON_NEIGHBORS, biên/validation và board 4x4/5x5.
+- Sau tích hợp: 517 test toàn project đạt; không thay Protocol hoặc dependency.
+
 ## Nhật ký AI
 
 Các lượt AI phải append mục theo AGENTS.md.

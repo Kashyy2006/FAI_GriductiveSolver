@@ -5,10 +5,11 @@ from __future__ import annotations
 import queue
 import threading
 from pathlib import Path
-from tkinter import BOTH, LEFT, RIGHT, Tk, X, Y, filedialog, messagebox, ttk
+from tkinter import BOTH, LEFT, RIGHT, Text, Tk, Toplevel, X, Y, filedialog, messagebox, ttk
 from typing import Callable
 
 from agent.agent import DeductiveAgent
+from agent.trace import save_trace
 from game.engine import GameEngine
 from game.models import (
     AutoSolveResult,
@@ -32,6 +33,7 @@ class MainWindow:
     _TEXT = "#312a26"
     _MUTED = "#796f64"
     _ACCENT = "#c92f28"
+    _EMPTY_CLUE = "Select a revealed card to inspect its clue."
 
     def __init__(self, root: Tk, engine: GameEngine, agent: DeductiveAgent) -> None:
         self.root = root
@@ -40,10 +42,15 @@ class MainWindow:
         self._state = engine.get_public_state()
         self._selected_id: str | None = None
         self._busy = False
-        self._messages: queue.Queue[tuple[str, object, StateToken]] = queue.Queue()
+        self._active_task: object | None = None
+        self._cancel_event: threading.Event | None = None
+        self._last_solve: AutoSolveResult | None = None
+        self._trace_window: Toplevel | None = None
+        self._messages: queue.Queue[tuple[object, str, object, StateToken]] = queue.Queue()
         self._configure_window()
         self._build_layout()
         self.refresh()
+        self.root.protocol("WM_DELETE_WINDOW", self._close)
         self.root.after(80, self._poll_messages)
 
     def refresh(self) -> None:
@@ -61,6 +68,12 @@ class MainWindow:
         self.selected_label.configure(
             text=(f"Selected: {selected.id}  ·  {selected.name}" if selected else "Select a card")
         )
+        if selected is None:
+            self.clue_label.configure(text=self._EMPTY_CLUE)
+        elif selected.clue is None:
+            self.clue_label.configure(text="This card is sealed. Its status and clue stay hidden.")
+        else:
+            self.clue_label.configure(text=self._describe_clue(selected.clue))
         self._update_controls()
 
     def _configure_window(self) -> None:
@@ -228,6 +241,14 @@ class MainWindow:
             sidebar, text="Auto Solve", style="Action.TButton", command=self._auto_solve
         )
         self.solve_button.pack(fill=X, pady=3)
+        self.view_trace_button = ttk.Button(
+            sidebar, text="View Trace", style="Action.TButton", command=self._view_trace
+        )
+        self.view_trace_button.pack(fill=X, pady=3)
+        self.save_trace_button = ttk.Button(
+            sidebar, text="Save Trace…", style="Action.TButton", command=self._save_trace
+        )
+        self.save_trace_button.pack(fill=X, pady=3)
         ttk.Separator(sidebar).pack(fill=X, pady=15)
         self.load_button = ttk.Button(
             sidebar, text="Load Puzzle…", style="Action.TButton", command=self._load
@@ -242,7 +263,7 @@ class MainWindow:
         )
         self.clue_label = ttk.Label(
             sidebar,
-            text="Select a revealed card to inspect its clue.",
+            text=self._EMPTY_CLUE,
             style="Body.TLabel",
             wraplength=280,
             justify=LEFT,
@@ -255,14 +276,14 @@ class MainWindow:
 
     def _select_cell(self, character_id: str) -> None:
         self._selected_id = character_id
-        character = next(item for item in self._state.characters if item.id == character_id)
-        if character.clue is None:
-            self.clue_label.configure(text="This card is sealed. Its status and clue stay hidden.")
-            self.board.highlight((character_id,))
-        else:
-            self.clue_label.configure(text=self._describe_clue(character.clue))
-            self.board.highlight(self._clue_cells(character.clue, character_id))
         self.refresh()
+        character = next((item for item in self._state.characters if item.id == character_id), None)
+        if character is not None:
+            self.board.highlight(
+                (character_id,)
+                if character.clue is None
+                else self._clue_cells(character.clue, character_id)
+            )
 
     def _clue_cells(self, clue: Clue, owner_id: str) -> tuple[str, ...]:
         if clue.type.value == "FACT" and clue.person is not None:
@@ -293,8 +314,27 @@ class MainWindow:
         self._start_task("hint", lambda: self.agent.next_hint(snapshot), snapshot.token)
 
     def _auto_solve(self) -> None:
+        if self._busy:
+            return
         snapshot = self._state
-        self._start_task("solve", lambda: self.agent.auto_solve(self.engine), snapshot.token)
+        cancel = threading.Event()
+
+        # Capture the initiating session, not mutable GUI state. Even if the
+        # worker starts after a reset, it must not solve the replacement game.
+        def should_cancel() -> bool:
+            return (
+                cancel.is_set()
+                or self.engine.get_public_state().token.session_id != snapshot.token.session_id
+            )
+
+        self._last_solve = None
+        self._close_trace()
+        self._start_task(
+            "solve",
+            lambda: self.agent.auto_solve(self.engine, should_cancel=should_cancel),
+            snapshot.token,
+            cancel_event=cancel,
+        )
 
     def _load(self) -> None:
         selected_path = filedialog.askopenfilename(
@@ -307,9 +347,7 @@ class MainWindow:
         try:
             puzzle = load_puzzle(Path(selected_path))
             self._state = self.engine.load(puzzle)
-            self._busy = False
-            self._selected_id = None
-            self.board.highlight(())
+            self._reset_view()
             self.status_label.configure(text="Puzzle loaded.")
             self.refresh()
         except Exception as error:
@@ -317,39 +355,83 @@ class MainWindow:
 
     def _restart(self) -> None:
         try:
-            self._selected_id = None
             self._state = self.engine.restart()
-            self._busy = False
-            self.board.highlight(())
+            self._reset_view()
             self.status_label.configure(text="Case restarted.")
             self.refresh()
         except Exception as error:
             self._show_error("Could not restart case", error)
 
-    def _start_task(self, kind: str, action: Callable[[], object], token: StateToken) -> None:
+    def _cancel_task(self) -> None:
+        """Invalidate queued messages and cooperatively stop the current worker."""
+        if self._cancel_event is not None:
+            self._cancel_event.set()
+        self._cancel_event = None
+        self._active_task = None
+        self._busy = False
+
+    def _close_trace(self) -> None:
+        if self._trace_window is not None and self._trace_window.winfo_exists():
+            self._trace_window.destroy()
+        self._trace_window = None
+
+    def _reset_view(self) -> None:
+        """Clear public information and trace belonging to the previous session."""
+        self._cancel_task()
+        self._selected_id = None
+        self._last_solve = None
+        self._close_trace()
+        self.board.highlight(())
+        self.clue_label.configure(text=self._EMPTY_CLUE)
+
+    def _close(self) -> None:
+        self._cancel_task()
+        self.root.destroy()
+
+    def _start_task(
+        self,
+        kind: str,
+        action: Callable[[], object],
+        token: StateToken,
+        *,
+        cancel_event: threading.Event | None = None,
+    ) -> None:
         if self._busy:
             return
         self._busy = True
+        task_id = object()
+        cancel = cancel_event if cancel_event is not None else threading.Event()
+        self._active_task = task_id
+        self._cancel_event = cancel
         self.status_label.configure(text="Working…")
         self._update_controls()
 
         def run() -> None:
+            if cancel.is_set():
+                return
             try:
                 result: object = action()
             except Exception as error:
                 result = error
-            self._messages.put((kind, result, token))
+            self._messages.put((task_id, kind, result, token))
 
         threading.Thread(target=run, name=f"griductive-{kind}", daemon=True).start()
 
     def _poll_messages(self) -> None:
         try:
             while True:
-                kind, result, token = self._messages.get_nowait()
-                if token.session_id != self._state.token.session_id:
+                task_id, kind, result, token = self._messages.get_nowait()
+                if task_id is not self._active_task:
+                    continue
+                if token.session_id != self.engine.get_public_state().token.session_id:
+                    self._cancel_task()
+                    self.refresh()
                     continue
                 self._busy = False
+                self._active_task = None
+                self._cancel_event = None
                 if isinstance(result, Exception):
+                    self.refresh()
                     self._show_error("Operation failed", result)
                 elif kind == "verdict" and isinstance(result, VerdictResult):
                     self._handle_verdict(result)
@@ -389,11 +471,77 @@ class MainWindow:
             self.refresh()
 
     def _handle_solve(self, result: AutoSolveResult) -> None:
-        if result.final_state.token.session_id != self._state.token.session_id:
+        if result.final_state.token != self.engine.get_public_state().token:
+            self.refresh()
             return
         self._state = result.final_state
-        self.status_label.configure(text=f"Auto Solve: {result.outcome.value.title()}.")
+        self._last_solve = result
+        self.status_label.configure(
+            text=f"Auto Solve: {result.outcome.value.title()} · {len(result.steps)} steps."
+        )
         self.refresh()
+
+    @staticmethod
+    def _trace_text(result: AutoSolveResult) -> str:
+        """Format only public, accepted steps and the recorded SAT queries."""
+        lines = [
+            f"Outcome: {result.outcome.value}",
+            f"Accepted steps: {len(result.steps)} | SAT calls: {len(result.queries)}",
+            "",
+        ]
+        if not result.steps:
+            lines.append("No accepted deduction steps.")
+        for step in result.steps:
+            lines.extend(
+                [
+                    f"Step {step.step}: {step.character_id} = {step.verdict.value}",
+                    f"Version: {step.token_before.version} -> {step.token_after.version}",
+                    f"Active clues before reveal: {', '.join(step.active_clue_ids)}",
+                    f"New clue: {step.newly_revealed_clue.id} — "
+                    f"{BoardView._format_clue(step.newly_revealed_clue)}",
+                    f"SAT calls in step: {len(step.queries)}",
+                    "",
+                ]
+            )
+        lines.append("All completed SAT calls (including the final consistency check):")
+        for index, query in enumerate(result.queries, 1):
+            lines.append(
+                f"{index}. {query.purpose} | assumptions={query.assumptions} | {query.result.value}"
+            )
+        return "\n".join(lines)
+
+    def _view_trace(self) -> None:
+        if self._last_solve is None or self._busy:
+            return
+        self._close_trace()
+        window = Toplevel(self.root)
+        window.title("Deduction Trace")
+        window.geometry("820x580")
+        scrollbar = ttk.Scrollbar(window)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        text = Text(window, wrap="word", yscrollcommand=scrollbar.set)
+        text.pack(fill=BOTH, expand=True)
+        scrollbar.configure(command=text.yview)
+        text.insert("1.0", self._trace_text(self._last_solve))
+        text.configure(state="disabled")
+        self._trace_window = window
+
+    def _save_trace(self) -> None:
+        if self._last_solve is None or self._busy:
+            return
+        destination = filedialog.asksaveasfilename(
+            title="Save deduction trace",
+            initialdir=Path(__file__).resolve().parents[1] / "outputs" / "traces",
+            initialfile="deduction_trace.json",
+            defaultextension=".json",
+            filetypes=(("JSON trace", "*.json"),),
+        )
+        if destination:
+            try:
+                save_trace(self._last_solve.steps, Path(destination))
+                self.status_label.configure(text="Trace saved.")
+            except Exception as error:
+                self._show_error("Could not save trace", error)
 
     def _update_controls(self) -> None:
         selected = next(
@@ -404,6 +552,9 @@ class MainWindow:
         self.innocent_button.configure(state="normal" if can_mark else "disabled")
         self.hint_button.configure(state="disabled" if self._busy else "normal")
         self.solve_button.configure(state="disabled" if self._busy else "normal")
+        can_trace = not self._busy and self._last_solve is not None
+        self.view_trace_button.configure(state="normal" if can_trace else "disabled")
+        self.save_trace_button.configure(state="normal" if can_trace else "disabled")
 
     @staticmethod
     def _show_error(title: str, error: Exception) -> None:
