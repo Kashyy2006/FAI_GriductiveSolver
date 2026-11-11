@@ -36,7 +36,58 @@ Report.pdf và video tạo sau khi hoàn thành; không đưa số liệu giả 
 
 Các lượt AI tiếp theo append theo AGENTS.md.
 
+### 2026-11-06 — Hoàn thiện validation và kiểm thử regions/evaluator
+
+- Thành viên: TV2.
+- AI: Codex.
+- Yêu cầu: Rà soát xử lý vùng và ngữ nghĩa clue; bổ sung validation và kiểm thử độc lập.
+- File thay đổi: logic/[regions.py](http://regions.py), logic/clue\_[evaluator.py](http://evaluator.py), tests/[conftest.py](http://conftest.py), tests/test\_[regions.py](http://regions.py), tests/test_clue\_[evaluator.py](http://evaluator.py) và README của hai thư mục.
+- Nội dung và lý do:
+  - Kiểm tra kích thước board, tọa độ, ID ô, ô thiếu/trùng và tham chiếu không tồn tại.
+  - Từ chối tham số thiếu/thừa hoặc sai kiểu theo từng loại region/clue bằng ContractError.
+  - Kiểm tra assignment đầy đủ với giá trị Status và k là integer trong giới hạn vùng.
+  - Kiểm chứng ROW, COLUMN, NEIGHBORS, EXPLICIT và COMMON_NEIGHBORS; bảo đảm kết quả row-major, không trùng ô.
+  - Tạo fixture công khai cho board 3×3/4×4/5×5; thêm truth table, vét cạn assignment trên các vùng thử, ca vùng rỗng và kiểm tra không sửa đầu vào.
+  - Evaluator được kiểm thử độc lập, không gọi CNF encoder hoặc SAT solver; giữ nguyên model/API/schema.
+- Kiểm tra:
+  - Viết test tái hiện lỗi trước khi sửa.
+  - Chạy bằng Python 3.11.9 trong .venv\\py311: 146/146 test đạt, gồm 130 test mới và 16 test hiện có.
+  - Ruff check, Ruff format --check và pip check đều đạt.
+- Còn thiếu: CNFEncoder còn stub; chưa kiểm thử tích hợp hệ thống; chưa commit/push.
+
+### 2026-11-06 — Mã hóa CNF cho ba clue cơ bản
+
+- Thành viên: TV2.
+- AI: Codex,.
+- Yêu cầu: Triển khai ánh xạ biến và encode FACT/SAME/DIFFERENT.
+- File thay đổi: logic/cnf\_[encoder.py](http://encoder.py), logic/clue\_[evaluator.py](http://evaluator.py), tests/test_cnf\_[encoder.py](http://encoder.py).
+- Nội dung và lý do:
+  - Ánh xạ toàn bộ ô thành biến row\*N+col+1, kể cả biến chưa có clause.
+  - Encode ba clue cơ bản và thêm unit clause đúng dấu cho status công khai.
+  - Xử lý clue theo ID, status theo row-major; trả đầy đủ EncodingResult, không dùng biến phụ.
+  - Tách validator cấu trúc clue để dùng chung; encoder không gọi evaluator để tạo CNF.
+  - Rebuild mỗi snapshot, không sửa đầu vào hoặc chia sẻ container kết quả giữa các lần encode.
+- Kiểm tra:
+  - Thêm 45 test; đối chiếu CNF với evaluator trên toàn bộ 512 assignment cho từng ca cơ bản của board 3×3.
+  - Kiểm tra mapping 3×3/4×4/5×5, nhiều clue kết hợp, mâu thuẫn, dữ liệu sai và rebuild snapshot.
+  - Python 3.11.9: 191/191 test đạt; Ruff check/format, pip check và git diff --check đạt.
+- Còn thiếu: Counting/parity vẫn raise NotImplementedError; chưa kiểm thử tích hợp.
+
+### 2026-11-06 — Hoàn thiện CNF encoder cho sáu clue core
+
+- Thành viên: TV2.
+- AI: Codex.
+- Yêu cầu: Bổ sung mã hóa EXACTLY/AT_LEAST/AT_MOST và kiểm thử độc lập.
+- File thay đổi: Source/logic/cnf_encoder.py, Source/tests/test_cnf_encoder.py.
+- Nội dung và lý do:
+  - Hoàn thiện sáu clue core bằng encoding tổ hợp trực tiếp, không thêm dependency hoặc biến phụ.
+  - Kiểm tra tham số, biên k và vùng rỗng; giữ nguyên model/API/schema.
+  - Bổ sung kiểm thử đối chiếu CNF với evaluator bằng vét cạn, gồm KB kết hợp sáu clue và unit verdict.
+- Kiểm tra: Python 3.11.9 đạt 274/274 test, gồm 128 test encoder; Ruff check/format, pip check và git diff --check đều đạt.
+- Còn thiếu: Encoding parity còn NotImplementedError; chưa kiểm thử tích hợp hệ thống; chưa commit/push.
+
 ### 2026-11-08 — Cập nhật tiến độ bàn giao TV4
+
 - Thành viên: TV4 (Tùng).
 - AI: Codex.
 - Yêu cầu: Triển khai Deductive Agent theo điều kiện bổ sung của người dùng.
@@ -44,3 +95,4 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Nội dung và lý do: Cập nhật Agent/trace đã triển khai và giới hạn chưa tích hợp; không thay Model/Protocol hoặc phần việc TV1–TV3/TV5.
 - Kiểm tra: 74 test đạt; Ruff check/format; local Python 3.12.6.
 - Còn thiếu: Python 3.11 runtime và tích hợp Engine/Encoder/Solver thật.
+  Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo append theo [AGENTS.md](http://AGENTS.md)
