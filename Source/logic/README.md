@@ -43,25 +43,15 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 ### 2026-11-06 — Triển khai encoder cho ba clue cơ bản
 
 - Thành viên: TV2.
-
 - AI: Codex.
-
 - Yêu cầu: Ánh xạ biến và mã hóa FACT/SAME/DIFFERENT thành CNF.
-
 - File thay đổi: cnf_encoder.py, clue_evaluator.py.
-
 - Nội dung và lý do:
-
   - Ánh xạ toàn bộ ô theo row\*N+col+1; thêm unit clause đúng dấu cho status công khai.
-
   - Encode FACT/SAME/DIFFERENT; xử lý clue theo ID và status theo row-major.
-
   - Trả đầy đủ EncodingResult, không dùng biến phụ; rebuild mỗi snapshot và không sửa đầu vào.
-
   - Tách validator cấu trúc clue để dùng chung, không dùng evaluator để tạo CNF.
-
 - Kiểm tra: Python 3.11.9 đạt 191 test; Ruff check/format, pip check và git diff --check đạt.
-
 - Còn thiếu: Counting/parity vẫn raise NotImplementedError; chưa kiểm thử tích hợp.
 
 ### 2026-11-06 — Hoàn thiện CNF encoder cho sáu clue core
@@ -80,5 +70,12 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Kiểm tra: Python 3.11.9 đạt 274 test; Ruff check/format, pip check và git diff --check đạt.
 - Còn thiếu: Parity còn NotImplementedError; chưa kiểm thử tích hợp.
 
+### 2026-11-09 — Tích hợp phụ thuộc TV2 trên branch TV3
 
-&nbsp;
+- Thành viên: TV3 (Mạnh, theo phân công); phần logic thuộc TV2.
+- AI: Codex.
+- Yêu cầu: Ghi nhận nguồn code được dùng để kiểm tra phần TV3.
+- File thay đổi: regions.py, clue_evaluator.py, cnf_encoder.py và README.md được lấy từ TV2 commit 23955a5; lượt này chỉ append nhật ký.
+- Nội dung và lý do: Codex đưa nguyên implementation của TV2 vào branch TV3 để chạy uniqueness và test tích hợp với DPLL thật. Không viết lại Encoder hoặc nhận phần logic của TV2 là phần triển khai mới của TV3; lịch sử nhật ký TV2 được giữ nguyên.
+- Kiểm tra: Đã đối chiếu byte của ba file production và các test được lấy từ TV2 với commit nguồn; toàn bộ test sau tích hợp đạt. Lượt ghi log không sửa code logic.
+- Còn thiếu: CNF parity vẫn chưa triển khai; chưa nghiệm thu progressive production với Engine thật.

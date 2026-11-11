@@ -1,0 +1,163 @@
+{
+  "characters": [
+    {
+      "clue": {
+        "id": "clue_A1",
+        "k": 0,
+        "region": {
+          "index": 1,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A1",
+      "name": "Person 00",
+      "profession": "Researcher",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_B1",
+        "k": 0,
+        "region": {
+          "index": 1,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B1",
+      "name": "Person 01",
+      "profession": "Researcher",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_C1",
+        "k": 0,
+        "region": {
+          "index": 1,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C1",
+      "name": "Person 02",
+      "profession": "Researcher",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_A2",
+        "k": 0,
+        "region": {
+          "index": 2,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A2",
+      "name": "Person 03",
+      "profession": "Researcher",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_B2",
+        "k": 0,
+        "region": {
+          "index": 2,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B2",
+      "name": "Person 04",
+      "profession": "Researcher",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_C2",
+        "k": 0,
+        "region": {
+          "index": 2,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C2",
+      "name": "Person 05",
+      "profession": "Researcher",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_A3",
+        "k": 0,
+        "region": {
+          "index": 0,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A3",
+      "name": "Person 06",
+      "profession": "Researcher",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_B3",
+        "k": 0,
+        "region": {
+          "index": 0,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B3",
+      "name": "Person 07",
+      "profession": "Researcher",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_C3",
+        "k": 0,
+        "region": {
+          "index": 0,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C3",
+      "name": "Person 08",
+      "profession": "Researcher",
+      "row": 2
+    }
+  ],
+  "initially_revealed": [
+    "A1"
+  ],
+  "puzzle_id": "synthetic_3x3_row_counts",
+  "schema_version": "1.0",
+  "size": 3
+}
