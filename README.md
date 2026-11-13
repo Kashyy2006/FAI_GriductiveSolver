@@ -6,9 +6,11 @@ COMMON_NEIGHBORS. Model/Protocol/schema/dependency không đổi.
 
 Trace đếm đúng calls thực tế kể cả Engine deepcopy proof; Auto Solve gắn với
 session khởi chạy, Load/Restart hủy tác vụ cũ và xóa thông tin sidebar/trace.
-GUI có View Trace và Save Trace. Kiểm tra: 517 test đạt và Ruff đạt; smoke test
-Tkinter thật (ẩn) giải 3x3 trong 8 bước/105 calls. Runtime local Python 3.12.6;
-nhóm vẫn target 3.11 và cần kiểm tra lại trên interpreter đó.
+GUI có View Trace và Save Trace. Nghiệm thu TV3 giai đoạn 3: 531 test đạt trên
+Python 3.11.0, Ruff check/format và pip check đạt. Bộ benchmark lưu 120 row cho
+cả solve và uniqueness; 54 run hoàn tất đều có trace khớp actual SAT calls.
+Test GUI trong suite kiểm tra controller/worker headless; demo giao diện thủ công
+và tổng hợp báo cáo chung vẫn cần nhóm nghiệm thu.
 
 ## Bắt đầu
 
@@ -30,9 +32,9 @@ python -m ruff format --check .
 
 `python main.py` mở GUI với puzzle 3x3 mặc định. `python main.py --preview`
 chỉ xem board tĩnh. Hướng dẫn module tại Source/agent/README.md,
-Source/gui/README.md và Source/logic/README.md. Benchmark runner đã triển khai;
-kết quả lưu sẵn trong Source/experiments/results/ là snapshot uniqueness cũ,
-không tự động cập nhật theo các sửa lỗi tích hợp này.
+Source/gui/README.md và Source/logic/README.md. Kết quả TV3 giai đoạn 3 nằm trong
+Source/experiments/results/phase3/. Các file trực tiếp trong
+Source/experiments/results/ là snapshot uniqueness ngày 09/11, được giữ riêng.
 Version dependency và giới hạn kiểm tra: docs/dependencies.md, docs/verification.md.
 Không dùng API tự đặt; model chung tại game/models.py, Protocol game/contracts.py.
 
@@ -143,3 +145,24 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Nội dung và lý do: Codex trực tiếp viết DPLL, uniqueness, runner benchmark, test, bộ puzzle synthetic và bản thảo báo cáo; chạy kiểm tra và xử lý lỗi phát sinh. Giữ nguyên model, Protocol, schema và dependency. Phần Agent kế thừa TV4; Encoder lấy từ TV2, không tính là phần TV3 tự xây lại. Các trao đổi và nhật ký cũ được giữ nguyên trên branch hiện tại.
 - Kiểm tra: Trong lượt triển khai đã chạy 403 test toàn bộ, Ruff check/format và pip check đạt trên Python 3.11.0; sau bổ sung kiểm tra deadline, 25 test uniqueness/benchmark liên quan đạt. Benchmark uniqueness thật có 21 lượt UNIQUE trên 7 puzzle, 3 repeats, không lỗi/timeout. Lượt bổ sung log này chỉ sửa Markdown, kiểm tra git diff --check, không chạy lại test code.
 - Còn thiếu: Nghiệm thu progressive với Engine thật của TV1, bộ puzzle khó và stress 5x5; CNF parity vẫn chưa được TV2 triển khai. Thay đổi chưa commit/push.
+
+
+### 2026-11-13 — Đối chiếu phần TV3 với phân công giai đoạn 3
+- Thành viên: TV3 (Mạnh, theo phân công).
+- AI: Codex.
+- Yêu cầu: Kiểm tra code hiện tại so với phân công mới trong PDF, deadline giai đoạn 3 ngày 14/11.
+- File thay đổi: Không thay đổi file triển khai; chỉ append nhật ký tại README.md. Các snapshot và kết quả kiểm tra tạm nằm trong .venv/audits/phase3-20261113, không thay kết quả benchmark đã bàn giao.
+- Nội dung và lý do: Đọc PDF 5 trang, đối chiếu trực quan bảng giai đoạn 3 ở trang 3 và xác minh các branch qua GitHub. Branch TV3 vẫn dùng Engine stub và Agent cũ; integration_v1 commit 23de657 đã có backend thật, bản sửa query accounting và test tích hợp. Tái hiện Agent hiện tại ghép Engine thật ghi 129 query/105 calls ở 3x3 và 346 query/301 calls ở 4x4; Agent trên integration_v1 khớp 105/105 và 301/301. Đề xuất cập nhật bản tích hợp, nghiệm thu test backend thật, lưu benchmark cả hai phase và bổ sung kiểm tra timeout trong SAT/verifier thật; chưa thấy cần viết lại DPLL hoặc uniqueness.
+- Kiểm tra: Branch hiện tại đạt 403 test, Ruff check/format đạt; snapshot integration_v1 tách biệt đạt 517 test. Benchmark tạm với backend tích hợp ghi solve: 6 SOLVED, 3 STUCK, 2 ERROR; uniqueness: 8 UNIQUE, 1 MULTIPLE, 2 ERROR. Hai phase với deadline rất nhỏ trả TIMEOUT trước SAT call (0 calls), chưa chứng nhận timeout giữa một SAT call. Không merge, chuyển branch, sửa code, commit hoặc publish.
+- Còn thiếu: Đưa các thay đổi tích hợp vào branch TV3 theo kế hoạch nhóm; thêm nghiệm thu timeout giữa SAT/verifier với Engine thật, cập nhật kết quả/report giai đoạn 3 và giữ riêng lỗi/timeout khỏi các lần chạy bình thường.
+
+
+### 2026-11-14 — Tổng hợp công việc TV3 và câu hỏi đã trao đổi
+
+- Thành viên: TV3 (Mạnh, theo phân công).
+- AI: Codex.
+- Yêu cầu: Cập nhật README theo công việc đã làm và bổ sung phần các câu hỏi của người dùng.
+- File thay đổi: README.md; tổng hợp các thay đổi triển khai đã có tại experiments, tests, docs và results.
+- Nội dung và lý do: Bổ sung trạng thái bàn giao deadline 14/11, lệnh demo/benchmark và bảng tóm tắt câu hỏi gần đây. Branch TV3 đã fast-forward tới integration_v1 commit 23de657; giữ các thay đổi chưa commit. Codex trực tiếp bổ sung runner, đối chiếu query, test tích hợp, số liệu và báo cáo TV3. Engine, Encoder/parity, Agent và GUI kế thừa phần tích hợp của nhóm, không ghi thành công việc TV3 tự viết lại. Giữ lịch sử, không khôi phục mục đã yêu cầu xóa; các lượt sau chỉ ghi log khi người dùng yêu cầu rõ.
+- Kiểm tra: Lượt triển khai trước đã đạt 531 test trên Python 3.11.0, Ruff check/format và pip check; benchmark có 120 row, 54/54 run normal khớp trace/calls, tổng 3.903 calls. Lượt này chỉ sửa README và kiểm tra diff, liên kết, lịch sử cùng hash code/dữ liệu; không chạy lại test hoặc benchmark.
+- Còn thiếu: Người dùng rà soát diff; commit/push và bàn giao nhóm chưa thực hiện. Demo GUI thủ công và Report.pdf chung cần nhóm nghiệm thu.

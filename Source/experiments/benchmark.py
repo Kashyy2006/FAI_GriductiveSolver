@@ -9,9 +9,11 @@ import inspect
 import json
 import platform
 import sys
+from collections import defaultdict
 from collections.abc import Sequence
 from importlib.metadata import version
 from pathlib import Path
+from statistics import median
 from time import perf_counter
 
 from agent.agent import DeductiveAgent
@@ -25,6 +27,8 @@ from game.models import (
     PublicState,
     Puzzle,
     SATResult,
+    SATStatus,
+    SolverStats,
     SolverTimeout,
     StateToken,
     Status,
@@ -53,6 +57,8 @@ FIELDS = (
     "clauses_max",
     "clauses_final",
     "sat_calls",
+    "trace_query_count",
+    "query_count_matches",
     "failed_sat_calls",
     "decisions",
     "propagations",
@@ -89,6 +95,7 @@ class _MeasuredSolver:
         self.propagations = 0
         self.backtracks = 0
         self.clause_counts: list[int] = []
+        self.completed: list[tuple[tuple[Literal, ...], SATStatus, SolverStats]] = []
 
     def solve(
         self,
@@ -112,6 +119,7 @@ class _MeasuredSolver:
         self.decisions += result.stats.decisions
         self.propagations += result.stats.propagations
         self.backtracks += result.stats.backtracks
+        self.completed.append((tuple(assumptions), result.status, result.stats))
         self.deadline.check()
         return result
 
@@ -162,6 +170,11 @@ def _run_case(puzzle: Puzzle, mode: str, timeout_seconds: float | None) -> dict[
             engine = _MeasuredEngine(GameEngine(puzzle, agent.verify_verdict))
             result = agent.auto_solve(engine)
             row["outcome"] = result.outcome.value
+        recorded = [(query.assumptions, query.result, query.stats) for query in result.queries]
+        row["trace_query_count"] = len(recorded)
+        row["query_count_matches"] = len(recorded) == solver.calls and recorded == solver.completed
+        if not row["query_count_matches"]:
+            raise ContractError("Run queries do not match the actual Solver call sequence")
         deadline.check()
         row["metrics_partial"] = False
     except Exception as error:
@@ -194,28 +207,59 @@ def _run_case(puzzle: Puzzle, mode: str, timeout_seconds: float | None) -> dict[
 
 
 def _plot(rows: Sequence[dict[str, object]], destination: Path) -> None:
-    """Plot every row, retaining errors/timeouts with a distinct color."""
+    """Group repeats by outcome; retain every raw measurement in the CSV."""
     import matplotlib
 
     matplotlib.use("Agg")
     from matplotlib import pyplot as plt
+    from matplotlib.ticker import MaxNLocator
 
-    labels = [f"{r['puzzle_id']} / {r['mode']} / {r['repeat']} [{r['outcome']}]" for r in rows]
-    colors = ["#b64b48" if r["outcome"] in ("ERROR", "TIMEOUT") else "#377d71" for r in rows]
-    figure, axes = plt.subplots(1, 2, figsize=(15, max(4, len(rows) * 0.35)), sharey=True)
-    positions = list(range(len(rows)))
-    axes[0].barh(positions, [r["runtime_seconds"] for r in rows], color=colors)
-    axes[1].barh(positions, [r["sat_calls"] for r in rows], color=colors)
+    grouped: dict[tuple[str, str, str], list[dict[str, object]]] = defaultdict(list)
+    for row in rows:
+        grouped[(str(row["puzzle_id"]), str(row["mode"]), str(row["outcome"]))].append(row)
+    labels = [f"{key[0]} / {key[1]} [{key[2]}; n={len(group)}]" for key, group in grouped.items()]
+    colors = ["#b64b48" if key[2] in ("ERROR", "TIMEOUT") else "#377d71" for key in grouped]
+    figure, axes = plt.subplots(1, 2, figsize=(16, max(4, len(grouped) * 0.4)), sharey=True)
+    positions = list(range(len(grouped)))
+    axes[0].barh(
+        positions,
+        [median(float(r["runtime_seconds"]) for r in group) for group in grouped.values()],
+        color=colors,
+    )
+    axes[1].barh(
+        positions,
+        [median(int(r["sat_calls"]) for r in group) for group in grouped.values()],
+        color=colors,
+    )
     axes[0].set_yticks(positions, labels)
     axes[0].invert_yaxis()
-    axes[0].set_xlabel("Runtime (seconds)")
-    axes[1].set_xlabel("Actual SAT calls (including failed calls)")
-    figure.suptitle("Griductive benchmark: all outcomes retained; red = error/timeout")
+    axes[0].set_xlabel("Median runtime (seconds)")
+    axes[1].set_xlabel("Median actual SAT calls per run (including failed calls)")
+    axes[0].set_xlim(left=0)
+    axes[1].set_xlim(left=0)
+    axes[1].xaxis.set_major_locator(MaxNLocator(integer=True))
+    for axis, field, message in (
+        (
+            axes[0],
+            "runtime_seconds",
+            "All recorded phase runtimes are zero; see loader time in CSV",
+        ),
+        (axes[1], "sat_calls", "No SAT calls were started"),
+    ):
+        if not any(float(row[field]) for row in rows):
+            axis.set_xlim(0, 1)
+            axis.text(
+                0.5, 0.5, message, ha="center", va="center", transform=axis.transAxes, wrap=True
+            )
+    figure.suptitle(
+        "Griductive benchmark: grouped by puzzle, phase and outcome; red = error/timeout"
+    )
     figure.tight_layout()
     destination.parent.mkdir(parents=True, exist_ok=True)
     if not (destination.parent / "README.md").exists():
         (destination.parent / "README.md").write_text(
-            "# Benchmark charts\n\nGenerated by experiments.benchmark; see environment.json.\n",
+            "# Benchmark charts\n\nOwner: TV3. Generated by experiments.benchmark.\n"
+            "Medians grouped by puzzle, phase and outcome; all raw rows remain in CSV.\n\n## AI log\n",
             encoding="utf-8",
         )
     figure.savefig(destination, dpi=160)
@@ -234,7 +278,7 @@ def _write_results(
     output.mkdir(parents=True, exist_ok=True)
     if not (output / "README.md").exists():
         (output / "README.md").write_text(
-            "# Benchmark results\n\nGenerated by experiments.benchmark; all outcomes retained.\n",
+            "# Benchmark results\n\nOwner: TV3. Generated by experiments.benchmark; all outcomes retained.\n\n## AI log\n",
             encoding="utf-8",
         )
     with (output / "benchmark.csv").open("w", encoding="utf-8", newline="") as stream:
@@ -276,11 +320,14 @@ def _write_results(
                 "solver/_timing.py",
                 "solver/uniqueness.py",
                 "experiments/benchmark.py",
+                "experiments/phase3.py",
             )
         ],
         "measurement": {
             "runtime": "Per phase wall time; includes encoding and engine/verifier; excludes loading, GUI and export",
             "sat_calls": "Actual calls, including calls that raise; no summing nested trace queries",
+            "query_accounting": "Completed runs compare ordered assumptions/status/stats against the Solver ledger; failed runs leave trace fields unavailable",
+            "charts": "Median across repeats, grouped separately by puzzle/phase/outcome; raw rows retained in CSV",
             "partial_metrics": "Counters include completed calls only when a call raises",
             "uniqueness_clauses": "Includes the primary blocking clause in maximum/final counts",
             "deadline": "Cooperative; checked around dependencies and inside DPLL, not a hard process kill",
@@ -294,13 +341,14 @@ def _write_results(
         "",
         "All outcomes, including errors and timeouts, are retained. No hidden labels or clues are exported.",
         "",
-        "| Puzzle | Phase | Repeat | Outcome | SAT calls | Steps | Seconds |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| Puzzle | Phase | Repeat | Outcome | SAT calls | Trace queries | Match | Steps | Seconds |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in rows:
         summary.append(
             f"| {row['puzzle_id']} | {row['mode']} | {row['repeat']} | {row['outcome']} | "
-            f"{row['sat_calls']} | {row['deduction_steps']} | {row['runtime_seconds']:.6f} |"
+            f"{row['sat_calls']} | {row['trace_query_count']} | {row['query_count_matches']} | "
+            f"{row['deduction_steps']} | {row['runtime_seconds']:.6f} |"
         )
     failures = [row for row in rows if row["error"]]
     summary.extend(["", "## Limitations", ""])

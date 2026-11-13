@@ -1,0 +1,77 @@
+{
+  "python": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "packages": {
+    "pytest": "8.3.5",
+    "ruff": "0.11.13",
+    "jsonschema": "4.24.0",
+    "matplotlib": "3.10.3"
+  },
+  "timeout_seconds_per_phase": 10.0,
+  "repeats": 3,
+  "mode": "all",
+  "puzzles": [
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\tests\\fixtures\\inconsistent.json",
+      "sha256": "08911a1b6b5746fe3568b7fc1911ce9eab6e048b755216acdb453f7582f2ff66"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\tests\\fixtures\\invalid_reference.json",
+      "sha256": "182e089deaf3b85cbfb7fe9808bca142f1e9a2859b1600495bca134167976e6a"
+    }
+  ],
+  "backend_sources": {
+    "encoder": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\logic\\cnf_encoder.py",
+      "sha256": "9d398b0b6200959ce265a9eadc2f5d551dc80c7e87536dac15ca2df42a25c195"
+    },
+    "solver": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\solver\\dpll.py",
+      "sha256": "6b9bd34d3b9075d7e084536fa2faae89ecb209a0e98ffb1cb7d2cf28c0130c14"
+    },
+    "agent": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\agent\\agent.py",
+      "sha256": "aefe7b0c6a499c81dbffa352334283dd68190f10a229581339815ebd11ca7ceb"
+    },
+    "engine": {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\game\\engine.py",
+      "sha256": "de9d6fc2ef20cd562ff8490645e4a3c9c1e02dbb0b4c72fda33efbd869a0fffd"
+    }
+  },
+  "support_sources": [
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\game\\models.py",
+      "sha256": "a12e650959a57f8893eb7813b06c7557a61a219818e5fc77990ca2635a846391"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\game\\contracts.py",
+      "sha256": "387da0864cfcd5f7f89a4b68989214885f23a14225389c24dbc93ec241fbfd81"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\solver\\_timing.py",
+      "sha256": "64887806e82d5407622ec9791883531021f14ba659ac05911f8b813dd3ec730c"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\solver\\uniqueness.py",
+      "sha256": "8d3cf4ad208d5da840571218bdeabb6aa087551b5f36bb616473e42757b54cec"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\benchmark.py",
+      "sha256": "b6a09f7dec74a27bbb194b1d58e4de7e32b1ef33ac6dc9ffd2654037f1ec4b1b"
+    },
+    {
+      "path": "C:\\Users\\huynh\\Downloads\\FAI\\FAI_GriductiveSolver\\Source\\experiments\\phase3.py",
+      "sha256": "f946ff84a3e4437e7890fbff9bf8121b426d228fd12c5214c1e18f3d74b41d7c"
+    }
+  ],
+  "measurement": {
+    "runtime": "Per phase wall time; includes encoding and engine/verifier; excludes loading, GUI and export",
+    "sat_calls": "Actual calls, including calls that raise; no summing nested trace queries",
+    "query_accounting": "Completed runs compare ordered assumptions/status/stats against the Solver ledger; failed runs leave trace fields unavailable",
+    "charts": "Median across repeats, grouped separately by puzzle/phase/outcome; raw rows retained in CSV",
+    "partial_metrics": "Counters include completed calls only when a call raises",
+    "uniqueness_clauses": "Includes the primary blocking clause in maximum/final counts",
+    "deadline": "Cooperative; checked around dependencies and inside DPLL, not a hard process kill"
+  }
+}

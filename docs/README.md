@@ -7,6 +7,15 @@
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
 
+## TV3 giai đoạn 3
+
+- [report/tv3_phase3.md](report/tv3_phase3.md): bản bàn giao deadline 14/11, test,
+  phương pháp đo, số liệu thật và giới hạn.
+- [interfaces.md](interfaces.md): giữ API v1; cập nhật mô tả entry point benchmark
+  và hai trường đối chiếu trace_query_count/query_count_matches.
+- [README gốc](../README.md): trạng thái hiện tại và bảng tóm tắt câu hỏi/yêu cầu
+  của người dùng về TV3. Chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
+
 ## Nhật ký AI
 
 Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
@@ -37,3 +46,14 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Ghi phạm vi hoàn thành TV1 giai đoạn 2, cách ghép, kiểm tra và giới hạn tích hợp.
 - Kiểm tra: python -m pytest tests -q (70 passed); Ruff check và format check đạt toàn Source; Python 3.12.14/Linux.
 - Còn thiếu: Tích hợp verifier thật/GUI/SAT uniqueness khi TV2–TV5 hoàn thiện; chưa kiểm tra Python 3.11/Windows.
+
+
+### 2026-11-14 — Đồng bộ chỉ dẫn tài liệu TV3 giai đoạn 3
+
+- Thành viên: TV3 (Mạnh, theo phân công).
+- AI: Codex.
+- Yêu cầu: Ghi lại tài liệu đã cập nhật và liên kết phần bàn giao TV3.
+- File thay đổi: interfaces.md ở lượt triển khai; README.md ở lượt này.
+- Nội dung và lý do: Cập nhật mô tả entry point benchmark đã triển khai và hai trường đối chiếu trace/calls; giữ nguyên signature Model/Protocol/schema. Bổ sung liên kết báo cáo giai đoạn 3 và bảng câu hỏi ở README gốc.
+- Kiểm tra: Đối chiếu tên trường và entry point với mã hiện có; kiểm tra liên kết và diff Markdown, không chạy lại test code.
+- Còn thiếu: Nhóm tổng hợp tài liệu chung và Report.pdf.

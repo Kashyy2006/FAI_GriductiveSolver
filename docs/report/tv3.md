@@ -1,5 +1,9 @@
 # TV3 — DPLL, uniqueness và thực nghiệm
 
+> Đây là snapshot bàn giao ngày 09/11/2026. Các ghi chú về Engine/parity chưa
+> triển khai bên dưới mô tả trạng thái ở thời điểm đó. Kết quả tích hợp cho
+> deadline 14/11 nằm trong [báo cáo giai đoạn 3](tv3_phase3.md).
+
 Phụ trách: TV3 (Mạnh). Ngày nghiệm thu: 09/11/2026, Asia/Saigon.
 Branch làm việc: `feature/TV3-dpll-uniqueness-experiments`.
 

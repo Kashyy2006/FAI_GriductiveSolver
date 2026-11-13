@@ -166,8 +166,14 @@ riêng, không gọi đó là UNSAT, STUCK hoặc kết quả hoàn thành.
 
 ## Thực nghiệm
 
-`python -m experiments.benchmark` là entry point, hiện raise NotImplementedError.
-Chỉ benchmark sau tích hợp. CSV ít nhất: puzzle_id, outcome, primary_count,
+`python -m experiments.benchmark` là entry point đo hệ thống đã tích hợp.
+`python -m experiments.phase3` chạy riêng nhóm bình thường, dữ liệu lỗi và timeout
+để tái lập bộ nghiệm thu TV3 giai đoạn 3. CSV ít nhất: puzzle_id, outcome, primary_count,
 auxiliary_count_initial/max/final, clauses_initial/max/final, sat_calls, decisions,
 propagations, backtracks, deduction_steps, runtime_seconds, error. Runtime không
 gồm render GUI, uniqueness đo riêng. Ghi môi trường và bộ puzzle, lỗi và timeout.
+
+Runner bổ sung trace_query_count và query_count_matches cho run hoàn tất; đối
+chiếu theo thứ tự assumptions/status/stats với ledger tại Solver. Run lỗi trước
+khi trả kết quả để hai trường trace trống; không giả có trace hoàn tất. CSV vẫn
+giữ actual calls, failed_sat_calls và metrics_partial cho lỗi/timeout.

@@ -5,7 +5,7 @@
 - Phụ trách: Cả nhóm.
 - Kiểm thử contract, schema và examples có sẵn; thêm test Engine, encoder, DPLL, Agent, tích hợp khi triển khai.
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
-- Test TV4 đã bổ sung, chạy độc lập với module thật của TV1–TV3.
+- Giữ test TV4 độc lập và bổ sung test tích hợp Engine/Encoder/DPLL/Agent thật.
 
 ## Kiểm thử Agent và trace — TV4 (Tùng)
 
@@ -20,12 +20,12 @@
   FakeSolver tra bảng kết quả, không chứa thuật toán DPLL; không thay solver thật.
 
 Chạy từ Source/: `python -m pytest tests/test_agent.py tests/test_trace.py -q`.
-Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (403 ca trên branch TV3).
+Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (531 ca trên branch TV3).
 Sandbox Windows có thể chặn thư mục tạm của pytest; chạy ngoài sandbox nếu cần,
 dùng --basetemp với đường dẫn thư mục tạm riêng đã kiểm tra. Không dùng thư mục
 chứa dữ liệu làm basetemp vì pytest sẽ xóa nội dung khi bắt đầu.
-Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Branch TV3 hiện đã chạy toàn bộ
-403 test trên Python 3.11.0; progressive production vẫn cần tích hợp Engine thật.
+Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Kết quả TV3 trước tích hợp là 403
+test, base tích hợp có 517 test; giai đoạn 3 thêm 14 ca, tổng 531 test trên Python 3.11.0.
 
 ## Kiểm thử TV3 và tích hợp phụ thuộc
 
@@ -37,8 +37,8 @@ Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Branch TV3 hiện đã c
 - tv3_helpers.py chỉ chứa builder/fake dùng trong test, không dùng thay Engine/Encoder production.
 - conftest.py, test_regions.py, test_clue_evaluator.py và test_cnf_encoder.py được lấy
   nguyên từ TV2 commit 23955a5, cùng ba file logic production. Test TV4 được giữ nguyên.
-- Toàn bộ số liệu progressive dùng PublicTestEngine chỉ chứng minh luồng test;
-  cần nghiệm thu lại với GameEngine thật sau tích hợp TV1.
+- Test dùng PublicTestEngine chỉ chứng minh luồng thành phần; nghiệm thu backend
+  thật nằm trong test_integration.py và test_phase3_backend.py.
 
 
 ## Kiểm thử logic độc lập
@@ -60,6 +60,18 @@ Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Branch TV3 hiện đã c
 - test_cnf_encoder.py thay kỳ vọng NotImplementedError của parity bằng truth
   tables độc lập, vùng rỗng, COMMON_NEIGHBORS, biên/validation và board 4x4/5x5.
 - Sau tích hợp: 517 test toàn project đạt; không thay Protocol hoặc dependency.
+
+## Nghiệm thu TV3 giai đoạn 3
+
+- test_phase3_backend.py thêm 14 ca với Engine/Encoder/Agent/DPLL thật.
+- Kiểm tra 3x3 105/105 calls/query và 4x4 301/301; giữ STUCK dù full-clue UNIQUE.
+- Làm hỏng trace bằng query trùng hoặc assumption sai phải cho ERROR.
+- Điều khiển đồng hồ sau phép rút gọn CNF thật để kiểm tra timeout trong SAT,
+  trong verifier, sau một accepted reveal và trong call uniqueness thứ hai.
+- Timeout không thành UNSAT, không mở thẻ sai; giữ số calls và reveal đã chấp nhận.
+- Xuất trace từ run Engine thật; kiểm tra token/bước và không xuất hidden assignment.
+- Kiểm tra ba profile benchmark, giữ raw ERROR/TIMEOUT và CLI thất bại khi run normal
+  không đạt kỳ vọng. Kết quả cuối: 531 test, Ruff check/format và pip check đạt.
 
 ## Nhật ký AI
 
@@ -142,3 +154,14 @@ Các lượt AI phải append mục theo AGENTS.md.
 - Nội dung và lý do: Codex trực tiếp viết 71 ca TV3, gồm oracle vét cạn độc lập, timeout, counters, complete assignment, input immutability, primary blocking và kiểm tra output benchmark. Builder/fake chỉ dùng trong test; test TV4 và test TV2 được giữ nguồn riêng.
 - Kiểm tra: Toàn bộ 403 ca đạt trên Python 3.11.0; sau chỉnh deadline, 25 ca uniqueness/benchmark liên quan đạt. Ruff check/format và pip check đạt. Lượt bổ sung nhật ký chỉ sửa Markdown, không chạy lại test.
 - Còn thiếu: Kiểm thử progressive production với GameEngine thật; test dùng Engine fake không thay thế nghiệm thu đó.
+
+
+### 2026-11-14 — Ghi nhận kiểm thử backend thật cho TV3
+
+- Thành viên: TV3 (Mạnh, theo phân công).
+- AI: Codex.
+- Yêu cầu: Cập nhật README theo các test TV3 giai đoạn 3 đã bổ sung.
+- File thay đổi: test_phase3_backend.py ở lượt triển khai; README.md ở lượt này.
+- Nội dung và lý do: Codex viết thêm 14 test dùng Engine/Encoder/Agent/DPLL thật: query khớp calls, trace sai bị từ chối, timeout giữa SAT/verifier không reveal trái phép, timeout sau reveal đã chấp nhận, timeout call uniqueness thứ hai và trace export. Đồng hồ kiểm soát kích hoạt sau khi đi vào DPLL thật; không dùng timeout trước SAT trong benchmark để thay bằng chứng này.
+- Kiểm tra: Lượt triển khai đã chạy đủ 531 test (517 của base và 14 bổ sung), Ruff check/format và pip check đạt trên Python 3.11.0. Lượt README không chạy lại test.
+- Còn thiếu: GUI trong suite được kiểm thử headless; demo giao diện thủ công cần nhóm nghiệm thu.
