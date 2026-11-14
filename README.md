@@ -6,9 +6,9 @@ COMMON_NEIGHBORS. Model/Protocol/schema/dependency không đổi.
 
 Trace đếm đúng calls thực tế kể cả Engine deepcopy proof; Auto Solve gắn với
 session khởi chạy, Load/Restart hủy tác vụ cũ và xóa thông tin sidebar/trace.
-GUI có View Trace và Save Trace. Kiểm tra: 517 test đạt và Ruff đạt; smoke test
-Tkinter thật (ẩn) giải 3x3 trong 8 bước/105 calls. Runtime local Python 3.12.6;
-nhóm vẫn target 3.11 và cần kiểm tra lại trên interpreter đó.
+GUI có View Trace và Save Trace. Xác nhận gần nhất: 517 test đạt trên Python 3.11.9;
+Ruff check và `ruff format --check` đạt. Đã thao tác GUI thật với verdict, Hint,
+Auto Solve 3×3, trace, Load 4×4 và Restart khi đang solve.
 
 ## Bắt đầu
 
@@ -28,8 +28,8 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
-`python main.py` mở GUI với puzzle 3x3 mặc định. `python main.py --preview`
-chỉ xem board tĩnh. Hướng dẫn module tại Source/agent/README.md,
+`python main.py` mở GUI với puzzle 3x3 mặc định và luồng Engine/Agent thật.
+Hướng dẫn module tại Source/agent/README.md,
 Source/gui/README.md và Source/logic/README.md. Benchmark runner đã triển khai;
 kết quả lưu sẵn trong Source/experiments/results/ là snapshot uniqueness cũ,
 không tự động cập nhật theo các sửa lỗi tích hợp này.
@@ -143,3 +143,21 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Nội dung và lý do: Codex trực tiếp viết DPLL, uniqueness, runner benchmark, test, bộ puzzle synthetic và bản thảo báo cáo; chạy kiểm tra và xử lý lỗi phát sinh. Giữ nguyên model, Protocol, schema và dependency. Phần Agent kế thừa TV4; Encoder lấy từ TV2, không tính là phần TV3 tự xây lại. Các trao đổi và nhật ký cũ được giữ nguyên trên branch hiện tại.
 - Kiểm tra: Trong lượt triển khai đã chạy 403 test toàn bộ, Ruff check/format và pip check đạt trên Python 3.11.0; sau bổ sung kiểm tra deadline, 25 test uniqueness/benchmark liên quan đạt. Benchmark uniqueness thật có 21 lượt UNIQUE trên 7 puzzle, 3 repeats, không lỗi/timeout. Lượt bổ sung log này chỉ sửa Markdown, kiểm tra git diff --check, không chạy lại test code.
 - Còn thiếu: Nghiệm thu progressive với Engine thật của TV1, bộ puzzle khó và stress 5x5; CNF parity vẫn chưa được TV2 triển khai. Thay đổi chưa commit/push.
+
+### 2026-11-12 — Gỡ chế độ preview giao diện tĩnh
+- Thành viên: Phúc (TV5).
+- AI: Codex, GPT-6.
+- Yêu cầu: Bỏ preview tĩnh vì dự án chuyển sang chạy luồng game chính.
+- File thay đổi: `Source/main.py`, `Source/gui/preview.py`, `Source/README.md`, `Source/gui/README.md`, `README.md`.
+- Nội dung và lý do: Bỏ cờ `--preview` và module tạo PublicState tĩnh; `python main.py` tiếp tục khởi tạo loader, Engine, Agent và GUI theo puzzle mẫu.
+- Kiểm tra: Chưa chạy test hoặc Ruff.
+- Còn thiếu: Chưa kiểm tra khởi chạy GUI sau khi gỡ preview.
+
+### 2026-11-14 — Đồng bộ trạng thái nghiệm thu
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Cập nhật README tổng hợp theo lần chạy test và Ruff mới nhất.
+- File thay đổi: `README.md`, `Source/tests/README.md`.
+- Nội dung và lý do: Sửa trạng thái runtime/test và ghi rõ test tích hợp Engine thật; giữ các mục cũ làm lịch sử.
+- Kiểm tra: Theo kết quả vừa chạy, 517 test đạt trên Python 3.11.9; Ruff check và format check đạt.
+- Còn thiếu: Chưa rà giao diện trên kích thước màn hình khác.

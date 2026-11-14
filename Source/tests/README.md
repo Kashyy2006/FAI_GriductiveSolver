@@ -20,12 +20,12 @@
   FakeSolver tra bảng kết quả, không chứa thuật toán DPLL; không thay solver thật.
 
 Chạy từ Source/: `python -m pytest tests/test_agent.py tests/test_trace.py -q`.
-Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (403 ca trên branch TV3).
+Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (517 test ở lần xác nhận gần nhất).
 Sandbox Windows có thể chặn thư mục tạm của pytest; chạy ngoài sandbox nếu cần,
 dùng --basetemp với đường dẫn thư mục tạm riêng đã kiểm tra. Không dùng thư mục
 chứa dữ liệu làm basetemp vì pytest sẽ xóa nội dung khi bắt đầu.
-Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Branch TV3 hiện đã chạy toàn bộ
-403 test trên Python 3.11.0; progressive production vẫn cần tích hợp Engine thật.
+Lần xác nhận gần nhất: toàn bộ 517 test chạy trên Python 3.11.9. Test tích hợp
+progressive hiện dùng GameEngine, CNF encoder, DPLL và Agent thật.
 
 ## Kiểm thử TV3 và tích hợp phụ thuộc
 
@@ -37,8 +37,8 @@ Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Branch TV3 hiện đã c
 - tv3_helpers.py chỉ chứa builder/fake dùng trong test, không dùng thay Engine/Encoder production.
 - conftest.py, test_regions.py, test_clue_evaluator.py và test_cnf_encoder.py được lấy
   nguyên từ TV2 commit 23955a5, cùng ba file logic production. Test TV4 được giữ nguyên.
-- Toàn bộ số liệu progressive dùng PublicTestEngine chỉ chứng minh luồng test;
-  cần nghiệm thu lại với GameEngine thật sau tích hợp TV1.
+- Các fixture progressive riêng vẫn dùng `PublicTestEngine` để cô lập test;
+  `test_integration.py` kiểm tra luồng suy luận với GameEngine thật.
 
 
 ## Kiểm thử logic độc lập
@@ -142,3 +142,12 @@ Các lượt AI phải append mục theo AGENTS.md.
 - Nội dung và lý do: Codex trực tiếp viết 71 ca TV3, gồm oracle vét cạn độc lập, timeout, counters, complete assignment, input immutability, primary blocking và kiểm tra output benchmark. Builder/fake chỉ dùng trong test; test TV4 và test TV2 được giữ nguồn riêng.
 - Kiểm tra: Toàn bộ 403 ca đạt trên Python 3.11.0; sau chỉnh deadline, 25 ca uniqueness/benchmark liên quan đạt. Ruff check/format và pip check đạt. Lượt bổ sung nhật ký chỉ sửa Markdown, không chạy lại test.
 - Còn thiếu: Kiểm thử progressive production với GameEngine thật; test dùng Engine fake không thay thế nghiệm thu đó.
+
+### 2026-11-14 — Cập nhật test GUI theo API board
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Đồng bộ README với regression GUI và kết quả Ruff mới nhất.
+- File thay đổi: `test_gui.py`, `README.md`.
+- Nội dung và lý do: Cập nhật mô tả test GUI/Engine thật; số liệu lịch sử được giữ tách khỏi trạng thái mới nhất.
+- Kiểm tra: Kết quả gần nhất là 26 test GUI/tích hợp và 517 test toàn bộ đạt trên Python 3.11.9; Ruff check và format check đạt. Lượt sửa README này chỉ kiểm tra `git diff --check`.
+- Còn thiếu: Không.

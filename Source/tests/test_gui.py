@@ -35,6 +35,23 @@ class Widget:
     def highlight(self, cells: tuple[str, ...]) -> None:
         self.highlighted = tuple(cells)
 
+    def flip_card(
+        self,
+        character_id: str,
+        on_flip: Callable[[], None],
+        on_done: Callable[[], None] | None = None,
+    ) -> None:
+        del character_id
+        on_flip()
+        if on_done is not None:
+            on_done()
+
+    def pulse(self, cells: tuple[str, ...]) -> None:
+        self.highlight(cells)
+
+    def cancel_animations(self) -> None:
+        pass
+
     def pack(self, **kwargs: object) -> None:
         pass
 
@@ -102,6 +119,7 @@ def ui(monkeypatch: pytest.MonkeyPatch) -> MainWindow:
 
     monkeypatch.setattr(MainWindow, "_configure_window", lambda self: None)
     monkeypatch.setattr(MainWindow, "_build_layout", build)
+    monkeypatch.setattr(MainWindow, "_show_toast", lambda self, title, message, tone: None)
     DeferredThread.pending = []
     monkeypatch.setattr("gui.main_window.threading.Thread", DeferredThread)
     agent = DeductiveAgent(CNFEncoder(), DPLLSolver())

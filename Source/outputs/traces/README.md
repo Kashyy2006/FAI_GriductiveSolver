@@ -9,4 +9,11 @@
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
+### 2026-11-14 — Lưu trace nghiệm thu GUI
+- Thành viên: Phúc (TV5).
+- AI: Codex
+- Yêu cầu: Xác nhận Save Trace từ GUI thật.
+- File thay đổi: `tv5_manual_acceptance.json`.
+- Nội dung và lý do: Lưu 6 bước deduction công khai từ run Auto Solve 3×3.
+- Kiểm tra: JSON đọc hợp lệ, đủ 6 bước; không chứa hidden assignment.
+- Còn thiếu: Không.

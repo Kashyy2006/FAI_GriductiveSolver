@@ -5,7 +5,7 @@
 - Phụ trách: TV5.
 - Tkinter/ttk, board tự co theo khung không dùng thanh cuộn, thẻ bo góc, verdict thủ công,
   highlight, Load/Restart/Hint/Auto Solve; chỉ luồng chính cập nhật widget, queue + after cho việc nền.
-- `python main.py --preview` mở snapshot PublicState tĩnh; các nút gameplay bị khóa.
+- `python main.py` mở GUI theo luồng game thật với puzzle 3×3 mặc định.
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - GUI đã nối Engine/Encoder/DPLL/Agent thật; các API công khai vẫn giữ nguyên.
 
@@ -28,83 +28,45 @@
 Chạy từ Source/: `python -m pytest tests/test_gui.py tests/test_integration.py -q`.
 Controller test dùng widgets giả nhưng Engine/Encoder/DPLL/Agent thật; scheduler
 điều khiển tình huống queued worker và Event/Barrier cho worker đang chạy, không
-dùng sleep để tạo race. Đã smoke test Tkinter thật ở chế độ ẩn: Auto Solve 3x3,
-8 bước/105 calls, mở popup trace và Restart xóa sidebar/trace. Chưa đánh giá toàn
-bộ layout trực quan trên nhiều kích thước màn hình.
+dùng sleep để tạo race. Toàn bộ suite đạt 517 test trên Python 3.11.9. Ruff check
+và `ruff format --check` đều đạt. GUI thật đã kiểm tra verdict accepted/rejected,
+Hint, Auto Solve 3×3, xem/lưu trace, Load 4×4 và Restart trong lúc solve; board
+3×3/4×4 vừa khung ở màn hình nghiệm thu.
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
+### 2026-11-08 — Dựng GUI và bố cục board
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Tạo board/thẻ, sidebar và thao tác gameplay theo API v1.
+- File thay đổi: `board_view.py`, `main_window.py`, `preview.py`.
+- Nội dung và lý do: Dựng board công khai, verdict, highlight, Hint, Auto Solve và preview tĩnh khi backend còn stub; điều chỉnh bố cục thẻ.
+- Kiểm tra: Ruff, compileall và preview 3×3 đạt theo nhật ký lúc thực hiện.
+- Còn thiếu: Preview tĩnh được bỏ khi nối backend thật.
 
-### 2026-11-08 — Xây dựng GUI và nối composition root
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Đọc contract, tài liệu phân công và triển khai giao diện GUI.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Tạo grid công khai, thẻ úp/mở, verdict, highlight, Load/Restart,
-  Hint và Auto Solve; đặt thao tác suy luận trong worker và chuyển kết quả về Tk qua queue/after.
-  Dựng composition root bằng các lớp canonical; không thêm model hay dependency mới.
-- Kiểm tra: `compileall` đạt; Ruff không chạy được vì môi trường hiện tại thiếu package `ruff`.
-- Còn thiếu: Engine, CNFEncoder, DPLLSolver và Agent vẫn là stub, nên chưa chạy được
-  GUI với luồng game end-to-end.
+### 2026-11-12 — Nối gameplay, reset và trace
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Chạy gameplay qua composition root và bảo vệ vòng đời worker.
+- File thay đổi: `main.py`, `main_window.py`, `board_view.py`, `preview.py`, README.
+- Nội dung và lý do: Nối stack thật; hủy worker cũ khi Load/Restart; xóa UI phiên cũ; xem/lưu trace và hoàn thiện phản hồi thao tác.
+- Kiểm tra: Có regression test GUI; smoke test 3×3 được ghi nhận trước đó.
+- Còn thiếu: Nghiệm thu trực tiếp các chỉnh sửa giao diện gần nhất.
 
-### 2026-11-08 — Sửa lint và format GUI
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Khắc phục lỗi Ruff còn lại khi chạy trong VS Code.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Sắp xếp import, bỏ import `PublicState` chưa dùng và áp dụng format Ruff.
-- Kiểm tra: Ruff check và format được chạy lại sau chỉnh sửa.
-- Còn thiếu: Backend chưa hoàn thiện để chạy game end-to-end.
+### 2026-11-14 — Nghiệm thu TV5 và rút gọn nhật ký
+- Thành viên: Phúc (TV5).
+- AI: Codex
+- Yêu cầu: Hoàn tất phần TV5 còn lại và giúp nhóm theo dõi lịch sử GUI.
+- File thay đổi: `README.md`, `../tests/test_gui.py`.
+- Nội dung và lý do: Gộp lịch sử chỉnh sửa GUI thành mốc ngắn; đồng bộ mock board với API hoạt ảnh.
+- Kiểm tra: 517 test đạt; Ruff check và format check đạt. Đã nghiệm thu thao tác gameplay và lưu trace JSON.
+- Còn thiếu: Chưa kiểm tra bố cục trên các kích thước màn hình khác.
 
-### 2026-11-08 — Thêm cửa sổ preview tĩnh
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Cho phép xem GUI trước khi các backend hoàn tất.
-- File thay đổi: `preview.py`.
-- Nội dung và lý do: Hiển thị board 3×3 bằng PublicState công khai; khóa toàn bộ thao tác
-  gameplay để preview không tạo kết quả giả.
-- Kiểm tra: Đang kiểm tra Ruff, cú pháp và khởi chạy cửa sổ preview.
-- Còn thiếu: Không kiểm thử luồng Engine/Agent trong chế độ preview.
-
-### 2026-11-08 — Đổi board sang thẻ nhân vật minh họa
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6 và image_gen
-- Yêu cầu: Chỉnh GUI theo ảnh tham khảo của người dùng.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Đổi sang palette giấy sáng, viền thẻ đậm, portrait, tên/nghề và clue
-  nằm trên thẻ; thêm cuộn dọc để board 4×4/5×5 dùng được trong cửa sổ.
-- Kiểm tra: Ruff check/format đạt.
-- Còn thiếu: Chưa mở lại preview sau lần đổi giao diện này.
-
-### 2026-11-08 — Sửa chẩn đoán kiểu của BoardView
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Xử lý các lỗi còn hiển thị trong VS Code Problems.
-- File thay đổi: `board_view.py`, `preview.py`.
-- Nội dung và lý do: Dùng kiểu Tkinter `Misc` cho master và kiểm tra các trường optional
-  trước khi định dạng clue/region.
-- Kiểm tra: Ruff check/format đạt.
-- Còn thiếu: Backend chưa hoàn thiện để chạy game end-to-end.
-
-### 2026-11-08 — Hoàn thiện preview thẻ minh họa
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Chỉnh GUI theo ảnh tham khảo và kiểm tra giao diện trực tiếp.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Dùng màu nền giấy, thẻ nhân vật có avatar/tên/nghề/clue và highlight; cuộn về đầu
-  board sau khi dựng lại; sửa tham chiếu màu và cách cập nhật màu widget Tk.
-- Kiểm tra: Ruff check, Ruff format, compileall và import Pillow đều đạt; mở `main.py --preview`
-  và quan sát được board 3×3 cùng sidebar.
-- Còn thiếu: Preview chỉ dùng PublicState tĩnh; gameplay phụ thuộc backend chưa hoàn thiện.
-
-### 2026-11-08 — Bo góc thẻ và fit board vào khung
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Bo góc các ô và giữ toàn bộ board trong khung, không có thanh kéo.
-- File thay đổi: `board_view.py`, `preview.py`.
-- Nội dung và lý do: Vẽ nền thẻ bo góc trên Canvas; tính kích thước ô theo vùng khả dụng và co avatar,
-  chữ theo kích thước đó; bỏ scrollbar và xử lý cuộn chuột.
-- Kiểm tra: Ruff check, Ruff format, compileall đạt; đã xem preview 3×3, cả 9 ô nằm trong khung,
-  không có thanh kéo.
-- Còn thiếu: Chưa xem trực tiếp board 4×4/5×5; preview vẫn dùng PublicState tĩnh.
+### 2026-11-14 — Rà soát tiêu chí bàn giao TV5
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Đối chiếu race/reset, thông báo worker, sidebar, trace và nghiệm thu thật.
+- File thay đổi: Không thay đổi file triển khai; chỉ append nhật ký README.
+- Nội dung và lý do: Đối chiếu controller với regression test và trace nghiệm thu; xác nhận hủy cooperative, session/task guard loại kết quả cũ.
+- Kiểm tra: Trace JSON 6 bước đọc hợp lệ; test mới không thu thập được do Python hiện tại thiếu `jsonschema`. Lần kiểm tra trước ghi nhận 517 test và thao tác GUI thật đạt.
+- Còn thiếu: Chưa kiểm tra layout 5×5/nhiều kích thước màn hình; cần chạy lại test trong môi trường đủ dependency.

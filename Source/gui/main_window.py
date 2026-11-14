@@ -4,8 +4,23 @@ from __future__ import annotations
 
 import queue
 import threading
+from dataclasses import replace
 from pathlib import Path
-from tkinter import BOTH, LEFT, RIGHT, Text, Tk, Toplevel, X, Y, filedialog, messagebox, ttk
+from tkinter import (
+    BOTH,
+    LEFT,
+    RIGHT,
+    Frame,
+    Label,
+    Text,
+    Tk,
+    Toplevel,
+    X,
+    Y,
+    filedialog,
+    messagebox,
+    ttk,
+)
 from typing import Callable
 
 from agent.agent import DeductiveAgent
@@ -15,6 +30,7 @@ from game.models import (
     AutoSolveResult,
     Clue,
     HintResult,
+    PublicState,
     StateToken,
     Status,
     VerdictOutcome,
@@ -46,6 +62,11 @@ class MainWindow:
         self._cancel_event: threading.Event | None = None
         self._last_solve: AutoSolveResult | None = None
         self._trace_window: Toplevel | None = None
+        self._animation_generation = 0
+        self._solve_start_state = self._state
+        self._verdict_context: tuple[str, Status, bool] | None = None
+        self._toast_window: Frame | None = None
+        self._toast_after_ids: set[str] = set()
         self._messages: queue.Queue[tuple[object, str, object, StateToken]] = queue.Queue()
         self._configure_window()
         self._build_layout()
@@ -56,6 +77,11 @@ class MainWindow:
     def refresh(self) -> None:
         """Render the latest public snapshot and update action state."""
         self._state = self.engine.get_public_state()
+        self._render_state(self._state)
+
+    def _render_state(self, state: PublicState) -> None:
+        """Render a public snapshot without querying the engine again."""
+        self._state = state
         self.board.render(self._state)
         self.puzzle_title.configure(text=self._state.puzzle_id.replace("_", " ").title())
         revealed = sum(item.status is not None for item in self._state.characters)
@@ -299,10 +325,24 @@ class MainWindow:
         return BoardView._format_clue(clue)
 
     def _submit(self, status: Status) -> None:
+        if self._busy:
+            return
         character_id = self._selected_id
         if character_id is None:
             return
         snapshot = self._state
+        character = next(item for item in snapshot.characters if item.id == character_id)
+        self._verdict_context = (character_id, status, character.clue is None)
+        if character.clue is None:
+            self.status_label.configure(
+                text=f"Checking whether public clues prove {character_id} is {status.value.title()}…"
+            )
+            self._show_toast(
+                f"Checking {character_id}",
+                "This card has no revealed clue yet. Checking whether the public clues prove "
+                f"it is {status.value.title()}.",
+                "info",
+            )
         self._start_task(
             "verdict",
             lambda: self.engine.submit_verdict(character_id, status, expected_token=snapshot.token),
@@ -317,6 +357,7 @@ class MainWindow:
         if self._busy:
             return
         snapshot = self._state
+        self._solve_start_state = snapshot
         cancel = threading.Event()
 
         # Capture the initiating session, not mutable GUI state. Even if the
@@ -377,14 +418,20 @@ class MainWindow:
 
     def _reset_view(self) -> None:
         """Clear public information and trace belonging to the previous session."""
+        self._animation_generation += 1
+        self.board.cancel_animations()
         self._cancel_task()
         self._selected_id = None
         self._last_solve = None
+        self._verdict_context = None
         self._close_trace()
         self.board.highlight(())
         self.clue_label.configure(text=self._EMPTY_CLUE)
 
     def _close(self) -> None:
+        self._animation_generation += 1
+        self.board.cancel_animations()
+        self._dismiss_toast()
         self._cancel_task()
         self.root.destroy()
 
@@ -424,17 +471,28 @@ class MainWindow:
                 if task_id is not self._active_task:
                     continue
                 if token.session_id != self.engine.get_public_state().token.session_id:
+                    context = self._verdict_context if kind == "verdict" else None
+                    self._verdict_context = None
                     self._cancel_task()
                     self.refresh()
+                    if context is not None and context[2]:
+                        self._show_unrevealed_verdict_message(context, VerdictOutcome.STALE_STATE)
                     continue
                 self._busy = False
                 self._active_task = None
                 self._cancel_event = None
                 if isinstance(result, Exception):
+                    context = self._verdict_context if kind == "verdict" else None
+                    self._verdict_context = None
                     self.refresh()
-                    self._show_error("Operation failed", result)
+                    if context is not None and context[2]:
+                        self._show_toast(f"Could not check {context[0]}", str(result), "error")
+                    else:
+                        self._show_error("Operation failed", result)
                 elif kind == "verdict" and isinstance(result, VerdictResult):
-                    self._handle_verdict(result)
+                    context = self._verdict_context
+                    self._verdict_context = None
+                    self._handle_verdict(result, context)
                 elif kind == "hint" and isinstance(result, HintResult):
                     self._handle_hint(result)
                 elif kind == "solve" and isinstance(result, AutoSolveResult):
@@ -444,8 +502,11 @@ class MainWindow:
         self._update_controls()
         self.root.after(80, self._poll_messages)
 
-    def _handle_verdict(self, result: VerdictResult) -> None:
-        self._state = result.state
+    def _handle_verdict(
+        self,
+        result: VerdictResult,
+        context: tuple[str, Status, bool] | None = None,
+    ) -> None:
         labels = {
             VerdictOutcome.ACCEPTED: "Verdict accepted. New clue revealed.",
             VerdictOutcome.NOT_PROVABLE: "Not provable yet. No card was changed.",
@@ -455,7 +516,150 @@ class MainWindow:
             VerdictOutcome.ALREADY_REVEALED: "That card is already revealed.",
         }
         self.status_label.configure(text=labels[result.outcome])
-        self.refresh()
+        if result.outcome == VerdictOutcome.ACCEPTED:
+            previous_statuses = {item.id: item.status for item in self._state.characters}
+            character_id = next(
+                (
+                    item.id
+                    for item in result.state.characters
+                    if item.status is not None and previous_statuses.get(item.id) is None
+                ),
+                self._selected_id,
+            )
+            generation = self._animation_generation
+            self._busy = True
+            self._update_controls()
+
+            def reveal() -> None:
+                if generation == self._animation_generation:
+                    self._render_state(result.state)
+
+            def done() -> None:
+                if generation == self._animation_generation:
+                    self._busy = False
+                    self._update_controls()
+                    if context is not None and context[2]:
+                        self._show_unrevealed_verdict_message(context, result.outcome)
+
+            self.board.flip_card(character_id or "", reveal, done)
+        else:
+            self.refresh()
+            if context is not None and context[2]:
+                self._show_unrevealed_verdict_message(context, result.outcome)
+
+    def _show_unrevealed_verdict_message(
+        self, context: tuple[str, Status, bool], outcome: VerdictOutcome
+    ) -> None:
+        character_id, status, _had_no_clue = context
+        messages = {
+            VerdictOutcome.ACCEPTED: (
+                f"{character_id} has been proven {status.value.title()} from public clues. "
+                "Its clue is now revealed."
+            ),
+            VerdictOutcome.NOT_PROVABLE: (
+                f"{character_id} has no revealed clue yet, and the current public clues do not "
+                "prove this verdict. No card was changed. Try Get a Hint or Auto Solve."
+            ),
+            VerdictOutcome.CONTRADICTED: (
+                f"The public clues contradict marking {character_id} as {status.value.title()}. "
+                "No card was changed."
+            ),
+            VerdictOutcome.INCONSISTENT: "The revealed clues are inconsistent, so no verdict was accepted.",
+            VerdictOutcome.STALE_STATE: "The board changed before this verdict could be applied.",
+            VerdictOutcome.ALREADY_REVEALED: f"{character_id} is already revealed.",
+        }
+        tone = (
+            "success"
+            if outcome == VerdictOutcome.ACCEPTED
+            else "error"
+            if outcome in (VerdictOutcome.CONTRADICTED, VerdictOutcome.INCONSISTENT)
+            else "info"
+        )
+        self._show_toast(f"{character_id} · {status.value.title()}", messages[outcome], tone)
+
+    def _show_toast(self, title: str, message: str, tone: str) -> None:
+        """Show a non-modal notification in the lower-right corner of the app."""
+        self._dismiss_toast()
+        colors = {
+            "success": "#577967",
+            "error": "#c92f28",
+            "info": "#d58b28",
+        }
+        accent = colors[tone]
+        toast = Frame(self.root, bg="#312a26", padx=1, pady=1, width=336, height=100)
+        toast.pack_propagate(False)
+        toast.place(relx=1.0, rely=1.0, x=-18, y=18, anchor="se")
+        toast.lift()
+        self._toast_window = toast
+
+        outer = Frame(toast, bg="#312a26", padx=1, pady=1)
+        outer.pack(fill="both", expand=True)
+        panel = Frame(outer, bg="#fffaf2")
+        panel.pack(fill="both", expand=True)
+        stripe = Frame(panel, bg=accent, width=5)
+        stripe.pack(side=LEFT, fill="y")
+        content = Frame(panel, bg="#fffaf2", padx=13, pady=10)
+        content.pack(side=LEFT, fill="both", expand=True)
+        Label(
+            content,
+            text=title,
+            bg="#fffaf2",
+            fg="#312a26",
+            font=("Segoe UI", 10, "bold"),
+            anchor="w",
+        ).pack(fill="x")
+        Label(
+            content,
+            text=message,
+            bg="#fffaf2",
+            fg="#796f64",
+            font=("Segoe UI", 9),
+            justify=LEFT,
+            anchor="w",
+            wraplength=288,
+        ).pack(fill="x", pady=(4, 0))
+
+        def enter(frame: int = 0) -> None:
+            if self._toast_window is not toast or not toast.winfo_exists():
+                return
+            progress = frame / 8
+            eased = 1 - (1 - progress) ** 3
+            toast.place_configure(y=18 - round(36 * eased))
+            if frame < 8:
+                self._schedule_toast(enter, frame + 1, delay=16)
+            else:
+                self._schedule_toast(dismiss, delay=3200)
+
+        def dismiss(frame: int = 0) -> None:
+            if self._toast_window is not toast or not toast.winfo_exists():
+                return
+            progress = frame / 8
+            toast.place_configure(y=-18 - round(10 * progress))
+            if frame < 8:
+                self._schedule_toast(dismiss, frame + 1, delay=16)
+            else:
+                toast.destroy()
+                self._toast_window = None
+
+        self._schedule_toast(enter, delay=16)
+
+    def _schedule_toast(self, callback: Callable[..., None], *args: object, delay: int) -> None:
+        after_id = ""
+
+        def run() -> None:
+            self._toast_after_ids.discard(after_id)
+            callback(*args)
+
+        after_id = self.root.after(delay, run)
+        self._toast_after_ids.add(after_id)
+
+    def _dismiss_toast(self) -> None:
+        for after_id in tuple(self._toast_after_ids):
+            self.root.after_cancel(after_id)
+        self._toast_after_ids.clear()
+        if self._toast_window is not None and self._toast_window.winfo_exists():
+            self._toast_window.destroy()
+        self._toast_window = None
 
     def _handle_hint(self, result: HintResult) -> None:
         if result.token != self._state.token:
@@ -464,22 +668,58 @@ class MainWindow:
             self.status_label.configure(text=f"No forced move · {result.kb_status.value.title()}")
         else:
             self._selected_id = result.character_id
-            self.board.highlight((result.character_id,))
+            self.board.pulse((result.character_id,))
             self.status_label.configure(
                 text=f"Hint: {result.character_id} is forced {result.status.value.title()}."
             )
-            self.refresh()
+            self._render_state(self._state)
 
     def _handle_solve(self, result: AutoSolveResult) -> None:
         if result.final_state.token != self.engine.get_public_state().token:
             self.refresh()
             return
-        self._state = result.final_state
-        self._last_solve = result
-        self.status_label.configure(
-            text=f"Auto Solve: {result.outcome.value.title()} · {len(result.steps)} steps."
-        )
-        self.refresh()
+        self._animation_generation += 1
+        generation = self._animation_generation
+        snapshots: list[tuple[str, PublicState]] = []
+        current = self._solve_start_state
+        for step in result.steps:
+            characters = tuple(
+                replace(
+                    character,
+                    status=step.verdict,
+                    clue=step.newly_revealed_clue,
+                )
+                if character.id == step.character_id
+                else character
+                for character in current.characters
+            )
+            current = replace(current, token=step.token_after, characters=characters)
+            snapshots.append((step.character_id, current))
+
+        self._busy = True
+        self._update_controls()
+
+        def show_step(index: int) -> None:
+            if generation != self._animation_generation:
+                return
+            if index >= len(snapshots):
+                self._render_state(result.final_state)
+                self._last_solve = result
+                self._busy = False
+                self.status_label.configure(
+                    text=f"Auto Solve: {result.outcome.value.title()} · {len(result.steps)} steps."
+                )
+                self._update_controls()
+                return
+            character_id, next_state = snapshots[index]
+
+            def reveal() -> None:
+                if generation == self._animation_generation:
+                    self._render_state(next_state)
+
+            self.board.flip_card(character_id, reveal, lambda: show_step(index + 1))
+
+        show_step(0)
 
     @staticmethod
     def _trace_text(result: AutoSolveResult) -> str:
