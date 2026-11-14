@@ -61,6 +61,16 @@ Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Branch TV3 hiện đã c
   tables độc lập, vùng rỗng, COMMON_NEIGHBORS, biên/validation và board 4x4/5x5.
 - Sau tích hợp: 517 test toàn project đạt; không thay Protocol hoặc dependency.
 
+## Nghiệm thu TV4 với backend thật
+
+Năm ca bổ sung trong test_integration.py kiểm tra đầy đủ trace từng bước,
+entailment từ KB trước reveal, row-major, thứ tự/count SAT calls và ownership
+snapshot/proof sau deepcopy. Bốn ca reset sau proof nhưng trước Engine commit
+bao gồm Load/Restart, verifier cùng/khác Agent và session mới cùng version=0.
+Kết quả: 522 test toàn project, 89 ca Agent/trace/integration/GUI. Controller
+GUI vẫn dùng dependency thật để kiểm tra hủy worker và xem/lưu JSON trace.
+Runtime kiểm thử local: Python 3.12.6; chưa chạy Python 3.11 tại máy này.
+
 ## Nhật ký AI
 
 Các lượt AI phải append mục theo AGENTS.md.

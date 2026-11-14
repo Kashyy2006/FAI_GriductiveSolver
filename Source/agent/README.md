@@ -84,7 +84,7 @@ python -m ruff check . --no-cache
 python -m ruff format --check . --no-cache
 ```
 
-Kết quả: 58 test TV4 và 16 test contract có sẵn (74 tổng), đạt trên Python
+Nghiệm thu TV4 ban đầu: 58 test TV4 và 16 test contract (74 tổng), trên Python
 3.12.6/Windows. Target nhóm vẫn Python 3.11; cần chạy lại trên interpreter đó.
 Sandbox Windows chặn tmp_path của pytest; nghiệm thu dùng chạy ngoài sandbox
 với --basetemp trỏ vào thư mục test riêng trong .venv. Lỗi môi trường ban đầu
@@ -95,8 +95,38 @@ dùng bảng phản hồi được lập sẵn, không triển khai DPLL thay TV
 Engine/CNF/DPLL/Agent thật tại tests/test_integration.py kiểm tra cả proof deepcopy,
 verifier cùng/khác Agent và các SAT calls có nội dung giống nhau. Regression 3x3:
 8 bước, 105 calls thực tế và 105 queries; 4x4: 15 bước, 301/301.
-Kết quả toàn project sau sửa tích hợp: 517 test đạt trên Python 3.12.6/Windows;
+Kết quả toàn project tại lần sửa tích hợp trước: 517 test đạt trên Python 3.12.6/Windows;
 cần chạy runtime lại trên Python 3.11 theo target nhóm.
+
+## Nghiệm thu TV4 — mốc 14/11/2026
+
+Phần sửa lõi ở commit `23de657` giữ nguyên: query accounting theo từng submit,
+Engine được deepcopy proof, worker GUI gắn với session và save_trace dùng được
+qua GUI. Lần nghiệm thu này bổ sung năm ca dùng toàn bộ backend thật trong
+tests/test_integration.py; không đổi Model, Protocol hoặc dependency.
+
+| Tiêu chí | Kiểm chứng |
+|---|---|
+| Không đoán | Kiểm tra SAT(KB) và entailment độc lập trước từng reveal, chọn forced đầu row-major |
+| Trace đúng | Đối chiếu từng step với snapshot/receipt: token, active clues, verdict và clue mới |
+| Query đúng | So sánh thứ tự assumptions, kết quả và stats với calls Solver thực tế: 3x3 có 8 bước, 105/105 calls |
+| Ownership | Receipt proof được deepcopy, snapshot/proof cũ không đổi sau reveal và Restart |
+| Hủy session | Bốn ca Load/Restart sau khi có proof, trước commit, verifier cùng/khác Agent: CANCELLED, không reveal, 20/20 calls |
+| GUI handoff | Trace copy xuất JSON, controller xem/lưu được; reset xóa dữ liệu của phiên trước |
+
+Chạy từ Source/:
+
+```powershell
+python -m pytest tests/test_agent.py tests/test_trace.py tests/test_integration.py tests/test_gui.py -q
+python -m pytest tests -q -p no:cacheprovider
+python -m ruff check . --no-cache
+python -m ruff format --check . --no-cache
+```
+
+Kết quả thực thi lại: 522 test toàn project đạt (89 ca nhóm Agent/trace/integration/GUI).
+Native Tk smoke ở chế độ ẩn xác nhận Auto Solve, View Trace, Save Trace xuất
+JSON qua controller và Restart xóa sidebar/trace. Runtime Python 3.12.6/Windows;
+chưa thay thế kiểm thử runtime Python 3.11. Các phần AI note không chỉnh sửa.
 
 ## Nhật ký AI
 
