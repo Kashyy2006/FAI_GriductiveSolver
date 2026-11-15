@@ -37,3 +37,12 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Ghi phạm vi hoàn thành TV1 giai đoạn 2, cách ghép, kiểm tra và giới hạn tích hợp.
 - Kiểm tra: python -m pytest tests -q (70 passed); Ruff check và format check đạt toàn Source; Python 3.12.14/Linux.
 - Còn thiếu: Tích hợp verifier thật/GUI/SAT uniqueness khi TV2–TV5 hoàn thiện; chưa kiểm tra Python 3.11/Windows.
+
+### 2026-11-12 — TV1 nghiệm thu giai đoạn 3
+- Thành viên: TV1 — Dương Thiên Phú.
+- AI: OpenAI Codex.
+- Yêu cầu: Đọc integration_v1 và quy ước, hoàn thành phần TV1 giai đoạn 3.
+- File thay đổi: tv1_stage3_acceptance.md; README.md.
+- Nội dung và lý do: Bổ sung hai puzzle demo forced/unknown và STUCK, kịch bản nghiệm thu và 6 test backend thật; xác nhận proof/query deepcopy và token sau Load/Restart. Giữ bản sửa query accounting đã có của TV4, không đổi API/dependency/production code.
+- Kiểm tra: 523 test đạt (6 mới), Ruff check đạt và 40 file đạt format; Python 3.12/Linux. git diff --check đạt.
+- Còn thiếu: Chưa nghiệm thu GUI trực tiếp hoặc Python 3.11/Windows; benchmark toàn hệ thống do TV3 phụ trách. Chưa commit/push.

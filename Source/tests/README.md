@@ -142,3 +142,12 @@ Các lượt AI phải append mục theo AGENTS.md.
 - Nội dung và lý do: Codex trực tiếp viết 71 ca TV3, gồm oracle vét cạn độc lập, timeout, counters, complete assignment, input immutability, primary blocking và kiểm tra output benchmark. Builder/fake chỉ dùng trong test; test TV4 và test TV2 được giữ nguồn riêng.
 - Kiểm tra: Toàn bộ 403 ca đạt trên Python 3.11.0; sau chỉnh deadline, 25 ca uniqueness/benchmark liên quan đạt. Ruff check/format và pip check đạt. Lượt bổ sung nhật ký chỉ sửa Markdown, không chạy lại test.
 - Còn thiếu: Kiểm thử progressive production với GameEngine thật; test dùng Engine fake không thay thế nghiệm thu đó.
+
+### 2026-11-12 — TV1 nghiệm thu giai đoạn 3
+- Thành viên: TV1 — Dương Thiên Phú.
+- AI: OpenAI Codex.
+- Yêu cầu: Đọc integration_v1 và quy ước, hoàn thành phần TV1 giai đoạn 3.
+- File thay đổi: test_tv1_stage3.py; README.md.
+- Nội dung và lý do: Bổ sung hai puzzle demo forced/unknown và STUCK, kịch bản nghiệm thu và 6 test backend thật; xác nhận proof/query deepcopy và token sau Load/Restart. Giữ bản sửa query accounting đã có của TV4, không đổi API/dependency/production code.
+- Kiểm tra: 523 test đạt (6 mới), Ruff check đạt và 40 file đạt format; Python 3.12/Linux. git diff --check đạt.
+- Còn thiếu: Chưa nghiệm thu GUI trực tiếp hoặc Python 3.11/Windows; benchmark toàn hệ thống do TV3 phụ trách. Chưa commit/push.
