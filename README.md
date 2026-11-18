@@ -72,7 +72,7 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Yêu cầu: Triển khai ánh xạ biến và encode FACT/SAME/DIFFERENT.
 - File thay đổi: logic/cnf\_[encoder.py](http://encoder.py), logic/clue\_[evaluator.py](http://evaluator.py), tests/test_cnf\_[encoder.py](http://encoder.py).
 - Nội dung và lý do:
-  - Ánh xạ toàn bộ ô thành biến row*N+col+1, kể cả biến chưa có clause.
+  - Ánh xạ toàn bộ ô thành biến row\*N+col+1, kể cả biến chưa có clause.
   - Encode ba clue cơ bản và thêm unit clause đúng dấu cho status công khai.
   - Xử lý clue theo ID, status theo row-major; trả đầy đủ EncodingResult, không dùng biến phụ.
   - Tách validator cấu trúc clue để dùng chung; encoder không gọi evaluator để tạo CNF.
@@ -146,7 +146,6 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Kiểm tra: Trong lượt triển khai đã chạy 403 test toàn bộ, Ruff check/format và pip check đạt trên Python 3.11.0; sau bổ sung kiểm tra deadline, 25 test uniqueness/benchmark liên quan đạt. Benchmark uniqueness thật có 21 lượt UNIQUE trên 7 puzzle, 3 repeats, không lỗi/timeout. Lượt bổ sung log này chỉ sửa Markdown, kiểm tra git diff --check, không chạy lại test code.
 - Còn thiếu: Nghiệm thu progressive với Engine thật của TV1, bộ puzzle khó và stress 5x5; CNF parity vẫn chưa được TV2 triển khai. Thay đổi chưa commit/push.
 
-<<<<<<< HEAD
 ### 2026-11-12 — Bổ sung và nghiệm thu kiểm thử Parity
 
 - Thành viên: TV2.
@@ -174,9 +173,8 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Còn thiếu: Chưa stress vùng EXPLICIT lớn; encoding parity trực tiếp sinh
   2^(m-1) clauses với m > 0. Chưa commit/publish.
 
-=======
-
 ### 2026-11-13 — Đối chiếu phần TV3 với phân công giai đoạn 3
+
 - Thành viên: TV3 (Mạnh, theo phân công).
 - AI: Codex.
 - Yêu cầu: Kiểm tra code hiện tại so với phân công mới trong PDF, deadline giai đoạn 3 ngày 14/11.
@@ -184,7 +182,6 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Nội dung và lý do: Đọc PDF 5 trang, đối chiếu trực quan bảng giai đoạn 3 ở trang 3 và xác minh các branch qua GitHub. Branch TV3 vẫn dùng Engine stub và Agent cũ; integration_v1 commit 23de657 đã có backend thật, bản sửa query accounting và test tích hợp. Tái hiện Agent hiện tại ghép Engine thật ghi 129 query/105 calls ở 3x3 và 346 query/301 calls ở 4x4; Agent trên integration_v1 khớp 105/105 và 301/301. Đề xuất cập nhật bản tích hợp, nghiệm thu test backend thật, lưu benchmark cả hai phase và bổ sung kiểm tra timeout trong SAT/verifier thật; chưa thấy cần viết lại DPLL hoặc uniqueness.
 - Kiểm tra: Branch hiện tại đạt 403 test, Ruff check/format đạt; snapshot integration_v1 tách biệt đạt 517 test. Benchmark tạm với backend tích hợp ghi solve: 6 SOLVED, 3 STUCK, 2 ERROR; uniqueness: 8 UNIQUE, 1 MULTIPLE, 2 ERROR. Hai phase với deadline rất nhỏ trả TIMEOUT trước SAT call (0 calls), chưa chứng nhận timeout giữa một SAT call. Không merge, chuyển branch, sửa code, commit hoặc publish.
 - Còn thiếu: Đưa các thay đổi tích hợp vào branch TV3 theo kế hoạch nhóm; thêm nghiệm thu timeout giữa SAT/verifier với Engine thật, cập nhật kết quả/report giai đoạn 3 và giữ riêng lỗi/timeout khỏi các lần chạy bình thường.
-
 
 ### 2026-11-14 — Tổng hợp công việc TV3 và câu hỏi đã trao đổi
 
@@ -195,4 +192,3 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Nội dung và lý do: Bổ sung trạng thái bàn giao deadline 14/11, lệnh demo/benchmark và bảng tóm tắt câu hỏi gần đây. Branch TV3 đã fast-forward tới integration_v1 commit 23de657; giữ các thay đổi chưa commit. Codex trực tiếp bổ sung runner, đối chiếu query, test tích hợp, số liệu và báo cáo TV3. Engine, Encoder/parity, Agent và GUI kế thừa phần tích hợp của nhóm, không ghi thành công việc TV3 tự viết lại. Giữ lịch sử, không khôi phục mục đã yêu cầu xóa; các lượt sau chỉ ghi log khi người dùng yêu cầu rõ.
 - Kiểm tra: Lượt triển khai trước đã đạt 531 test trên Python 3.11.0, Ruff check/format và pip check; benchmark có 120 row, 54/54 run normal khớp trace/calls, tổng 3.903 calls. Lượt này chỉ sửa README và kiểm tra diff, liên kết, lịch sử cùng hash code/dữ liệu; không chạy lại test hoặc benchmark.
 - Còn thiếu: Người dùng rà soát diff; commit/push và bàn giao nhóm chưa thực hiện. Demo GUI thủ công và Report.pdf chung cần nhóm nghiệm thu.
->>>>>>> origin/feature/TV3-dpll-uniqueness-experiments

@@ -21,6 +21,7 @@
 Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-05 — Phân công giai đoạn xây dựng module nền tảng
+
 - Thành viên: TV4 (Tùng).
 - AI: Codex.
 - Yêu cầu: Tạo bảng phân công giai đoạn 2, hạn 09/11/2026.
@@ -30,6 +31,7 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Còn thiếu: Các thành viên thực hiện và báo cáo kết quả trước mốc tích hợp.
 
 ### 2026-11-08 — Cập nhật kết quả nghiệm thu TV4
+
 - Thành viên: TV4 (Tùng).
 - AI: Codex.
 - Yêu cầu: Ghi rõ trạng thái kiểm tra sau triển khai Agent/trace theo điều kiện bổ sung.
@@ -39,6 +41,7 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Còn thiếu: Runtime Python 3.11 và nghiệm thu tích hợp thật.
 
 ### 2026-11-07 — Hoàn thành TV1 giai đoạn 2
+
 - Thành viên: TV1 — Dương Thiên Phú.
 - AI: OpenAI Codex.
 - Yêu cầu: Dựa trên hai file phân công và repo, code phần deadline TV1 (Phú).
@@ -47,8 +50,8 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Kiểm tra: python -m pytest tests -q (70 passed); Ruff check và format check đạt toàn Source; Python 3.12.14/Linux.
 - Còn thiếu: Tích hợp verifier thật/GUI/SAT uniqueness khi TV2–TV5 hoàn thiện; chưa kiểm tra Python 3.11/Windows.
 
-<<<<<<< HEAD
 ### 2026-11-12 — TV1 nghiệm thu giai đoạn 3
+
 - Thành viên: TV1 — Dương Thiên Phú.
 - AI: OpenAI Codex.
 - Yêu cầu: Đọc integration_v1 và quy ước, hoàn thành phần TV1 giai đoạn 3.
@@ -56,7 +59,6 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Bổ sung hai puzzle demo forced/unknown và STUCK, kịch bản nghiệm thu và 6 test backend thật; xác nhận proof/query deepcopy và token sau Load/Restart. Giữ bản sửa query accounting đã có của TV4, không đổi API/dependency/production code.
 - Kiểm tra: 523 test đạt (6 mới), Ruff check đạt và 40 file đạt format; Python 3.12/Linux. git diff --check đạt.
 - Còn thiếu: Chưa nghiệm thu GUI trực tiếp hoặc Python 3.11/Windows; benchmark toàn hệ thống do TV3 phụ trách. Chưa commit/push.
-=======
 
 ### 2026-11-14 — Đồng bộ chỉ dẫn tài liệu TV3 giai đoạn 3
 
@@ -67,4 +69,3 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Cập nhật mô tả entry point benchmark đã triển khai và hai trường đối chiếu trace/calls; giữ nguyên signature Model/Protocol/schema. Bổ sung liên kết báo cáo giai đoạn 3 và bảng câu hỏi ở README gốc.
 - Kiểm tra: Đối chiếu tên trường và entry point với mã hiện có; kiểm tra liên kết và diff Markdown, không chạy lại test code.
 - Còn thiếu: Nhóm tổng hợp tài liệu chung và Report.pdf.
->>>>>>> origin/feature/TV3-dpll-uniqueness-experiments
