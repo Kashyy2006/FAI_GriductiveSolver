@@ -20,12 +20,22 @@
   FakeSolver tra bảng kết quả, không chứa thuật toán DPLL; không thay solver thật.
 
 Chạy từ Source/: `python -m pytest tests/test_agent.py tests/test_trace.py -q`.
+<<<<<<< HEAD
 Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (531 ca trên branch TV3).
 Sandbox Windows có thể chặn thư mục tạm của pytest; chạy ngoài sandbox nếu cần,
 dùng --basetemp với đường dẫn thư mục tạm riêng đã kiểm tra. Không dùng thư mục
 chứa dữ liệu làm basetemp vì pytest sẽ xóa nội dung khi bắt đầu.
 Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Kết quả TV3 trước tích hợp là 403
 test, base tích hợp có 517 test; giai đoạn 3 thêm 14 ca, tổng 531 test trên Python 3.11.0.
+=======
+Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (517 test ở lần xác nhận gần nhất).
+Sandbox Windows có thể chặn thư mục tạm của pytest; chạy ngoài sandbox nếu cần,
+dùng --basetemp với đường dẫn thư mục tạm riêng đã kiểm tra. Không dùng thư mục
+chứa dữ liệu làm basetemp vì pytest sẽ xóa nội dung khi bắt đầu.
+Lần xác nhận gần nhất: toàn bộ 517 test chạy trên Python 3.11.9. Test tích hợp
+progressive hiện dùng GameEngine, CNF encoder, DPLL và Agent thật.
+
+> > > > > > > origin/feature/GUI
 
 ## Kiểm thử TV3 và tích hợp phụ thuộc
 
@@ -37,8 +47,14 @@ test, base tích hợp có 517 test; giai đoạn 3 thêm 14 ca, tổng 531 test
 - tv3_helpers.py chỉ chứa builder/fake dùng trong test, không dùng thay Engine/Encoder production.
 - conftest.py, test_regions.py, test_clue_evaluator.py và test_cnf_encoder.py được lấy
   nguyên từ TV2 commit 23955a5, cùng ba file logic production. Test TV4 được giữ nguyên.
+  <<<<<<< HEAD
 - Test dùng PublicTestEngine chỉ chứng minh luồng thành phần; nghiệm thu backend
   thật nằm trong test_integration.py và test_phase3_backend.py.
+  =======
+- Các fixture progressive riêng vẫn dùng `PublicTestEngine` để cô lập test;
+  `test_integration.py` kiểm tra luồng suy luận với GameEngine thật.
+
+> > > > > > > origin/feature/GUI
 
 ## Kiểm thử logic độc lập
 
@@ -184,3 +200,13 @@ Các lượt AI phải append mục theo AGENTS.md.
 - Nội dung và lý do: Codex viết thêm 14 test dùng Engine/Encoder/Agent/DPLL thật: query khớp calls, trace sai bị từ chối, timeout giữa SAT/verifier không reveal trái phép, timeout sau reveal đã chấp nhận, timeout call uniqueness thứ hai và trace export. Đồng hồ kiểm soát kích hoạt sau khi đi vào DPLL thật; không dùng timeout trước SAT trong benchmark để thay bằng chứng này.
 - Kiểm tra: Lượt triển khai đã chạy đủ 531 test (517 của base và 14 bổ sung), Ruff check/format và pip check đạt trên Python 3.11.0. Lượt README không chạy lại test.
 - Còn thiếu: GUI trong suite được kiểm thử headless; demo giao diện thủ công cần nhóm nghiệm thu.
+
+### 2026-11-14 — Cập nhật test GUI theo API board
+
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Đồng bộ README với regression GUI và kết quả Ruff mới nhất.
+- File thay đổi: `test_gui.py`, `README.md`.
+- Nội dung và lý do: Cập nhật mô tả test GUI/Engine thật; số liệu lịch sử được giữ tách khỏi trạng thái mới nhất.
+- Kiểm tra: Kết quả gần nhất là 26 test GUI/tích hợp và 517 test toàn bộ đạt trên Python 3.11.9; Ruff check và format check đạt. Lượt sửa README này chỉ kiểm tra `git diff --check`.
+- Còn thiếu: Không.

@@ -3,12 +3,16 @@
 ## Phụ trách và công việc
 
 - Phụ trách: Cả nhóm, TV5 điều phối.
+  <<<<<<< HEAD
 - Mã nguồn Python; chạy lệnh từ đây. main.py là composition root nối GUI và backend thật.
-- Xem thử giao diện tĩnh bằng `python main.py --preview`; thao tác game bị khóa.
+- # Xem thử giao diện tĩnh bằng `python main.py --preview`; thao tác game bị khóa.
+- Mã nguồn Python; chạy lệnh từ đây. main.py khởi tạo game và giao diện mẫu.
+- Chạy game qua luồng chính bằng `python main.py`; giao diện dùng Engine/Agent thật.
+  > > > > > > > origin/feature/GUI
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
 
-## Backend trên branch TV3
+## Trạng thái tích hợp hiện tại
 
 - DPLL và uniqueness đã triển khai theo API v1, không dùng solver ngoài.
 - Base hiện tại là integration_v1 commit 23de657, có Engine thật, parity, bản sửa query accounting và GUI.
@@ -17,6 +21,11 @@
 - Chạy toàn bộ test: `python -m pytest tests -q -p no:cacheprovider`.
 - Kết quả mới nhất: 531 test trên Python 3.11.0 và 120 row benchmark giai đoạn 3.
 - Hướng dẫn chi tiết: [báo cáo giai đoạn 3](../docs/report/tv3_phase3.md).
+- Engine, CNF Encoder, DPLL/uniqueness, Agent/trace và GUI đã nối theo API v1.
+- Encoder hỗ trợ sáu clue core cùng EVEN/ODD; region hỗ trợ COMMON_NEIGHBORS.
+- Chạy game mẫu: `python main.py`.
+- Chạy uniqueness: `python -m experiments.benchmark --mode uniqueness --repeats 3`.
+- Kết quả benchmark hiện lưu là snapshot uniqueness; xem `experiments/results/`.
 
 ## Nhật ký AI
 
@@ -52,6 +61,7 @@
 - Kiểm tra: Đối chiếu lệnh với CLI và kết quả đã chạy trên Python 3.11.0; lượt này chỉ bổ sung Markdown.
 - Còn thiếu: Chạy lại luồng game sau tích hợp Engine/GUI thật.
 
+<<<<<<< HEAD
 
 ### 2026-11-14 — Đồng bộ hướng dẫn chạy bản tích hợp TV3
 
@@ -61,4 +71,25 @@
 - File thay đổi: README.md trong Source/.
 - Nội dung và lý do: Thay mô tả Engine/GUI stub bằng trạng thái bản tích hợp; cập nhật lệnh main.py, experiments.phase3, kết quả kiểm tra và liên kết báo cáo. Không thay đổi mã nguồn trong lượt cập nhật README này.
 - Kiểm tra: Đối chiếu hướng dẫn với entry point hiện có và kết quả triển khai trước: 531 test, 120 row benchmark; không chạy lại suite.
-- Còn thiếu: Nghiệm thu GUI thủ công cùng nhóm; không tự commit/push.
+- # Còn thiếu: Nghiệm thu GUI thủ công cùng nhóm; không tự commit/push.
+
+### 2026-11-12 — Gỡ chế độ preview giao diện tĩnh
+
+- Thành viên: Phúc (TV5).
+- AI: Codex, GPT-6.
+- Yêu cầu: Bỏ preview tĩnh vì dự án chuyển sang chạy luồng game chính.
+- File thay đổi: `main.py`, `gui/preview.py`, `README.md`.
+- Nội dung và lý do: Bỏ cờ `--preview` và module tạo PublicState tĩnh; giữ composition root kết nối loader, Engine, Agent và GUI. Cập nhật hướng dẫn trạng thái backend theo nhánh đã tích hợp.
+- Kiểm tra: Chưa chạy test hoặc Ruff.
+- Còn thiếu: Chưa kiểm tra khởi chạy GUI sau khi gỡ preview.
+
+### 2026-11-14 — Cập nhật nghiệm thu GUI
+
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Cập nhật trạng thái kiểm tra sau khi nghiệm thu TV5.
+- File thay đổi: `README.md`.
+- Nội dung và lý do: Ghi kết quả mới nhất của bộ test và Ruff để README tổng hợp khớp trạng thái hiện tại.
+- Kiểm tra: 517 test đạt; Ruff check và format check đạt.
+- Còn thiếu: Chưa rà bố cục GUI ở các kích thước màn hình khác.
+  > > > > > > > origin/feature/GUI

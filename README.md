@@ -6,11 +6,18 @@ COMMON_NEIGHBORS. Model/Protocol/schema/dependency không đổi.
 
 Trace đếm đúng calls thực tế kể cả Engine deepcopy proof; Auto Solve gắn với
 session khởi chạy, Load/Restart hủy tác vụ cũ và xóa thông tin sidebar/trace.
+<<<<<<< HEAD
 GUI có View Trace và Save Trace. Nghiệm thu TV3 giai đoạn 3: 531 test đạt trên
 Python 3.11.0, Ruff check/format và pip check đạt. Bộ benchmark lưu 120 row cho
 cả solve và uniqueness; 54 run hoàn tất đều có trace khớp actual SAT calls.
 Test GUI trong suite kiểm tra controller/worker headless; demo giao diện thủ công
 và tổng hợp báo cáo chung vẫn cần nhóm nghiệm thu.
+=======
+GUI có View Trace và Save Trace. Xác nhận gần nhất: 517 test đạt trên Python 3.11.9;
+Ruff check và `ruff format --check` đạt. Đã thao tác GUI thật với verdict, Hint,
+Auto Solve 3×3, trace, Load 4×4 và Restart khi đang solve.
+
+> > > > > > > origin/feature/GUI
 
 ## Bắt đầu
 
@@ -30,13 +37,22 @@ python -m ruff check .
 python -m ruff format --check .
 ```
 
+<<<<<<< HEAD
 `python main.py` mở GUI với puzzle 3x3 mặc định. `python main.py --preview`
 chỉ xem board tĩnh. Hướng dẫn module tại Source/agent/README.md,
 Source/gui/README.md và Source/logic/README.md. Kết quả TV3 giai đoạn 3 nằm trong
 Source/experiments/results/phase3/. Các file trực tiếp trong
 Source/experiments/results/ là snapshot uniqueness ngày 09/11, được giữ riêng.
-Version dependency và giới hạn kiểm tra: docs/dependencies.md, docs/verification.md.
-Không dùng API tự đặt; model chung tại game/models.py, Protocol game/contracts.py.
+=======
+`python main.py` mở GUI với puzzle 3x3 mặc định và luồng Engine/Agent thật.
+Hướng dẫn module tại Source/agent/README.md,
+Source/gui/README.md và Source/logic/README.md. Benchmark runner đã triển khai;
+kết quả lưu sẵn trong Source/experiments/results/ là snapshot uniqueness cũ,
+không tự động cập nhật theo các sửa lỗi tích hợp này.
+
+> > > > > > > origin/feature/GUI
+> > > > > > > Version dependency và giới hạn kiểm tra: docs/dependencies.md, docs/verification.md.
+> > > > > > > Không dùng API tự đặt; model chung tại game/models.py, Protocol game/contracts.py.
 
 Hai extensions: Parity (EVEN/ODD) và COMMON_NEIGHBORS. Mẫu JSON:
 Source/puzzles/3x3/example_01.json. Phân công tại docs/task_distribution.md.
@@ -146,6 +162,16 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Kiểm tra: Trong lượt triển khai đã chạy 403 test toàn bộ, Ruff check/format và pip check đạt trên Python 3.11.0; sau bổ sung kiểm tra deadline, 25 test uniqueness/benchmark liên quan đạt. Benchmark uniqueness thật có 21 lượt UNIQUE trên 7 puzzle, 3 repeats, không lỗi/timeout. Lượt bổ sung log này chỉ sửa Markdown, kiểm tra git diff --check, không chạy lại test code.
 - Còn thiếu: Nghiệm thu progressive với Engine thật của TV1, bộ puzzle khó và stress 5x5; CNF parity vẫn chưa được TV2 triển khai. Thay đổi chưa commit/push.
 
+### 2026-11-12 — Gỡ chế độ preview giao diện tĩnh
+
+- Thành viên: Phúc (TV5).
+- AI: Codex, GPT-6.
+- Yêu cầu: Bỏ preview tĩnh vì dự án chuyển sang chạy luồng game chính.
+- File thay đổi: `Source/main.py`, `Source/gui/preview.py`, `Source/README.md`, `Source/gui/README.md`, `README.md`.
+- Nội dung và lý do: Bỏ cờ `--preview` và module tạo PublicState tĩnh; `python main.py` tiếp tục khởi tạo loader, Engine, Agent và GUI theo puzzle mẫu.
+- Kiểm tra: Chưa chạy test hoặc Ruff.
+- Còn thiếu: Chưa kiểm tra khởi chạy GUI sau khi gỡ preview.
+
 ### 2026-11-12 — Bổ sung và nghiệm thu kiểm thử Parity
 
 - Thành viên: TV2.
@@ -192,3 +218,13 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Nội dung và lý do: Bổ sung trạng thái bàn giao deadline 14/11, lệnh demo/benchmark và bảng tóm tắt câu hỏi gần đây. Branch TV3 đã fast-forward tới integration_v1 commit 23de657; giữ các thay đổi chưa commit. Codex trực tiếp bổ sung runner, đối chiếu query, test tích hợp, số liệu và báo cáo TV3. Engine, Encoder/parity, Agent và GUI kế thừa phần tích hợp của nhóm, không ghi thành công việc TV3 tự viết lại. Giữ lịch sử, không khôi phục mục đã yêu cầu xóa; các lượt sau chỉ ghi log khi người dùng yêu cầu rõ.
 - Kiểm tra: Lượt triển khai trước đã đạt 531 test trên Python 3.11.0, Ruff check/format và pip check; benchmark có 120 row, 54/54 run normal khớp trace/calls, tổng 3.903 calls. Lượt này chỉ sửa README và kiểm tra diff, liên kết, lịch sử cùng hash code/dữ liệu; không chạy lại test hoặc benchmark.
 - Còn thiếu: Người dùng rà soát diff; commit/push và bàn giao nhóm chưa thực hiện. Demo GUI thủ công và Report.pdf chung cần nhóm nghiệm thu.
+
+### 2026-11-14 — Đồng bộ trạng thái nghiệm thu
+
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Cập nhật README tổng hợp theo lần chạy test và Ruff mới nhất.
+- File thay đổi: `README.md`, `Source/tests/README.md`.
+- Nội dung và lý do: Sửa trạng thái runtime/test và ghi rõ test tích hợp Engine thật; giữ các mục cũ làm lịch sử.
+- Kiểm tra: Theo kết quả vừa chạy, 517 test đạt trên Python 3.11.9; Ruff check và format check đạt.
+- Còn thiếu: Chưa rà giao diện trên kích thước màn hình khác.
