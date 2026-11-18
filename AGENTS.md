@@ -48,11 +48,15 @@ Người dùng đã cho phép thiết lập các định nghĩa v1 trong lần t
 Theo yêu cầu người dùng, toàn bộ nhật ký cũ đã xóa; không tái tạo lịch sử cũ
 hoặc ghi mục khởi tạo mới trong lần reset này. Những lượt dùng AI tiếp theo:
 
-1. Append vào mục `Nhật ký AI` của README ở từng thư mục có file trực tiếp thay
-   đổi; không ghi đè lịch sử. Sửa log đơn thuần không tạo chuỗi log đệ quy.
+1. Chỉ ghi hoặc cập nhật nhật ký AI trong README khi người dùng yêu cầu rõ cho
+   lượt/prompt đó. Không tự động ghi sau mỗi lượt trao đổi hoặc sửa code. Khi
+   được yêu cầu, append vào mục `Nhật ký AI` của README ở từng thư mục có file
+   trực tiếp thay đổi; không ghi đè lịch sử. Sửa log đơn thuần không tạo chuỗi
+   log đệ quy.
 2. Ghi ngày Asia/Saigon, thành viên, công cụ/model nếu biết, yêu cầu, file đổi,
    nội dung/lý do, kiểm tra đã chạy và phần còn thiếu. Không bịa danh tính.
-3. Lượt chỉ trao đổi: ghi ở module chính, nêu `Không thay đổi file`.
+3. Lượt chỉ trao đổi cũng chỉ ghi khi người dùng yêu cầu rõ; khi ghi thì dùng
+   module chính và nêu `Không thay đổi file`.
 4. Nếu AI không ghi file được, trả nội dung để thành viên lưu và nói rõ chưa lưu.
 5. Không ghi hidden assignment, clue chưa reveal hoặc thông tin nhạy cảm.
    `docs/ai_usage.md` chỉ là chỉ mục cho phụ lục, không thay nhật ký cục bộ.

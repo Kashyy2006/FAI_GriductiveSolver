@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "repeats": 3,
+  "profiles": {
+    "normal": {
+      "passed": true,
+      "rows": 54,
+      "timeout_seconds": 10.0,
+      "outcomes": {
+        "solve:SOLVED": 18,
+        "solve:STUCK": 9,
+        "uniqueness:MULTIPLE": 3,
+        "uniqueness:UNIQUE": 24
+      },
+      "query_matches": 54,
+      "actual_sat_calls": 3903,
+      "mismatches": []
+    },
+    "errors": {
+      "passed": true,
+      "rows": 12,
+      "timeout_seconds": 10.0,
+      "outcomes": {
+        "solve:ERROR": 6,
+        "uniqueness:ERROR": 6
+      },
+      "query_matches": 0,
+      "actual_sat_calls": 0,
+      "mismatches": []
+    },
+    "timeouts": {
+      "passed": true,
+      "rows": 54,
+      "timeout_seconds": 1e-12,
+      "outcomes": {
+        "solve:TIMEOUT": 27,
+        "uniqueness:TIMEOUT": 27
+      },
+      "query_matches": 0,
+      "actual_sat_calls": 0,
+      "mismatches": []
+    }
+  },
+  "notes": [
+    "Expected invalid-input ERROR rows remain errors in their original CSV.",
+    "Timeout profile deliberately expires before SAT; mid-SAT/verifier deadlines are covered by controlled-clock integration tests.",
+    "Normal inputs are small synthetic/chain baselines, not a difficult performance set.",
+    "Query reconciliation checks every completed run without exposing SAT assignments or clue contents."
+  ]
+}
