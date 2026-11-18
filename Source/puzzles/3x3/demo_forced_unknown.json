@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "puzzle_id": "example_3x3_chain",
+  "puzzle_id": "demo_3x3_forced_unknown",
   "size": 3,
   "characters": [
     {
       "id": "A1",
-      "name": "Person 01",
+      "name": "Alice",
       "profession": "Detective",
       "row": 0,
       "col": 0,
@@ -19,7 +19,7 @@
     },
     {
       "id": "B1",
-      "name": "Person 02",
+      "name": "Ben",
       "profession": "Detective",
       "row": 0,
       "col": 1,
@@ -33,7 +33,7 @@
     },
     {
       "id": "C1",
-      "name": "Person 03",
+      "name": "Claire",
       "profession": "Detective",
       "row": 0,
       "col": 2,
@@ -47,7 +47,7 @@
     },
     {
       "id": "A2",
-      "name": "Person 04",
+      "name": "David",
       "profession": "Detective",
       "row": 1,
       "col": 0,
@@ -61,7 +61,7 @@
     },
     {
       "id": "B2",
-      "name": "Person 05",
+      "name": "Emma",
       "profession": "Detective",
       "row": 1,
       "col": 1,
@@ -75,7 +75,7 @@
     },
     {
       "id": "C2",
-      "name": "Person 06",
+      "name": "Felix",
       "profession": "Detective",
       "row": 1,
       "col": 2,
@@ -89,7 +89,7 @@
     },
     {
       "id": "A3",
-      "name": "Person 07",
+      "name": "Grace",
       "profession": "Detective",
       "row": 2,
       "col": 0,
@@ -103,7 +103,7 @@
     },
     {
       "id": "B3",
-      "name": "Person 08",
+      "name": "Henry",
       "profession": "Detective",
       "row": 2,
       "col": 1,
@@ -117,7 +117,7 @@
     },
     {
       "id": "C3",
-      "name": "Person 09",
+      "name": "Iris",
       "profession": "Detective",
       "row": 2,
       "col": 2,
