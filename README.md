@@ -70,7 +70,7 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Yêu cầu: Triển khai ánh xạ biến và encode FACT/SAME/DIFFERENT.
 - File thay đổi: logic/cnf\_[encoder.py](http://encoder.py), logic/clue\_[evaluator.py](http://evaluator.py), tests/test_cnf\_[encoder.py](http://encoder.py).
 - Nội dung và lý do:
-  - Ánh xạ toàn bộ ô thành biến row\*N+col+1, kể cả biến chưa có clause.
+  - Ánh xạ toàn bộ ô thành biến row*N+col+1, kể cả biến chưa có clause.
   - Encode ba clue cơ bản và thêm unit clause đúng dấu cho status công khai.
   - Xử lý clue theo ID, status theo row-major; trả đầy đủ EncodingResult, không dùng biến phụ.
   - Tách validator cấu trúc clue để dùng chung; encoder không gọi evaluator để tạo CNF.
@@ -143,3 +143,31 @@ Các lượt AI tiếp theo append theo AGENTS.md.
 - Nội dung và lý do: Codex trực tiếp viết DPLL, uniqueness, runner benchmark, test, bộ puzzle synthetic và bản thảo báo cáo; chạy kiểm tra và xử lý lỗi phát sinh. Giữ nguyên model, Protocol, schema và dependency. Phần Agent kế thừa TV4; Encoder lấy từ TV2, không tính là phần TV3 tự xây lại. Các trao đổi và nhật ký cũ được giữ nguyên trên branch hiện tại.
 - Kiểm tra: Trong lượt triển khai đã chạy 403 test toàn bộ, Ruff check/format và pip check đạt trên Python 3.11.0; sau bổ sung kiểm tra deadline, 25 test uniqueness/benchmark liên quan đạt. Benchmark uniqueness thật có 21 lượt UNIQUE trên 7 puzzle, 3 repeats, không lỗi/timeout. Lượt bổ sung log này chỉ sửa Markdown, kiểm tra git diff --check, không chạy lại test code.
 - Còn thiếu: Nghiệm thu progressive với Engine thật của TV1, bộ puzzle khó và stress 5x5; CNF parity vẫn chưa được TV2 triển khai. Thay đổi chưa commit/push.
+
+### 2026-11-12 — Bổ sung và nghiệm thu kiểm thử Parity
+
+- Thành viên: TV2.
+- AI: Codex.
+- Yêu cầu: Kiểm tra encoding EVEN/ODD, đối chiếu CNF với evaluator độc lập,
+  kiểm chứng Parity kết hợp COMMON_NEIGHBORS và clue mới sau reveal.
+- File thay đổi: Source/tests/test_cnf_encoder.py,
+  Source/tests/test_integration.py.
+- Nội dung và lý do:
+  - Thành viên bổ sung test; Codex rà soát code, đối chiếu contract và chạy kiểm tra.
+  - Xác nhận encoder hiện có hỗ trợ đủ tám loại clue; parity không còn stub
+    hoặc test kỳ vọng NotImplementedError.
+  - Bổ sung kiểm thử CNF với evaluator trên toàn bộ 512 assignment của board
+    3×3, gồm KB kết hợp tám loại clue, unit verdict và trường hợp mâu thuẫn.
+  - Kiểm tra EVEN/ODD trên COMMON_NEIGHBORS nhiều ô, một ô, vùng rỗng,
+    đảo đầu mút và các ca board 4×4/5×5.
+  - Kiểm thử bằng Engine/Encoder/DPLL/Agent thật: clue chưa mở không vào KB;
+    ô đích còn Unknown trước reveal và chỉ được chứng minh sau khi clue mới
+    được mở. Hint/rejected verdict không đổi trạng thái; snapshot cũ giữ nguyên.
+  - Giữ nguyên model, Protocol, schema và dependency; không sửa code production.
+- Kiểm tra:
+  - Python 3.11.9: toàn bộ 533 test đạt.
+  - Ruff check, Ruff format --check và git diff --check đều đạt.
+  - Rà soát không phát hiện lỗi cần sửa trong phạm vi yêu cầu.
+- Còn thiếu: Chưa stress vùng EXPLICIT lớn; encoding parity trực tiếp sinh
+  2^(m-1) clauses với m > 0. Chưa commit/publish.
+
