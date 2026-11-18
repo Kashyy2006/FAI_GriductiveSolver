@@ -9,7 +9,6 @@
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-12 — TV1 nghiệm thu giai đoạn 3
 - Thành viên: TV1 — Dương Thiên Phú.

@@ -10,7 +10,6 @@
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-08 — Tạo bộ avatar cho thẻ nhân vật
 - Thành viên: Phúc (phân công TV5)

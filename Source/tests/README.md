@@ -19,23 +19,15 @@
 - Fakes chỉ trong test, theo đúng Encoder/SATSolver/PublicEngine Protocol.
   FakeSolver tra bảng kết quả, không chứa thuật toán DPLL; không thay solver thật.
 
-Chạy từ Source/: `python -m pytest tests/test_agent.py tests/test_trace.py -q`.
-<<<<<<< HEAD
-Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (531 ca trên branch TV3).
-Sandbox Windows có thể chặn thư mục tạm của pytest; chạy ngoài sandbox nếu cần,
-dùng --basetemp với đường dẫn thư mục tạm riêng đã kiểm tra. Không dùng thư mục
-chứa dữ liệu làm basetemp vì pytest sẽ xóa nội dung khi bắt đầu.
-Nghiệm thu TV4 ban đầu chạy trên Python 3.12.6. Kết quả TV3 trước tích hợp là 403
-test, base tích hợp có 517 test; giai đoạn 3 thêm 14 ca, tổng 531 test trên Python 3.11.0.
-=======
-Toàn bộ: `python -m pytest tests -q -p no:cacheprovider` (517 test ở lần xác nhận gần nhất).
-Sandbox Windows có thể chặn thư mục tạm của pytest; chạy ngoài sandbox nếu cần,
-dùng --basetemp với đường dẫn thư mục tạm riêng đã kiểm tra. Không dùng thư mục
-chứa dữ liệu làm basetemp vì pytest sẽ xóa nội dung khi bắt đầu.
-Lần xác nhận gần nhất: toàn bộ 517 test chạy trên Python 3.11.9. Test tích hợp
-progressive hiện dùng GameEngine, CNF encoder, DPLL và Agent thật.
+Chạy từ Source/: `python -m pytest tests -q -p no:cacheprovider`.
+Kiểm tra sau khắc phục ngày 18/11/2026: **558 passed** trên Python 3.12.6/Windows.
+Đã khôi phục puzzle 3x3 example_01.json đúng bản gốc, giải quyết 23 failures và
+76 setup errors trước đó; không skip/xóa/nới test. Các kết quả 517/522/531
+trong phần nghiệm thu bên dưới là các mốc lịch sử riêng.
 
-> > > > > > > origin/feature/GUI
+Sandbox Windows có thể chặn thư mục tạm của pytest; nghiệm thu dùng basetemp
+riêng trong .venv khi chạy ngoài sandbox. Không trỏ basetemp vào dữ liệu project
+vì pytest xóa nội dung thư mục này lúc bắt đầu.
 
 ## Kiểm thử TV3 và tích hợp phụ thuộc
 
@@ -47,14 +39,9 @@ progressive hiện dùng GameEngine, CNF encoder, DPLL và Agent thật.
 - tv3_helpers.py chỉ chứa builder/fake dùng trong test, không dùng thay Engine/Encoder production.
 - conftest.py, test_regions.py, test_clue_evaluator.py và test_cnf_encoder.py được lấy
   nguyên từ TV2 commit 23955a5, cùng ba file logic production. Test TV4 được giữ nguyên.
-  <<<<<<< HEAD
-- Test dùng PublicTestEngine chỉ chứng minh luồng thành phần; nghiệm thu backend
-  thật nằm trong test_integration.py và test_phase3_backend.py.
-  =======
-- Các fixture progressive riêng vẫn dùng `PublicTestEngine` để cô lập test;
-  `test_integration.py` kiểm tra luồng suy luận với GameEngine thật.
+- Fixture progressive riêng dùng PublicTestEngine để cô lập test, không thay
+  nghiệm thu backend thật tại test_integration.py và test_phase3_backend.py.
 
-> > > > > > > origin/feature/GUI
 
 ## Kiểm thử logic độc lập
 
@@ -100,7 +87,8 @@ Runtime kiểm thử local: Python 3.12.6; chưa chạy Python 3.11 tại máy n
 
 ## Nhật ký AI
 
-Các lượt AI phải append mục theo AGENTS.md.
+
+Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 
 ### 2026-11-06 — Thêm bộ test regions và evaluator độc lập
 

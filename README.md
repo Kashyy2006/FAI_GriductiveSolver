@@ -1,30 +1,26 @@
 # FAI Griductive Solver — contract v1
 
-Đã tích hợp Engine, CNF Encoder, DPLL, Deductive Agent và GUI Tkinter theo
-contract v1. Encoder hỗ trợ sáu clue core cùng Parity (EVEN/ODD); các vùng gồm
-COMMON_NEIGHBORS. Model/Protocol/schema/dependency không đổi.
+Engine, CNF Encoder, DPLL, Deductive Agent và GUI Tkinter đã được triển khai
+và nối theo API v1. Encoder hỗ trợ sáu clue core, Parity (EVEN/ODD) và vùng
+COMMON_NEIGHBORS. Model, Protocol, schema và dependency giữ nguyên.
 
-Trace đếm đúng calls thực tế kể cả Engine deepcopy proof; Auto Solve gắn với
-session khởi chạy, Load/Restart hủy tác vụ cũ và xóa thông tin sidebar/trace.
-<<<<<<< HEAD
-GUI có View Trace và Save Trace. Nghiệm thu TV3 giai đoạn 3: 531 test đạt trên
-Python 3.11.0, Ruff check/format và pip check đạt. Bộ benchmark lưu 120 row cho
-cả solve và uniqueness; 54 run hoàn tất đều có trace khớp actual SAT calls.
-Test GUI trong suite kiểm tra controller/worker headless; demo giao diện thủ công
-và tổng hợp báo cáo chung vẫn cần nhóm nghiệm thu.
-=======
-GUI có View Trace và Save Trace. Xác nhận gần nhất: 517 test đạt trên Python 3.11.9;
-Ruff check và `ruff format --check` đạt. Đã thao tác GUI thật với verdict, Hint,
-Auto Solve 3×3, trace, Load 4×4 và Restart khi đang solve.
+## Trạng thái kiểm tra hiện tại — 18/11/2026
 
-> > > > > > > origin/feature/GUI
+- Review giai đoạn 2: [bảng đối chiếu và các điểm đang bị chặn](docs/phase2_review.md).
+- Đã khôi phục Source/puzzles/3x3/example_01.json từ bản gốc trước commit xóa
+  7e99d7a; không sửa yếu test hoặc thay đổi kỳ vọng của fixture.
+- Suite hiện tại: **558 passed**, không failed/error, trên Python 3.12.6/Windows.
+- Đã smoke test composition root main.py và Tkinter thật ở chế độ ẩn: tải puzzle
+  mặc định, Auto Solve 8 bước/105 queries và Restart thành công.
+- Ruff check/format đạt (41 file Python). Không dùng kết quả này để thay các
+  số liệu cũ trong nhật ký; mỗi mục lịch sử phản ánh thời điểm riêng.
+- Đã chạy backend thật với các puzzle còn tồn tại: demo_forced_unknown 3x3
+  SOLVED/8 bước/105 queries, example 4x4 SOLVED/15 bước/301 queries.
 
-## Bắt đầu
+## Cài đặt và chạy
 
-Đọc AGENTS.md, docs/interfaces.md, docs/puzzle_format.md và README module.
-Code trong Source/, tài liệu trong docs/. TV4 (Tùng) thực hiện tạo lại bộ khung.
-
-Từ gốc repo (PowerShell):
+Đọc AGENTS.md, docs/interfaces.md, docs/puzzle_format.md và README của module.
+Từ gốc repo, dùng PowerShell:
 
 ```powershell
 py -3.11 -m venv .venv
@@ -32,35 +28,28 @@ py -3.11 -m venv .venv
 cd Source
 python -m pip install -r requirements.txt
 python main.py
-python -m pytest tests
-python -m ruff check .
-python -m ruff format --check .
+python -m pytest tests -q
+python -m ruff check . --no-cache
+python -m ruff format --check . --no-cache
 ```
 
-<<<<<<< HEAD
-`python main.py` mở GUI với puzzle 3x3 mặc định. `python main.py --preview`
-chỉ xem board tĩnh. Hướng dẫn module tại Source/agent/README.md,
-Source/gui/README.md và Source/logic/README.md. Kết quả TV3 giai đoạn 3 nằm trong
-Source/experiments/results/phase3/. Các file trực tiếp trong
-Source/experiments/results/ là snapshot uniqueness ngày 09/11, được giữ riêng.
-=======
-`python main.py` mở GUI với puzzle 3x3 mặc định và luồng Engine/Agent thật.
-Hướng dẫn module tại Source/agent/README.md,
-Source/gui/README.md và Source/logic/README.md. Benchmark runner đã triển khai;
-kết quả lưu sẵn trong Source/experiments/results/ là snapshot uniqueness cũ,
-không tự động cập nhật theo các sửa lỗi tích hợp này.
+Lệnh main.py tải lại được puzzle mặc định. Các puzzle demo mới vẫn được giữ
+nguyên bên cạnh example_01.json để không phá các đường dẫn tương thích.
+Chế độ --preview đã bị gỡ, không còn là chế độ được hỗ trợ.
 
-> > > > > > > origin/feature/GUI
-> > > > > > > Version dependency và giới hạn kiểm tra: docs/dependencies.md, docs/verification.md.
-> > > > > > > Không dùng API tự đặt; model chung tại game/models.py, Protocol game/contracts.py.
-
-Hai extensions: Parity (EVEN/ODD) và COMMON_NEIGHBORS. Mẫu JSON:
-Source/puzzles/3x3/example_01.json. Phân công tại docs/task_distribution.md.
-Report.pdf và video tạo sau khi hoàn thành; không đưa số liệu giả vào báo cáo.
+- Hướng dẫn Agent/GUI/Logic: README của từng package trong Source/.
+- Nghiệm thu TV3: `python -m experiments.phase3 --repeats 3 --timeout 10`.
+  Test runner/profile đã đạt; snapshot benchmark lưu sẵn không bị ghi đè.
+- Snapshot kết quả giai đoạn 3: Source/experiments/results/phase3/;
+  snapshot uniqueness cũ: các file trực tiếp trong Source/experiments/results/.
+- Phân công: docs/task_distribution.md. Môi trường: docs/dependencies.md.
+- Lịch sử AI theo ngày: [chỉ mục](docs/ai_usage.md). Không coi thứ tự merge commit
+  là thời gian thực hiện từng thao tác hoặc tự sửa ngày sự kiện.
 
 ## Nhật ký AI
 
-Các lượt AI tiếp theo append theo AGENTS.md.
+
+Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 
 ### 2026-11-06 — Hoàn thiện validation và kiểm thử regions/evaluator
 

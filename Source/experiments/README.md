@@ -74,7 +74,6 @@ bản sửa Agent/GUI; không nhận phần việc của TV1/TV2/TV4/TV5 là cod
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-09 — Xây runner và đo uniqueness
 - Thành viên: TV3 (Mạnh, theo phân công).
@@ -84,7 +83,6 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Codex viết CLI và wrapper đo Encoder/Solver/Engine; xuất CSV, metadata, summary và biểu đồ. Đếm actual SAT calls, giữ row lỗi/timeout và số reveal trước lỗi; đánh dấu thống kê chưa đầy đủ. Error không xuất private exception payload. Generator tạo sáu puzzle synthetic tái lập được, dùng schema hiện có.
 - Kiểm tra: Test accounting chạy Agent/DPLL thật với Engine fake được đánh dấu rõ. Benchmark production chỉ đo uniqueness bằng Encoder/DPLL thật: 7 puzzle, 3 repeats, 21 lượt UNIQUE, 0 lỗi/timeout. Đã kiểm tra nguồn số liệu và hash inputs/backend; lượt ghi log chỉ sửa tài liệu.
 - Còn thiếu: Benchmark solve/all với GameEngine thật sau tích hợp TV1; bổ sung puzzle khó và không dùng sanity suite để kết luận hiệu năng tổng quát.
-
 
 ### 2026-11-14 — Ghi nhận runner nghiệm thu giai đoạn 3
 

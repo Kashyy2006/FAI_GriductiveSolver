@@ -130,7 +130,8 @@ chưa thay thế kiểm thử runtime Python 3.11. Các phần AI note không ch
 
 ## Nhật ký AI
 
-Các lượt AI phải append mục theo AGENTS.md.
+
+Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 
 ### 2026-11-08 — Đề xuất triển khai TV4 đến mốc 09/11
 - Thành viên: TV4 (Tùng).

@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "puzzle_id": "example_3x3_chain",
+  "size": 3,
+  "characters": [
+    {
+      "id": "A1",
+      "name": "Person 01",
+      "profession": "Detective",
+      "row": 0,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_01",
+        "type": "FACT",
+        "person": "B1",
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "id": "B1",
+      "name": "Person 02",
+      "profession": "Detective",
+      "row": 0,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_02",
+        "type": "FACT",
+        "person": "C1",
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "id": "C1",
+      "name": "Person 03",
+      "profession": "Detective",
+      "row": 0,
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_03",
+        "type": "FACT",
+        "person": "A2",
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "Person 04",
+      "profession": "Detective",
+      "row": 1,
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_04",
+        "type": "FACT",
+        "person": "B2",
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "id": "B2",
+      "name": "Person 05",
+      "profession": "Detective",
+      "row": 1,
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_05",
+        "type": "FACT",
+        "person": "C2",
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "id": "C2",
+      "name": "Person 06",
+      "profession": "Detective",
+      "row": 1,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_06",
+        "type": "FACT",
+        "person": "A3",
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "Person 07",
+      "profession": "Detective",
+      "row": 2,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_07",
+        "type": "FACT",
+        "person": "B3",
+        "status": "INNOCENT"
+      }
+    },
+    {
+      "id": "B3",
+      "name": "Person 08",
+      "profession": "Detective",
+      "row": 2,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_08",
+        "type": "FACT",
+        "person": "C3",
+        "status": "CRIMINAL"
+      }
+    },
+    {
+      "id": "C3",
+      "name": "Person 09",
+      "profession": "Detective",
+      "row": 2,
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_09",
+        "type": "FACT",
+        "person": "A1",
+        "status": "CRIMINAL"
+      }
+    }
+  ],
+  "initially_revealed": [
+    "A1"
+  ]
+}

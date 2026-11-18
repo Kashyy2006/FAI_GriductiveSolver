@@ -25,7 +25,6 @@
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-09 — Thu thập và kiểm tra kết quả uniqueness
 - Thành viên: TV3 (Mạnh, theo phân công).
@@ -35,7 +34,6 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Codex chạy runner mode uniqueness trên 7 puzzle, mỗi puzzle 3 lần, timeout 10 giây mỗi phase. Runner ghi môi trường, hash input/code và toàn bộ outcomes. Số liệu được tạo từ lần chạy thật, không lấy số từ fake Engine trong test.
 - Kiểm tra: 21 row UNIQUE, 0 lỗi/timeout; kiểm tra lại hash đầu vào/mã nguồn và median trong báo cáo. Không có assignments hoặc clue contents trong output. Lượt ghi log không chạy lại benchmark.
 - Còn thiếu: Số liệu progressive production, puzzle khó và stress 5x5; kết quả hiện tại chỉ là uniqueness trên bộ mẫu cơ bản.
-
 
 ### 2026-11-14 — Chỉ mục kết quả nghiệm thu TV3 giai đoạn 3
 

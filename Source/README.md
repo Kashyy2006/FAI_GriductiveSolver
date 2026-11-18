@@ -2,32 +2,27 @@
 
 ## Phụ trách và công việc
 
-- Phụ trách: Cả nhóm, TV5 điều phối.
-  <<<<<<< HEAD
-- Mã nguồn Python; chạy lệnh từ đây. main.py là composition root nối GUI và backend thật.
-- # Xem thử giao diện tĩnh bằng `python main.py --preview`; thao tác game bị khóa.
-- Mã nguồn Python; chạy lệnh từ đây. main.py khởi tạo game và giao diện mẫu.
-- Chạy game qua luồng chính bằng `python main.py`; giao diện dùng Engine/Agent thật.
-  > > > > > > > origin/feature/GUI
-- Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
-- Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
+- Cả nhóm; TV5 điều phối tích hợp. Mỗi thành viên chịu trách nhiệm module mình.
+- main.py là composition root nối loader, Encoder, DPLL, Agent, Engine và GUI.
+- Chạy lệnh Python từ thư mục này, dùng import tuyệt đối theo API v1.
+- --preview đã bị gỡ khỏi main.py; không dùng hướng dẫn preview tĩnh cũ.
 
-## Trạng thái tích hợp hiện tại
+## Trạng thái kiểm tra hiện tại
 
-- DPLL và uniqueness đã triển khai theo API v1, không dùng solver ngoài.
-- Base hiện tại là integration_v1 commit 23de657, có Engine thật, parity, bản sửa query accounting và GUI.
-- Chạy demo: `python main.py`; xem board tĩnh: `python main.py --preview`.
-- Nghiệm thu TV3 hai phase: `python -m experiments.phase3 --repeats 3 --timeout 10`.
-- Chạy toàn bộ test: `python -m pytest tests -q -p no:cacheprovider`.
-- Kết quả mới nhất: 531 test trên Python 3.11.0 và 120 row benchmark giai đoạn 3.
-- Hướng dẫn chi tiết: [báo cáo giai đoạn 3](../docs/report/tv3_phase3.md).
-- Engine, CNF Encoder, DPLL/uniqueness, Agent/trace và GUI đã nối theo API v1.
-- Encoder hỗ trợ sáu clue core cùng EVEN/ODD; region hỗ trợ COMMON_NEIGHBORS.
-- Chạy game mẫu: `python main.py`.
-- Chạy uniqueness: `python -m experiments.benchmark --mode uniqueness --repeats 3`.
-- Kết quả benchmark hiện lưu là snapshot uniqueness; xem `experiments/results/`.
+- Engine, core/parity Encoder, regions/evaluator, DPLL/uniqueness, Agent/trace
+  và GUI đã triển khai. Đã khôi phục puzzles/3x3/example_01.json đúng bản gốc.
+- Kiểm tra sau khắc phục ngày 18/11/2026: **558 passed**, Ruff check/format
+  và pip check đạt. main.py/Tkinter thật chạy Auto Solve và Restart thành công.
+- Lệnh test: `python -m pytest tests -q -p no:cacheprovider`.
+- Backend thật giải được các demo 3x3 và example 4x4 còn tồn tại; giới hạn và
+  bảng kiểm tra từng thành viên tại [review giai đoạn 2](../docs/phase2_review.md).
+- Runner benchmark: `python -m experiments.benchmark --mode all --repeats 3`.
+- Runner nghiệm thu: `python -m experiments.phase3 --repeats 3 --timeout 10`.
+- Kết quả lưu trong experiments/results/phase3/ là snapshot nghiệm thu cũ,
+  không tự trở thành kết quả của checkout hiện tại sau merge.
 
 ## Nhật ký AI
+
 
 ### 2026-11-08 — Nối composition root cho GUI
 
@@ -61,7 +56,15 @@
 - Kiểm tra: Đối chiếu lệnh với CLI và kết quả đã chạy trên Python 3.11.0; lượt này chỉ bổ sung Markdown.
 - Còn thiếu: Chạy lại luồng game sau tích hợp Engine/GUI thật.
 
-<<<<<<< HEAD
+### 2026-11-12 — Gỡ chế độ preview giao diện tĩnh
+
+- Thành viên: Phúc (TV5).
+- AI: Codex, GPT-6.
+- Yêu cầu: Bỏ preview tĩnh vì dự án chuyển sang chạy luồng game chính.
+- File thay đổi: `main.py`, `gui/preview.py`, `README.md`.
+- Nội dung và lý do: Bỏ cờ `--preview` và module tạo PublicState tĩnh; giữ composition root kết nối loader, Engine, Agent và GUI. Cập nhật hướng dẫn trạng thái backend theo nhánh đã tích hợp.
+- Kiểm tra: Chưa chạy test hoặc Ruff.
+- Còn thiếu: Chưa kiểm tra khởi chạy GUI sau khi gỡ preview.
 
 ### 2026-11-14 — Đồng bộ hướng dẫn chạy bản tích hợp TV3
 
@@ -73,16 +76,6 @@
 - Kiểm tra: Đối chiếu hướng dẫn với entry point hiện có và kết quả triển khai trước: 531 test, 120 row benchmark; không chạy lại suite.
 - # Còn thiếu: Nghiệm thu GUI thủ công cùng nhóm; không tự commit/push.
 
-### 2026-11-12 — Gỡ chế độ preview giao diện tĩnh
-
-- Thành viên: Phúc (TV5).
-- AI: Codex, GPT-6.
-- Yêu cầu: Bỏ preview tĩnh vì dự án chuyển sang chạy luồng game chính.
-- File thay đổi: `main.py`, `gui/preview.py`, `README.md`.
-- Nội dung và lý do: Bỏ cờ `--preview` và module tạo PublicState tĩnh; giữ composition root kết nối loader, Engine, Agent và GUI. Cập nhật hướng dẫn trạng thái backend theo nhánh đã tích hợp.
-- Kiểm tra: Chưa chạy test hoặc Ruff.
-- Còn thiếu: Chưa kiểm tra khởi chạy GUI sau khi gỡ preview.
-
 ### 2026-11-14 — Cập nhật nghiệm thu GUI
 
 - Thành viên: Phúc (TV5).
@@ -92,4 +85,3 @@
 - Nội dung và lý do: Ghi kết quả mới nhất của bộ test và Ruff để README tổng hợp khớp trạng thái hiện tại.
 - Kiểm tra: 517 test đạt; Ruff check và format check đạt.
 - Còn thiếu: Chưa rà bố cục GUI ở các kích thước màn hình khác.
-  > > > > > > > origin/feature/GUI

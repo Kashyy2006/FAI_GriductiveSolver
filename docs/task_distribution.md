@@ -15,3 +15,10 @@ lại bộ khung là TV4 (Tùng); thông tin này không phải nhật ký AI l�
 Mốc: ngày 1–2 chốt contract/model/API/schema; 3–7 triển khai độc lập; 8–11 tích
 hợp puzzle 3x3; 12–15 hoàn thiện, ngoại lệ và 4x4; 16–18 thực nghiệm/báo cáo;
 19–21 demo, chạy sạch và đóng gói. Đây là mốc tương đối từ lúc nhóm bắt đầu.
+
+## Đối chiếu giai đoạn 2
+
+Review checkout ngày 18/11/2026 tại [phase2_review.md](phase2_review.md).
+Các module nền tảng đã có triển khai. Sau khi khôi phục puzzle mẫu dùng chung,
+558 test đạt; entry point GUI mặc định đã được smoke test. Không mặc định
+100% hoàn thành hoặc suy ra đúng hạn từ các commit được merge sau đó.

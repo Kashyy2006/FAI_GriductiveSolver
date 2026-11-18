@@ -19,7 +19,6 @@
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-09 — Soạn phần thuật toán và thực nghiệm TV3
 - Thành viên: TV3 (Mạnh, theo phân công).
@@ -29,7 +28,6 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Codex soạn mô tả DPLL, uniqueness, định nghĩa metrics, phương pháp đo và nhận xét từ CSV thực tế. Bản thảo phân biệt uniqueness với progressive solving, nêu nguồn Encoder/Agent của thành viên khác và các giới hạn chưa nghiệm thu.
 - Kiểm tra: Đối chiếu bảng median với 21 row CSV, cấu hình với environment.json và các phát biểu kiểm thử với kết quả đã chạy. Lượt ghi log không sửa báo cáo hoặc số liệu.
 - Còn thiếu: Nhóm rà soát nội dung, bổ sung thực nghiệm toàn hệ thống và ghép vào Report.pdf cuối cùng.
-
 
 ### 2026-11-14 — Ghi nhận báo cáo bàn giao TV3 ngày 14/11
 
