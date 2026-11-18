@@ -8,14 +8,14 @@ COMMON_NEIGHBORS. Model, Protocol, schema và dependency giữ nguyên.
 
 - Review giai đoạn 2: [bảng đối chiếu và các điểm đang bị chặn](docs/phase2_review.md).
 - Đã khôi phục Source/puzzles/3x3/example_01.json từ bản gốc trước commit xóa
-  7e99d7a; không sửa yếu test hoặc thay đổi kỳ vọng của fixture.
+7e99d7a; không sửa yếu test hoặc thay đổi kỳ vọng của fixture.
 - Suite hiện tại: **558 passed**, không failed/error, trên Python 3.12.6/Windows.
 - Đã smoke test composition root main.py và Tkinter thật ở chế độ ẩn: tải puzzle
-  mặc định, Auto Solve 8 bước/105 queries và Restart thành công.
+mặc định, Auto Solve 8 bước/105 queries và Restart thành công.
 - Ruff check/format đạt (41 file Python). Không dùng kết quả này để thay các
-  số liệu cũ trong nhật ký; mỗi mục lịch sử phản ánh thời điểm riêng.
+số liệu cũ trong nhật ký; mỗi mục lịch sử phản ánh thời điểm riêng.
 - Đã chạy backend thật với các puzzle còn tồn tại: demo_forced_unknown 3x3
-  SOLVED/8 bước/105 queries, example 4x4 SOLVED/15 bước/301 queries.
+SOLVED/8 bước/105 queries, example 4x4 SOLVED/15 bước/301 queries.
 
 ## Cài đặt và chạy
 
@@ -39,15 +39,14 @@ Chế độ --preview đã bị gỡ, không còn là chế độ được hỗ 
 
 - Hướng dẫn Agent/GUI/Logic: README của từng package trong Source/.
 - Nghiệm thu TV3: `python -m experiments.phase3 --repeats 3 --timeout 10`.
-  Test runner/profile đã đạt; snapshot benchmark lưu sẵn không bị ghi đè.
+Test runner/profile đã đạt; snapshot benchmark lưu sẵn không bị ghi đè.
 - Snapshot kết quả giai đoạn 3: Source/experiments/results/phase3/;
-  snapshot uniqueness cũ: các file trực tiếp trong Source/experiments/results/.
+snapshot uniqueness cũ: các file trực tiếp trong Source/experiments/results/.
 - Phân công: docs/task_distribution.md. Môi trường: docs/dependencies.md.
 - Lịch sử AI theo ngày: [chỉ mục](docs/ai_usage.md). Không coi thứ tự merge commit
-  là thời gian thực hiện từng thao tác hoặc tự sửa ngày sự kiện.
+là thời gian thực hiện từng thao tác hoặc tự sửa ngày sự kiện.
 
 ## Nhật ký AI
-
 
 Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 
@@ -77,7 +76,7 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Yêu cầu: Triển khai ánh xạ biến và encode FACT/SAME/DIFFERENT.
 - File thay đổi: logic/cnf\_[encoder.py](http://encoder.py), logic/clue\_[evaluator.py](http://evaluator.py), tests/test_cnf\_[encoder.py](http://encoder.py).
 - Nội dung và lý do:
-  - Ánh xạ toàn bộ ô thành biến row\*N+col+1, kể cả biến chưa có clause.
+  - Ánh xạ toàn bộ ô thành biến row*N+col+1, kể cả biến chưa có clause.
   - Encode ba clue cơ bản và thêm unit clause đúng dấu cho status công khai.
   - Xử lý clue theo ID, status theo row-major; trả đầy đủ EncodingResult, không dùng biến phụ.
   - Tách validator cấu trúc clue để dùng chung; encoder không gọi evaluator để tạo CNF.
@@ -166,27 +165,27 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Thành viên: TV2.
 - AI: Codex.
 - Yêu cầu: Kiểm tra encoding EVEN/ODD, đối chiếu CNF với evaluator độc lập,
-  kiểm chứng Parity kết hợp COMMON_NEIGHBORS và clue mới sau reveal.
+kiểm chứng Parity kết hợp COMMON_NEIGHBORS và clue mới sau reveal.
 - File thay đổi: Source/tests/test_cnf_encoder.py,
-  Source/tests/test_integration.py.
+Source/tests/test_integration.py.
 - Nội dung và lý do:
   - Thành viên bổ sung test; Codex rà soát code, đối chiếu contract và chạy kiểm tra.
   - Xác nhận encoder hiện có hỗ trợ đủ tám loại clue; parity không còn stub
-    hoặc test kỳ vọng NotImplementedError.
+  hoặc test kỳ vọng NotImplementedError.
   - Bổ sung kiểm thử CNF với evaluator trên toàn bộ 512 assignment của board
-    3×3, gồm KB kết hợp tám loại clue, unit verdict và trường hợp mâu thuẫn.
+  3×3, gồm KB kết hợp tám loại clue, unit verdict và trường hợp mâu thuẫn.
   - Kiểm tra EVEN/ODD trên COMMON_NEIGHBORS nhiều ô, một ô, vùng rỗng,
-    đảo đầu mút và các ca board 4×4/5×5.
+  đảo đầu mút và các ca board 4×4/5×5.
   - Kiểm thử bằng Engine/Encoder/DPLL/Agent thật: clue chưa mở không vào KB;
-    ô đích còn Unknown trước reveal và chỉ được chứng minh sau khi clue mới
-    được mở. Hint/rejected verdict không đổi trạng thái; snapshot cũ giữ nguyên.
+  ô đích còn Unknown trước reveal và chỉ được chứng minh sau khi clue mới
+  được mở. Hint/rejected verdict không đổi trạng thái; snapshot cũ giữ nguyên.
   - Giữ nguyên model, Protocol, schema và dependency; không sửa code production.
 - Kiểm tra:
   - Python 3.11.9: toàn bộ 533 test đạt.
   - Ruff check, Ruff format --check và git diff --check đều đạt.
   - Rà soát không phát hiện lỗi cần sửa trong phạm vi yêu cầu.
 - Còn thiếu: Chưa stress vùng EXPLICIT lớn; encoding parity trực tiếp sinh
-  2^(m-1) clauses với m > 0. Chưa commit/publish.
+2^(m-1) clauses với m > 0. Chưa commit/publish.
 
 ### 2026-11-13 — Đối chiếu phần TV3 với phân công giai đoạn 3
 
@@ -217,3 +216,13 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Nội dung và lý do: Sửa trạng thái runtime/test và ghi rõ test tích hợp Engine thật; giữ các mục cũ làm lịch sử.
 - Kiểm tra: Theo kết quả vừa chạy, 517 test đạt trên Python 3.11.9; Ruff check và format check đạt.
 - Còn thiếu: Chưa rà giao diện trên kích thước màn hình khác.
+
+### 2026-11-18 — Kiểm chứng CNF bằng evaluator độc lập
+- Thành viên: TV2.
+- AI: Codex.
+- Yêu cầu: Kiểm chứng encoder/evaluator cho sáu clue core, Parity và COMMON_NEIGHBORS, gồm vùng rỗng, biên k, tham số và tham chiếu sai, số biến và số clause.
+- File thay đổi: test_cnf_encoder.py, test_puzzle_loader.py.
+- Nội dung và lý do: Tận dụng các test hiện có để đối chiếu CNF với evaluator trên toàn bộ 512 phép gán cho từng fixture 3×3. Bổ sung kiểm tra KB gồm tám loại clue và sáu verdict sinh đúng 20 clause. Kiểm tra cùng một encoder vẫn mã hóa đúng clue hợp lệ sau khi từ chối k sai. Thêm bốn ca JSON lỗi: parity có k, k vượt kích thước vùng COMMON_NEIGHBORS, hai đầu mút trùng và đầu mút ngoài bàn. Cả bốn ca đều trả PuzzleValidationError và giữ nguyên dữ liệu đầu vào.
+- Kiểm tra: Python 3.11.9. Trước khi sửa, 306 test TV2 đạt. Sau khi sửa, 348 test tập trung đạt (gồm TV2, loader và tích hợp), toàn bộ 562 test của dự án đạt. Ruff check, Ruff format --check và git diff --check đều đạt.
+- Còn thiếu: Không còn hạng mục code/test nào theo kế hoạch nghiệm thu TV2. Bộ test đã vét cạn 512 phép gán cho từng fixture 3×3. Trên bàn 4×4 và 5×5, bộ test vét cạn các vùng nhỏ đã chọn và kiểm tra ảnh hưởng của các ô ngoài vùng.
+

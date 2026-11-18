@@ -67,6 +67,48 @@ def test_invalid_data(raw, mode):
     assert raw == before
 
 
+@pytest.mark.parametrize(
+    "fields",
+    [
+        pytest.param(
+            {"type": "EVEN", "region": {"kind": "EXPLICIT", "cells": []}, "k": 0},
+            id="parity-forbids-k",
+        ),
+        pytest.param(
+            {
+                "type": "AT_MOST",
+                "region": {"kind": "COMMON_NEIGHBORS", "first": "A1", "second": "C1"},
+                "k": 3,
+            },
+            id="k-exceeds-two-common-neighbors",
+        ),
+        pytest.param(
+            {
+                "type": "AT_LEAST",
+                "region": {"kind": "COMMON_NEIGHBORS", "first": "A1", "second": "A1"},
+                "k": 0,
+            },
+            id="identical-endpoints",
+        ),
+        pytest.param(
+            {
+                "type": "AT_LEAST",
+                "region": {"kind": "COMMON_NEIGHBORS", "first": "A1", "second": "D1"},
+                "k": 0,
+            },
+            id="endpoint-outside-board",
+        ),
+    ],
+)
+def test_loader_rejects_invalid_extension_clues(raw: dict, fields: dict) -> None:
+    character = raw["characters"][0]
+    character["clue"] = {"id": character["clue"]["id"], **fields}
+    before = copy.deepcopy(raw)
+    with pytest.raises(PuzzleValidationError):
+        puzzle_from_dict(raw)
+    assert raw == before
+
+
 def test_loader_normalizes_order_and_detaches_data(raw):
     raw["characters"].reverse()
     before = copy.deepcopy(raw)

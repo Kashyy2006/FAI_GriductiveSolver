@@ -587,9 +587,14 @@ def test_counting_rejects_invalid_k_without_mutating_input(
         public_state, Clue("count", kind, region=Region(RegionType.ROW, index=0), k=k)
     )
     before = deepcopy(state)
+    encoder = CNFEncoder()
     with pytest.raises(ContractError):
-        CNFEncoder().encode(state)
+        encoder.encode(state)
     assert state == before
+    valid = _with_clue(public_state, Clue("valid", kind, region=Region(RegionType.EXPLICIT), k=0))
+    recovered = encoder.encode(valid)
+    assert recovered.cnf == []
+    assert recovered.active_clue_ids == ("valid",)
 
 
 @pytest.mark.parametrize("kind", [ClueType.EXACTLY, ClueType.AT_LEAST, ClueType.AT_MOST])
@@ -699,7 +704,8 @@ def test_all_eight_clue_types_and_known_statuses_match_the_evaluator(
     encoder = CNFEncoder()
     result = encoder.encode(state)
     assert result.active_clue_ids == tuple(sorted(clue.id for clue in clues))
-    assert result.clause_count == len(result.cnf)
+    # FACT, SAME, DIFFERENT, EXACTLY, AT_LEAST, AT_MOST, EVEN, ODD, then six verdicts.
+    assert result.clause_count == len(result.cnf) == 1 + 2 + 2 + 4 + 1 + 1 + 2 + 1 + 6
     assert result.auxiliary_variables == ()
     satisfying_count = 0
     for values in product((False, True), repeat=9):
