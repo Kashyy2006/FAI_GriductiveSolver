@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "puzzle_id": "museum_shift",
+  "size": 3,
+  "characters": [
+    {
+      "id": "A1",
+      "name": "Eva",
+      "profession": "Curator",
+      "row": 0,
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_A1",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "ROW",
+          "index": 0
+        },
+        "k": 0
+      }
+    },
+    {
+      "id": "B1",
+      "name": "Beethoven",
+      "profession": "Guide",
+      "row": 0,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_B1",
+        "type": "ODD",
+        "region": {
+          "kind": "COMMON_NEIGHBORS",
+          "first": "A1",
+          "second": "C3"
+        }
+      }
+    },
+    {
+      "id": "C1",
+      "name": "Chloe",
+      "profession": "Musician",
+      "row": 0,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_C1",
+        "type": "AT_MOST",
+        "region": {
+          "kind": "COLUMN",
+          "index": 2
+        },
+        "k": 0
+      }
+    },
+    {
+      "id": "A2",
+      "name": "Damian",
+      "profession": "Teacher",
+      "row": 1,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_A2",
+        "type": "SAME",
+        "first": "A2",
+        "second": "A3"
+      }
+    },
+    {
+      "id": "B2",
+      "name": "Mia",
+      "profession": "Baker",
+      "row": 1,
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_B2",
+        "type": "SAME",
+        "first": "A2",
+        "second": "B2"
+      }
+    },
+    {
+      "id": "C2",
+      "name": "David",
+      "profession": "Gardener",
+      "row": 1,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_C2",
+        "type": "DIFFERENT",
+        "first": "A3",
+        "second": "B3"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "Oliver",
+      "profession": "Tailor",
+      "row": 2,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_A3",
+        "type": "REMARK",
+        "text": "The weather is nice today. Let’s walk home after work."
+      }
+    },
+    {
+      "id": "B3",
+      "name": "Lily",
+      "profession": "Librarian",
+      "row": 2,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_B3",
+        "type": "REMARK",
+        "text": "This morning, I spilled coffee on my sleeve."
+      }
+    },
+    {
+      "id": "C3",
+      "name": "Victor",
+      "profession": "Pilot",
+      "row": 2,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_C3",
+        "type": "REMARK",
+        "text": "Standing all day, I just want to sit down and take off my shoes."
+      }
+    }
+  ],
+  "initially_revealed": [
+    "A1"
+  ]
+}

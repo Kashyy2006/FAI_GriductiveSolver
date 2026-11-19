@@ -170,6 +170,16 @@
         {
           "type": "object",
           "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "type": {"const": "REMARK"},
+            "text": {"type": "string", "pattern": "\\S"}
+          },
+          "required": ["id", "type", "text"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
             "id": {
               "type": "string",
               "minLength": 1

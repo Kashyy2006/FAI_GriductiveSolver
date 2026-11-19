@@ -6,6 +6,7 @@ from game.contracts import Encoder, SATSolver
 from game.models import (
     Character,
     Clue,
+    ClueType,
     ContractError,
     EncodingResult,
     PublicCharacter,
@@ -88,7 +89,13 @@ def _validate_encoding(encoding: EncodingResult, state: PublicState, deadline: _
         type(encoding.clause_count) is not int
         or encoding.clause_count != len(encoding.cnf)
         or encoding.active_clue_ids
-        != tuple(sorted(cell.clue.id for cell in state.characters if cell.clue is not None))
+        != tuple(
+            sorted(
+                cell.clue.id
+                for cell in state.characters
+                if cell.clue is not None and cell.clue.type != ClueType.REMARK
+            )
+        )
     ):
         raise ContractError("Encoder must report all validation clues and actual clause counts")
 
