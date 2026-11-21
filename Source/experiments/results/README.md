@@ -9,6 +9,12 @@
 
 ## Kết quả
 
+- phase4/: bộ kết quả chốt giai đoạn 4 (340 row, `repeats=5`, `timeout=10.0s`):
+  `acceptance.json`, `combined_summary.md`, 3 profile `normal/` (160 row, 160/160
+  khớp query/calls, 10.390 actual calls, kèm 3 biểu đồ phân tích), `errors/` (20 row
+  `ERROR`), `timeouts/` (160 row `TIMEOUT`). Tái lập bằng
+  `python -m experiments.phase4 --repeats 5 --timeout 10`; báo cáo tại
+  `docs/report/tv3_phase4.md`.
 - phase3/acceptance.json: kiểm tra outcome mong đợi và đối chiếu trace/calls.
 - phase3/normal/: 54 row, gồm SOLVED/STUCK và UNIQUE/MULTIPLE; 54/54 khớp query/calls.
 - phase3/errors/: 12 row ERROR từ hai fixture dữ liệu sai.
@@ -44,3 +50,13 @@
 - Nội dung và lý do: Ghi chỉ mục 120 row trong ba profile và acceptance.json PASS; giữ riêng 21 row uniqueness snapshot 09/11. Kết quả giai đoạn 3 dùng backend production thật, không lấy số liệu từ fake Engine.
 - Kiểm tra: 54 normal, 12 errors, 54 timeouts; 54/54 normal khớp query, 3.903 actual calls. Lượt tài liệu kiểm tra hash, không ghi lại CSV/metadata/biểu đồ.
 - Còn thiếu: Kết quả chỉ phản ánh bộ nghiệm thu hiện có; chưa có bộ stress khó để khái quát hiệu năng.
+
+### 2026-11-21 — Bổ sung bộ kết quả thực nghiệm giai đoạn 4
+
+- Thành viên: TV3 (Mạnh).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Chạy benchmark chốt giai đoạn 4 trên `integration_v2` và cập nhật chỉ mục kết quả.
+- File thay đổi: `phase4/` (CSV, metadata, summary, acceptance, biểu đồ), `README.md`.
+- Nội dung và lý do: Lưu toàn bộ 340 row giai đoạn 4 trong `phase4/` (tách biệt với snapshot `phase3/` và snapshot 09/11), giữ nguyên các dòng `ERROR`/`TIMEOUT`, bổ sung bảng tổng hợp và 3 biểu đồ phân tích.
+- Kiểm tra: `acceptance.json` `passed=true`; 160/160 normal khớp trace/calls (10.390 actual SAT calls), 20 `ERROR`, 160 `TIMEOUT`; chạy trên Python 3.11.9 đúng bản khóa dependency.
+- Còn thiếu: Cập nhật lại nếu nhóm chốt bổ sung puzzle từ branch TV1; chưa commit/push.
