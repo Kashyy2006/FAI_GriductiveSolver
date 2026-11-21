@@ -75,3 +75,13 @@
 - Nội dung và lý do: Cập nhật mô tả entry point benchmark đã triển khai và hai trường đối chiếu trace/calls; giữ nguyên signature Model/Protocol/schema. Bổ sung liên kết báo cáo giai đoạn 3 và bảng câu hỏi ở README gốc.
 - Kiểm tra: Đối chiếu tên trường và entry point với mã hiện có; kiểm tra liên kết và diff Markdown, không chạy lại test code.
 - Còn thiếu: Nhóm tổng hợp tài liệu chung và Report.pdf.
+
+### 2026-11-20 — Chốt checklist nghiệm thu và tài liệu dependencies TV5
+
+- Thành viên: Phúc (TV5).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Hoàn thiện checklist nghiệm thu giai đoạn 4 và tài liệu dependencies.
+- File thay đổi: `tv5_stage4_acceptance.md`, `dependencies.md`, `README.md`.
+- Nội dung và lý do: Lập bảng nghiệm thu GUI thật và môi trường sạch Python 3.11.9; bổ sung ghi nhận `pillow==11.2.1` (đã khóa sẵn trong lockfile) cho `BoardView`.
+- Kiểm tra: Đối chiếu trực tiếp với kết quả chạy sạch (564 test, Ruff 41 file, `pip check`) và `git diff --check`.
+- Còn thiếu: Không.

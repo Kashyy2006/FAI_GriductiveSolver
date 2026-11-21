@@ -30,7 +30,11 @@ from game.models import (
     AutoSolveResult,
     Clue,
     HintResult,
+    KBStatus,
     PublicState,
+    SolutionMismatchError,
+    SolveOutcome,
+    SolverTimeout,
     StateToken,
     Status,
     VerdictOutcome,
@@ -83,7 +87,7 @@ class MainWindow:
         """Render a public snapshot without querying the engine again."""
         self._state = state
         self.board.render(self._state)
-        self.puzzle_title.configure(text=self._state.puzzle_id.replace("_", " ").title())
+        self.puzzle_title.configure(text=self._format_title(self._state.puzzle_id))
         revealed = sum(item.status is not None for item in self._state.characters)
         self.progress_label.configure(
             text=f"{revealed:02d} / {len(self._state.characters):02d} cards revealed"
@@ -102,6 +106,18 @@ class MainWindow:
             self.clue_label.configure(text=self._describe_clue(selected.clue))
         self._update_controls()
 
+    @staticmethod
+    def _format_title(puzzle_id: str) -> str:
+        words = puzzle_id.replace("_", " ").split()
+        formatted: list[str] = []
+        for word in words:
+            lower = word.lower()
+            if len(lower) == 3 and lower[0].isdigit() and lower[1] == "x" and lower[2].isdigit():
+                formatted.append(f"{lower[0]}×{lower[2]}")
+            else:
+                formatted.append(word.title())
+        return " ".join(formatted)
+
     def _configure_window(self) -> None:
         self.root.title("GRIDUCTIVE  /  Deduction bureau")
         self.root.geometry("1280x820")
@@ -112,193 +128,218 @@ class MainWindow:
         style.configure("App.TFrame", background=self._BASE)
         style.configure("Panel.TFrame", background=self._BASE)
         style.configure("Board.TFrame", background=self._BASE)
+        style.configure("CardBox.TFrame", background=self._PANEL)
         style.configure(
             "Title.TLabel",
             background=self._BASE,
             foreground=self._TEXT,
-            font=("Segoe UI", 22, "bold"),
+            font=("Segoe UI", -28, "bold"),
         )
         style.configure(
             "Kicker.TLabel",
             background=self._BASE,
             foreground=self._ACCENT,
-            font=("Segoe UI", 9, "bold"),
+            font=("Segoe UI", -12, "bold"),
         )
         style.configure(
-            "Body.TLabel", background=self._BASE, foreground=self._TEXT, font=("Segoe UI", 10)
+            "Body.TLabel",
+            background=self._BASE,
+            foreground=self._TEXT,
+            font=("Segoe UI", -13),
         )
         style.configure(
-            "Muted.TLabel", background=self._BASE, foreground=self._MUTED, font=("Segoe UI", 9)
+            "CardBody.TLabel",
+            background=self._PANEL,
+            foreground=self._TEXT,
+            font=("Segoe UI", -13),
+        )
+        style.configure(
+            "Muted.TLabel",
+            background=self._BASE,
+            foreground=self._MUTED,
+            font=("Segoe UI", -12),
         )
         style.configure(
             "PanelTitle.TLabel",
             background=self._PANEL,
             foreground=self._TEXT,
-            font=("Segoe UI", 12, "bold"),
+            font=("Segoe UI", -15, "bold"),
         )
         style.configure(
             "Coordinate.TLabel",
             background=self._BASE,
             foreground=self._MUTED,
-            font=("Segoe UI", 10, "bold"),
+            font=("Segoe UI", -13, "bold"),
         )
-        style.configure(
-            "Card.TButton",
-            background="#fffaf2",
-            foreground=self._TEXT,
-            font=("Segoe UI", 9),
-            padding=10,
-            anchor="center",
-            justify="center",
-            relief="flat",
-            borderwidth=1,
-        )
-        style.map(
-            "Card.TButton",
-            background=[("active", "#f7eee1")],
-            foreground=[("disabled", "#9a9187")],
-        )
-        style.configure(
-            "Criminal.TButton",
-            background="#f7e7dd",
-            foreground=BoardView.CRIMINAL,
-            font=("Segoe UI", 9, "bold"),
-            padding=10,
-            anchor="center",
-            justify="center",
-            relief="flat",
-            borderwidth=1,
-        )
-        style.map("Criminal.TButton", background=[("active", "#f2ded2")])
-        style.configure(
-            "Innocent.TButton",
-            background="#fffaf2",
-            foreground=BoardView.INNOCENT,
-            font=("Segoe UI", 9, "bold"),
-            padding=10,
-            anchor="center",
-            justify="center",
-            relief="flat",
-            borderwidth=1,
-        )
-        style.map("Innocent.TButton", background=[("active", "#f7eee1")])
-        style.configure(
-            "Highlighted.TButton",
-            background="#f7c8c0",
-            foreground="#312a26",
-            font=("Segoe UI", 9, "bold"),
-            padding=10,
-            anchor="center",
-            justify="center",
-            relief="flat",
-            borderwidth=2,
-        )
-        style.map("Highlighted.TButton", background=[("active", "#f1b2a7")])
         style.configure(
             "Action.TButton",
             background="#4b4037",
             foreground="#fffaf2",
-            font=("Segoe UI", 9, "bold"),
-            padding=(12, 9),
+            font=("Segoe UI", -13, "bold"),
+            padding=(10, 9),
             relief="flat",
         )
-        style.map("Action.TButton", background=[("active", "#615449")])
+        style.map(
+            "Action.TButton",
+            background=[("disabled", "#b9afa3"), ("active", "#615449")],
+            foreground=[("disabled", "#efe7dc")],
+        )
+        style.configure(
+            "CriminalAction.TButton",
+            background=BoardView.CRIMINAL,
+            foreground="#fffaf2",
+            font=("Segoe UI", -13, "bold"),
+            padding=(10, 9),
+            relief="flat",
+        )
+        style.map(
+            "CriminalAction.TButton",
+            background=[("disabled", "#c8aca5"), ("active", "#b12620")],
+            foreground=[("disabled", "#f4ece6")],
+        )
+        style.configure(
+            "InnocentAction.TButton",
+            background=BoardView.INNOCENT,
+            foreground="#fffaf2",
+            font=("Segoe UI", -13, "bold"),
+            padding=(10, 9),
+            relief="flat",
+        )
+        style.map(
+            "InnocentAction.TButton",
+            background=[("disabled", "#aebcb4"), ("active", "#476555")],
+            foreground=[("disabled", "#eef3f0")],
+        )
         style.configure(
             "Primary.TButton",
             background="#d58b28",
             foreground="#fffaf2",
-            font=("Segoe UI", 9, "bold"),
-            padding=(12, 9),
+            font=("Segoe UI", -13, "bold"),
+            padding=(10, 9),
             relief="flat",
         )
-        style.map("Primary.TButton", background=[("active", "#e1a544")])
+        style.map(
+            "Primary.TButton",
+            background=[("disabled", "#d3b992"), ("active", "#e1a544")],
+            foreground=[("disabled", "#f5efe6")],
+        )
 
     def _build_layout(self) -> None:
-        shell = ttk.Frame(self.root, style="App.TFrame", padding=(24, 20))
+        shell = ttk.Frame(self.root, style="App.TFrame", padding=(24, 18))
         shell.pack(fill=BOTH, expand=True)
         header = ttk.Frame(shell, style="App.TFrame")
-        header.pack(fill=X, pady=(0, 18))
+        header.pack(fill=X, pady=(0, 12))
         heading = ttk.Frame(header, style="App.TFrame")
         heading.pack(side=LEFT, fill=X, expand=True)
         ttk.Label(heading, text="THE GRIDUCTIVE FILES", style="Kicker.TLabel").pack(anchor="w")
         self.puzzle_title = ttk.Label(heading, text="", style="Title.TLabel")
-        self.puzzle_title.pack(anchor="w", pady=(3, 0))
+        self.puzzle_title.pack(anchor="w", pady=(2, 0))
         self.progress_label = ttk.Label(header, text="", style="Body.TLabel")
         self.progress_label.pack(side=RIGHT, anchor="s", pady=(0, 5))
 
         body = ttk.Frame(shell, style="App.TFrame")
         body.pack(fill=BOTH, expand=True)
-        board_panel = ttk.Frame(body, style="Panel.TFrame", padding=8)
+        board_panel = ttk.Frame(body, style="Panel.TFrame", padding=6)
         board_panel.pack(side=LEFT, fill=BOTH, expand=True)
         self.board = BoardView(board_panel, self._select_cell)
         self.board.pack(fill=BOTH, expand=True)
 
-        sidebar = ttk.Frame(body, style="App.TFrame", width=300)
+        sidebar = ttk.Frame(body, style="App.TFrame", width=310)
         sidebar.pack(side=RIGHT, fill=Y, padx=(18, 0))
         sidebar.pack_propagate(False)
         ttk.Label(sidebar, text="CASE NOTES", style="Kicker.TLabel").pack(anchor="w")
+        selected_box = ttk.Frame(sidebar, style="CardBox.TFrame", padding=(10, 8))
+        selected_box.pack(fill=X, pady=(6, 12))
         self.selected_label = ttk.Label(
-            sidebar, text="Select a card", style="PanelTitle.TLabel", wraplength=280
+            selected_box, text="Select a card", style="PanelTitle.TLabel", wraplength=286
         )
-        self.selected_label.pack(anchor="w", pady=(6, 13))
-        ttk.Label(sidebar, text="Actions", style="Muted.TLabel").pack(anchor="w", pady=(0, 6))
-        actions = ttk.Frame(sidebar, style="App.TFrame")
-        actions.pack(fill=X)
+        self.selected_label.pack(anchor="w")
+
+        ttk.Label(sidebar, text="Verdict", style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
+        verdict_row = ttk.Frame(sidebar, style="App.TFrame")
+        verdict_row.pack(fill=X)
+        verdict_row.columnconfigure((0, 1), weight=1, uniform="actions")
         self.criminal_button = ttk.Button(
-            actions,
+            verdict_row,
             text="Mark Criminal",
-            style="Action.TButton",
+            style="CriminalAction.TButton",
             command=lambda: self._submit(Status.CRIMINAL),
         )
-        self.criminal_button.pack(fill=X, pady=3)
+        self.criminal_button.grid(row=0, column=0, sticky="ew", padx=(0, 4), pady=2)
         self.innocent_button = ttk.Button(
-            actions,
+            verdict_row,
             text="Mark Innocent",
-            style="Action.TButton",
+            style="InnocentAction.TButton",
             command=lambda: self._submit(Status.INNOCENT),
         )
-        self.innocent_button.pack(fill=X, pady=3)
-        ttk.Separator(sidebar).pack(fill=X, pady=15)
+        self.innocent_button.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=2)
+
+        ttk.Separator(sidebar).pack(fill=X, pady=12)
+        ttk.Label(sidebar, text="Deduction & Trace", style="Muted.TLabel").pack(
+            anchor="w", pady=(0, 4)
+        )
+        solve_row = ttk.Frame(sidebar, style="App.TFrame")
+        solve_row.pack(fill=X)
+        solve_row.columnconfigure((0, 1), weight=1, uniform="solve")
         self.hint_button = ttk.Button(
-            sidebar, text="Get a Hint", style="Primary.TButton", command=self._request_hint
+            solve_row, text="Get a Hint", style="Primary.TButton", command=self._request_hint
         )
-        self.hint_button.pack(fill=X, pady=3)
+        self.hint_button.grid(row=0, column=0, sticky="ew", padx=(0, 4), pady=2)
         self.solve_button = ttk.Button(
-            sidebar, text="Auto Solve", style="Action.TButton", command=self._auto_solve
+            solve_row, text="Auto Solve", style="Action.TButton", command=self._auto_solve
         )
-        self.solve_button.pack(fill=X, pady=3)
+        self.solve_button.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=2)
+
+        trace_row = ttk.Frame(sidebar, style="App.TFrame")
+        trace_row.pack(fill=X, pady=(4, 0))
+        trace_row.columnconfigure((0, 1), weight=1, uniform="trace")
         self.view_trace_button = ttk.Button(
-            sidebar, text="View Trace", style="Action.TButton", command=self._view_trace
+            trace_row, text="View Trace", style="Action.TButton", command=self._view_trace
         )
-        self.view_trace_button.pack(fill=X, pady=3)
+        self.view_trace_button.grid(row=0, column=0, sticky="ew", padx=(0, 4), pady=2)
         self.save_trace_button = ttk.Button(
-            sidebar, text="Save Trace…", style="Action.TButton", command=self._save_trace
+            trace_row, text="Save Trace…", style="Action.TButton", command=self._save_trace
         )
-        self.save_trace_button.pack(fill=X, pady=3)
-        ttk.Separator(sidebar).pack(fill=X, pady=15)
+        self.save_trace_button.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=2)
+
+        ttk.Separator(sidebar).pack(fill=X, pady=12)
+        ttk.Label(sidebar, text="Puzzle Session", style="Muted.TLabel").pack(
+            anchor="w", pady=(0, 4)
+        )
+        session_row = ttk.Frame(sidebar, style="App.TFrame")
+        session_row.pack(fill=X)
+        session_row.columnconfigure((0, 1), weight=1, uniform="session")
         self.load_button = ttk.Button(
-            sidebar, text="Load Puzzle…", style="Action.TButton", command=self._load
+            session_row, text="Load Puzzle…", style="Action.TButton", command=self._load
         )
-        self.load_button.pack(fill=X, pady=3)
+        self.load_button.grid(row=0, column=0, sticky="ew", padx=(0, 4), pady=2)
         self.restart_button = ttk.Button(
-            sidebar, text="Restart Case", style="Action.TButton", command=self._restart
+            session_row, text="Restart Case", style="Action.TButton", command=self._restart
         )
-        self.restart_button.pack(fill=X, pady=3)
+        self.restart_button.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=2)
+
         ttk.Label(sidebar, text="PUBLIC CLUES", style="Kicker.TLabel").pack(
-            anchor="w", pady=(19, 5)
+            anchor="w", pady=(16, 6)
         )
+        clue_box = ttk.Frame(sidebar, style="CardBox.TFrame", padding=(12, 10))
+        clue_box.pack(fill=X)
         self.clue_label = ttk.Label(
-            sidebar,
+            clue_box,
             text=self._EMPTY_CLUE,
-            style="Body.TLabel",
+            style="CardBody.TLabel",
             wraplength=280,
             justify=LEFT,
         )
         self.clue_label.pack(anchor="w")
+
+        status_box = ttk.Frame(sidebar, style="App.TFrame")
+        status_box.pack(side="bottom", fill=X, pady=(12, 0))
+        ttk.Separator(status_box).pack(fill=X, pady=(0, 8))
+        ttk.Label(status_box, text="STATUS", style="Kicker.TLabel").pack(anchor="w")
         self.status_label = ttk.Label(
-            sidebar, text="Ready", style="Muted.TLabel", wraplength=280, justify=LEFT
+            status_box, text="Ready", style="Body.TLabel", wraplength=300, justify=LEFT
         )
-        self.status_label.pack(side="bottom", anchor="w", pady=(12, 0))
+        self.status_label.pack(anchor="w", pady=(4, 0))
 
     def _select_cell(self, character_id: str) -> None:
         self._selected_id = character_id
@@ -313,11 +354,11 @@ class MainWindow:
 
     def _clue_cells(self, clue: Clue, owner_id: str) -> tuple[str, ...]:
         if clue.type.value == "FACT" and clue.person is not None:
-            return (owner_id, clue.person)
+            return (clue.person,)
         if clue.type.value in ("SAME", "DIFFERENT"):
             return tuple(cell for cell in (clue.first, clue.second) if cell is not None)
         if clue.region is not None:
-            return (owner_id, *resolve_region(clue.region, self._state))
+            return resolve_region(clue.region, self._state)
         return (owner_id,)
 
     @staticmethod
@@ -392,6 +433,11 @@ class MainWindow:
             self.status_label.configure(text="Puzzle loaded.")
             self.refresh()
         except Exception as error:
+            if not self._busy:
+                self.status_label.configure(
+                    text=f"Could not load puzzle ({type(error).__name__}: {error}). "
+                    "Previous game kept."
+                )
             self._show_error("Could not load puzzle", error)
 
     def _restart(self) -> None:
@@ -420,6 +466,7 @@ class MainWindow:
         """Clear public information and trace belonging to the previous session."""
         self._animation_generation += 1
         self.board.cancel_animations()
+        self._dismiss_toast()
         self._cancel_task()
         self._selected_id = None
         self._last_solve = None
@@ -485,10 +532,25 @@ class MainWindow:
                     context = self._verdict_context if kind == "verdict" else None
                     self._verdict_context = None
                     self.refresh()
-                    if context is not None and context[2]:
-                        self._show_toast(f"Could not check {context[0]}", str(result), "error")
+                    if isinstance(result, SolverTimeout):
+                        self.status_label.configure(
+                            text="Solver timed out before finishing. No result was assumed."
+                        )
+                        if context is not None and context[2]:
+                            self._show_toast("Solver timed out", str(result), "error")
+                        else:
+                            self._show_error("Solver timed out", result)
+                    elif isinstance(result, SolutionMismatchError):
+                        self.status_label.configure(
+                            text="Puzzle data error: proved verdict conflicts with puzzle data."
+                        )
+                        self._show_error("Puzzle data error", result)
                     else:
-                        self._show_error("Operation failed", result)
+                        self.status_label.configure(text="Operation failed. Board state unchanged.")
+                        if context is not None and context[2]:
+                            self._show_toast(f"Could not check {context[0]}", str(result), "error")
+                        else:
+                            self._show_error("Operation failed", result)
                 elif kind == "verdict" and isinstance(result, VerdictResult):
                     context = self._verdict_context
                     self._verdict_context = None
@@ -533,6 +595,13 @@ class MainWindow:
             def reveal() -> None:
                 if generation == self._animation_generation:
                     self._render_state(result.state)
+                    if character_id and character_id == self._selected_id:
+                        revealed = next(
+                            (item for item in self._state.characters if item.id == character_id),
+                            None,
+                        )
+                        if revealed is not None and revealed.clue is not None:
+                            self.board.highlight(self._clue_cells(revealed.clue, character_id))
 
             def done() -> None:
                 if generation == self._animation_generation:
@@ -605,7 +674,7 @@ class MainWindow:
             text=title,
             bg="#fffaf2",
             fg="#312a26",
-            font=("Segoe UI", 10, "bold"),
+            font=("Segoe UI", -13, "bold"),
             anchor="w",
         ).pack(fill="x")
         Label(
@@ -613,7 +682,7 @@ class MainWindow:
             text=message,
             bg="#fffaf2",
             fg="#796f64",
-            font=("Segoe UI", 9),
+            font=("Segoe UI", -12),
             justify=LEFT,
             anchor="w",
             wraplength=288,
@@ -665,7 +734,15 @@ class MainWindow:
         if result.token != self._state.token:
             return
         if result.character_id is None or result.status is None:
-            self.status_label.configure(text=f"No forced move · {result.kb_status.value.title()}")
+            all_revealed = all(item.status is not None for item in self._state.characters)
+            if result.kb_status == KBStatus.INCONSISTENT:
+                self.status_label.configure(text="No forced move · Inconsistent public clues.")
+            elif all_revealed:
+                self.status_label.configure(text="All cards are already revealed · Consistent.")
+            else:
+                self.status_label.configure(
+                    text=f"No forced move · {result.kb_status.value.title()}"
+                )
         else:
             self._selected_id = result.character_id
             self.board.pulse((result.character_id,))
@@ -706,10 +783,33 @@ class MainWindow:
                 self._render_state(result.final_state)
                 self._last_solve = result
                 self._busy = False
+                step_word = "step" if len(result.steps) == 1 else "steps"
                 self.status_label.configure(
-                    text=f"Auto Solve: {result.outcome.value.title()} · {len(result.steps)} steps."
+                    text=(
+                        f"Auto Solve: {result.outcome.value.title()} · "
+                        f"{len(result.steps)} {step_word} · {len(result.queries)} SAT calls."
+                    )
                 )
                 self._update_controls()
+                if result.outcome == SolveOutcome.SOLVED:
+                    self._show_toast(
+                        "Case Solved",
+                        f"All cards proven in {len(result.steps)} steps "
+                        f"({len(result.queries)} SAT calls).",
+                        "success",
+                    )
+                elif result.outcome == SolveOutcome.STUCK:
+                    self._show_toast(
+                        "Auto Solve Stuck",
+                        f"Stopped after {len(result.steps)} step(s) with no remaining forced move.",
+                        "info",
+                    )
+                elif result.outcome == SolveOutcome.INCONSISTENT:
+                    self._show_toast(
+                        "Inconsistent Clues",
+                        "Public clues are inconsistent. Deduction stopped.",
+                        "error",
+                    )
                 return
             character_id, next_state = snapshots[index]
 
@@ -759,7 +859,17 @@ class MainWindow:
         window.geometry("820x580")
         scrollbar = ttk.Scrollbar(window)
         scrollbar.pack(side=RIGHT, fill=Y)
-        text = Text(window, wrap="word", yscrollcommand=scrollbar.set)
+        text = Text(
+            window,
+            wrap="word",
+            yscrollcommand=scrollbar.set,
+            bg="#fffaf2",
+            fg=self._TEXT,
+            font=("Consolas", -13),
+            padx=14,
+            pady=12,
+            relief="flat",
+        )
         text.pack(fill=BOTH, expand=True)
         scrollbar.configure(command=text.yview)
         text.insert("1.0", self._trace_text(self._last_solve))

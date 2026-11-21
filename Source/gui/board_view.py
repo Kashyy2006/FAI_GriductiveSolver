@@ -22,9 +22,9 @@ class BoardView(ttk.Frame):
     INNOCENT = "#577967"
     CRIMINAL_FILL = "#f7e2dd"
     INNOCENT_FILL = "#e3eee6"
-    HIGHLIGHT = "#d8211c"
-    HIGHLIGHT_FILL = "#f7c8c0"
-    _CARD_SIZES = {3: (190, 175), 4: (166, 140), 5: (142, 105)}
+    HIGHLIGHT = "#d58b28"
+    HIGHLIGHT_FILL = "#faebd2"
+    _CARD_SIZES = {3: (210, 188), 4: (182, 146), 5: (146, 114)}
 
     def __init__(self, master: Misc, on_select: Callable[[str], None]) -> None:
         super().__init__(master, padding=8)
@@ -41,7 +41,9 @@ class BoardView(ttk.Frame):
         self._canvas = Canvas(self, bg=self.PAGE, highlightthickness=0, bd=0)
         self._canvas.pack(fill="both", expand=True)
         self._grid_frame = Frame(self._canvas, bg=self.PAGE)
-        self._grid_window = self._canvas.create_window((0, 0), window=self._grid_frame, anchor="nw")
+        self._grid_window = self._canvas.create_window(
+            (0, 0), window=self._grid_frame, anchor="center"
+        )
         self._canvas.bind("<Configure>", self._resize_grid)
         self._portraits = self._load_portraits()
         self._photo_cache: dict[tuple[int, int, int], ImageTk.PhotoImage] = {}
@@ -106,7 +108,7 @@ class BoardView(ttk.Frame):
             text=text,
             bg=BoardView.PAGE,
             fg=BoardView.MUTED,
-            font=("Segoe UI", 10, "bold"),
+            font=("Segoe UI", -13, "bold"),
             anchor="center",
         )
 
@@ -130,7 +132,7 @@ class BoardView(ttk.Frame):
             splinesteps=16,
             tags="card_border",
         )
-        content = Frame(border, bg=self.CARD, padx=4 if width < 130 else 6, pady=2)
+        content = Frame(border, bg=self.CARD, padx=4 if width < 140 else 7, pady=3)
         content_window = border.create_window(
             (width / 2, height / 2),
             window=content,
@@ -138,10 +140,13 @@ class BoardView(ttk.Frame):
             height=height - 10,
             anchor="center",
         )
-        card_font = 7 if width < 110 else 8 if width < 145 else 9
-        name_font = 9 if width < 110 else 10 if width < 145 else 12
-        portrait_width = max(34, min(76, width - 24))
-        portrait_height = max(26, min(72, height // 3))
+        compact = height < 160 or width < 165
+        id_px = max(10, min(13, height // 13))
+        name_px = max(11, min(15, height // 11))
+        role_px = max(9, min(12, height // 14))
+        clue_px = max(9, min(12, height // 13))
+        portrait_height = max(24, min(58, int(height * (0.24 if compact else 0.28))))
+        portrait_width = max(28, min(64, width - 28))
         self._bind_card(border, character.id)
         self._bind_card(content, character.id)
         id_label = Label(
@@ -153,7 +158,7 @@ class BoardView(ttk.Frame):
             ),
             bg=self.CARD,
             fg=self.MUTED,
-            font=("Segoe UI", card_font, "bold"),
+            font=("Segoe UI", -id_px, "bold"),
             anchor="w",
         )
         id_label.pack(fill="x")
@@ -176,7 +181,7 @@ class BoardView(ttk.Frame):
             text=character.name,
             bg=self.CARD,
             fg=self.INK,
-            font=("Segoe UI", name_font, "bold"),
+            font=("Segoe UI", -name_px, "bold"),
             wraplength=width - 18,
         )
         name.pack()
@@ -186,10 +191,10 @@ class BoardView(ttk.Frame):
             text=character.profession,
             bg=self.CARD,
             fg=self.MUTED,
-            font=("Segoe UI", card_font, "bold"),
+            font=("Segoe UI", -role_px, "bold"),
             wraplength=width - 18,
         )
-        profession.pack(pady=(1, 0))
+        profession.pack(pady=(0, 1))
         self._bind_card(profession, character.id)
         if character.clue is None:
             clue_text = "Clue locked"
@@ -202,11 +207,11 @@ class BoardView(ttk.Frame):
             text=clue_text,
             bg=self.CARD,
             fg=clue_color,
-            font=("Segoe UI", card_font),
+            font=("Segoe UI", -clue_px),
             wraplength=width - 20,
             justify="center",
         )
-        clue.pack(fill="both", expand=True, pady=(4, 0))
+        clue.pack(fill="both", expand=True, pady=(1, 0))
         self._bind_card(clue, character.id)
         self._card_labels[character.id] = {
             "id": id_label,
@@ -228,6 +233,8 @@ class BoardView(ttk.Frame):
                 else character.id
             )
         )
+        labels["name"].configure(text=character.name)
+        labels["profession"].configure(text=character.profession)
         labels["clue"].configure(
             text=self._format_clue(character.clue) if character.clue else "Clue locked",
             fg=self.INK if character.clue else self.MUTED,
@@ -371,11 +378,14 @@ class BoardView(ttk.Frame):
             card = self._buttons.get(character.id)
             if card is None:
                 continue
+            is_highlighted = character.id in self._highlighted
             if character.status == Status.CRIMINAL:
-                fill, border = self.CRIMINAL_FILL, self.CRIMINAL
+                fill = self.CRIMINAL_FILL
+                border = self.HIGHLIGHT if is_highlighted else self.CRIMINAL
             elif character.status == Status.INNOCENT:
-                fill, border = self.INNOCENT_FILL, self.INNOCENT
-            elif character.id in self._highlighted:
+                fill = self.INNOCENT_FILL
+                border = self.HIGHLIGHT if is_highlighted else self.INNOCENT
+            elif is_highlighted:
                 fill, border = self.HIGHLIGHT_FILL, self.HIGHLIGHT
             else:
                 fill, border = self.CARD, self.BORDER
@@ -403,19 +413,20 @@ class BoardView(ttk.Frame):
         with Image.open(path) as source:
             sheet = source.convert("RGBA")
             portraits = []
+            inset_x = max(2, round(sheet.width / 5 * 0.04))
+            inset_y = max(2, round(sheet.height / 5 * 0.04))
             for index in range(25):
                 row, col = divmod(index, 5)
-                left = round(col * sheet.width / 5)
-                upper = round(row * sheet.height / 5)
-                right = round((col + 1) * sheet.width / 5)
-                lower = round((row + 1) * sheet.height / 5)
+                left = round(col * sheet.width / 5) + inset_x
+                upper = round(row * sheet.height / 5) + inset_y
+                right = round((col + 1) * sheet.width / 5) - inset_x
+                lower = round((row + 1) * sheet.height / 5) - inset_y
                 crop = sheet.crop((left, upper, right, lower))
                 portraits.append(crop)
         return portraits
 
     def _resize_grid(self, event: Event) -> None:
-        self._canvas.itemconfigure(self._grid_window, width=event.width)
-        self._canvas.itemconfigure(self._grid_window, height=event.height)
+        self._canvas.coords(self._grid_window, event.width / 2, event.height / 2)
         if self._state is None or event.width < 100 or event.height < 100:
             return
         card_size = self._fit_card_size(self._state.size, event.width, event.height)
@@ -425,8 +436,8 @@ class BoardView(ttk.Frame):
 
     @staticmethod
     def _fit_card_size(board_size: int, width: int, height: int) -> tuple[int, int]:
-        card_width = min(220, max(72, (width - 32) // board_size - 8))
-        card_height = min(210, max(72, (height - 34) // board_size - 8))
+        card_width = min(230, max(88, (width - 36) // board_size - 8))
+        card_height = min(210, max(88, (height - 36) // board_size - 8))
         return card_width, card_height
 
     @staticmethod
