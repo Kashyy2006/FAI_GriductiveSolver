@@ -9,7 +9,6 @@
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-07 — Hoàn thành TV1 giai đoạn 2
 - Thành viên: TV1 — Dương Thiên Phú.

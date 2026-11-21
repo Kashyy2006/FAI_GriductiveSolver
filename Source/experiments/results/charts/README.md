@@ -9,7 +9,6 @@
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-09 — Vẽ biểu đồ từ kết quả đo
 - Thành viên: TV3 (Mạnh, theo phân công).

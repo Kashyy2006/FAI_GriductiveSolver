@@ -10,6 +10,7 @@ import pytest
 from game.models import CNF, Clue, ClueType, ContractError, PublicState, Region, RegionType, Status
 from logic.clue_evaluator import evaluate_clue
 from logic.cnf_encoder import CNFEncoder
+from logic.regions import resolve_region
 
 
 def _with_clue(state: PublicState, clue: Clue, owner_status: Status | None = None) -> PublicState:
@@ -18,6 +19,46 @@ def _with_clue(state: PublicState, clue: Clue, owner_status: Status | None = Non
         characters=(replace(state.characters[0], status=owner_status, clue=clue),)
         + state.characters[1:],
     )
+
+
+def _eight_clue_state(public_state: PublicState) -> tuple[PublicState, tuple[Clue, ...]]:
+    clues = (
+        Clue("a-fact", ClueType.FACT, person="C3", status=Status.INNOCENT),
+        Clue("b-same", ClueType.SAME, first="B1", second="C1"),
+        Clue("c-different", ClueType.DIFFERENT, first="A1", second="B1"),
+        Clue("d-exactly", ClueType.EXACTLY, region=Region(RegionType.ROW, index=0), k=2),
+        Clue("e-at-least", ClueType.AT_LEAST, region=Region(RegionType.COLUMN, index=1), k=1),
+        Clue(
+            "f-at-most",
+            ClueType.AT_MOST,
+            region=Region(RegionType.EXPLICIT, cells=("B1", "B2", "C2")),
+            k=2,
+        ),
+        Clue(
+            "g-even",
+            ClueType.EVEN,
+            region=Region(RegionType.COMMON_NEIGHBORS, first="A1", second="C1"),
+        ),
+        Clue(
+            "h-odd",
+            ClueType.ODD,
+            region=Region(RegionType.COMMON_NEIGHBORS, first="A1", second="C3"),
+        ),
+    )
+    statuses = (
+        Status.INNOCENT,
+        Status.CRIMINAL,
+        Status.CRIMINAL,
+        Status.INNOCENT,
+        Status.CRIMINAL,
+        Status.INNOCENT,
+    )
+    cells = list(public_state.characters)
+    for index, clue in enumerate(clues):
+        cells[index] = replace(cells[index], clue=clue)
+    for index, status in enumerate(statuses):
+        cells[index] = replace(cells[index], status=status)
+    return replace(public_state, characters=tuple(cells)), clues
 
 
 def _cnf_value(cnf: CNF, assignment: dict[int, bool]) -> bool:
@@ -276,11 +317,13 @@ def test_invalid_geometry_is_rejected(public_state: PublicState) -> None:
         Region(RegionType.ROW, index=0),
         Region(RegionType.COLUMN, index=1),
         Region(RegionType.NEIGHBORS, cell="A1"),
+        Region(RegionType.NEIGHBORS, cell="B1"),
         Region(RegionType.NEIGHBORS, cell="B2"),
         Region(RegionType.EXPLICIT, cells=("C3", "A1", "B2")),
         Region(RegionType.EXPLICIT, cells=("B2",)),
         Region(RegionType.EXPLICIT),
         Region(RegionType.COMMON_NEIGHBORS, first="A1", second="C1"),
+        Region(RegionType.COMMON_NEIGHBORS, first="A1", second="C3"),
     ],
 )
 def test_parity_matches_independent_evaluator_for_every_assignment(
@@ -336,6 +379,76 @@ def test_parity_on_larger_board_ignores_outside_cells(
             assignment = dict.fromkeys(result.primary_variables, outside)
             assignment.update(enumerate(values, 1))
             assert _cnf_value(result.cnf, assignment) == (sum(values) % 2 == (kind == ClueType.ODD))
+
+
+@pytest.mark.parametrize("kind", [ClueType.EVEN, ClueType.ODD])
+@pytest.mark.parametrize("public_state", [3, 4], indirect=True)
+def test_parity_common_neighbors_uses_expected_intersection(
+    public_state: PublicState, kind: ClueType
+) -> None:
+    cases = {
+        3: (
+            ("A1", "C1", ("B1", "B2")),
+            ("A1", "C3", ("B2",)),
+        ),
+        4: (("A1", "D4", ()),),
+    }[public_state.size]
+    encoder = CNFEncoder()
+    for first, second, expected in cases:
+        region = Region(RegionType.COMMON_NEIGHBORS, first=first, second=second)
+        reversed_region = Region(RegionType.COMMON_NEIGHBORS, first=second, second=first)
+        assert resolve_region(region, public_state) == expected
+        assert resolve_region(reversed_region, public_state) == expected
+        assert len(set(expected)) == len(expected)
+        assert first not in expected and second not in expected
+        clue = Clue("parity", kind, region=region)
+        state = _with_clue(public_state, clue)
+        before = deepcopy(state)
+        result = encoder.encode(state)
+        assert result.active_clue_ids == ("parity",)
+        assert result.clause_count == len(result.cnf)
+        assert (
+            encoder.encode(
+                _with_clue(public_state, Clue("parity", kind, region=reversed_region))
+            ).cnf
+            == result.cnf
+        )
+        if not expected:
+            assert result.cnf == ([] if kind == ClueType.EVEN else [[]])
+            assert state == before
+            continue
+        assert result.clause_count == 2 ** (len(expected) - 1)
+        for values in product((False, True), repeat=9):
+            primary = dict(zip(result.primary_variables, values))
+            assignment = {
+                cell: Status.CRIMINAL if primary[var] else Status.INNOCENT
+                for cell, var in result.variable_map.items()
+            }
+            assert _cnf_value(result.cnf, primary) == evaluate_clue(clue, assignment, state)
+        assert state == before
+
+
+@pytest.mark.parametrize("kind", [ClueType.EVEN, ClueType.ODD])
+@pytest.mark.parametrize("public_state", [4, 5], indirect=True)
+def test_parity_small_regions_on_larger_boards_ignore_outside_cells(
+    public_state: PublicState, kind: ClueType
+) -> None:
+    region = Region(RegionType.COMMON_NEIGHBORS, first="A1", second="C1")
+    expected = ("B1", "B2")
+    clue = Clue("parity", kind, region=region)
+    state = _with_clue(public_state, clue)
+    result = CNFEncoder().encode(state)
+    region_variables = tuple(result.variable_map[cell] for cell in expected)
+    assert result.clause_count == 2
+    for outside in (False, True):
+        for values in product((False, True), repeat=len(region_variables)):
+            primary = dict.fromkeys(result.primary_variables, outside)
+            primary.update(zip(region_variables, values))
+            assignment = {
+                cell: Status.CRIMINAL if primary[var] else Status.INNOCENT
+                for cell, var in result.variable_map.items()
+            }
+            assert _cnf_value(result.cnf, primary) == evaluate_clue(clue, assignment, state)
 
 
 @pytest.mark.parametrize("kind", [ClueType.EVEN, ClueType.ODD])
@@ -576,3 +689,49 @@ def test_six_core_clues_and_known_statuses_match_the_evaluator(public_state: Pub
         satisfying_count += expected
     assert satisfying_count == 2
     assert state == before
+
+
+def test_all_eight_clue_types_and_known_statuses_match_the_evaluator(
+    public_state: PublicState,
+) -> None:
+    state, clues = _eight_clue_state(public_state)
+    before = deepcopy(state)
+    encoder = CNFEncoder()
+    result = encoder.encode(state)
+    assert result.active_clue_ids == tuple(sorted(clue.id for clue in clues))
+    assert result.clause_count == len(result.cnf)
+    assert result.auxiliary_variables == ()
+    satisfying_count = 0
+    for values in product((False, True), repeat=9):
+        primary_assignment = dict(zip(result.primary_variables, values))
+        assignment = {
+            cell_id: Status.CRIMINAL if primary_assignment[variable] else Status.INNOCENT
+            for cell_id, variable in result.variable_map.items()
+        }
+        expected = all(evaluate_clue(clue, assignment, state) for clue in clues) and all(
+            cell.status is None or cell.status == assignment[cell.id] for cell in state.characters
+        )
+        assert _cnf_value(result.cnf, primary_assignment) is expected
+        satisfying_count += expected
+    assert satisfying_count == 4
+    assert state == before
+
+
+def test_contradictory_unit_with_parity_kb_is_unsatisfiable(public_state: PublicState) -> None:
+    state, clues = _eight_clue_state(public_state)
+    cells = list(state.characters)
+    cells[8] = replace(cells[8], status=Status.CRIMINAL)
+    inconsistent = replace(state, characters=tuple(cells))
+    result = CNFEncoder().encode(inconsistent)
+    for values in product((False, True), repeat=9):
+        primary_assignment = dict(zip(result.primary_variables, values))
+        assignment = {
+            cell_id: Status.CRIMINAL if primary_assignment[variable] else Status.INNOCENT
+            for cell_id, variable in result.variable_map.items()
+        }
+        expected = all(evaluate_clue(clue, assignment, inconsistent) for clue in clues) and all(
+            cell.status is None or cell.status == assignment[cell.id]
+            for cell in inconsistent.characters
+        )
+        assert expected is False
+        assert _cnf_value(result.cnf, primary_assignment) is False

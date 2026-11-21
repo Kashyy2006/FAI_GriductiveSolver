@@ -56,7 +56,6 @@ kiểm tra; không có cơ chế kill dependency đang treo. Chi tiết nghiệm
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-09 — Triển khai DPLL và uniqueness với Codex
 - Thành viên: TV3 (Mạnh, theo phân công).

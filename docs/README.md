@@ -16,11 +16,18 @@
 - [README gốc](../README.md): trạng thái hiện tại và bảng tóm tắt câu hỏi/yêu cầu
   của người dùng về TV3. Chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
 
+## Kiểm tra giai đoạn 2 và lịch sử
+
+- [phase2_review.md](phase2_review.md): đối chiếu công việc năm thành viên với
+  checkout ngày 18/11/2026, kết quả test thực chạy và dữ liệu còn thiếu sau merge.
+- [ai_usage.md](ai_usage.md): chỉ mục 66 mục lịch sử đang có theo ngày; không
+  thay tác giả/ngày/nội dung, không coi thứ tự merge là thứ tự thực hiện.
+
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-05 — Phân công giai đoạn xây dựng module nền tảng
+
 - Thành viên: TV4 (Tùng).
 - AI: Codex.
 - Yêu cầu: Tạo bảng phân công giai đoạn 2, hạn 09/11/2026.
@@ -29,16 +36,8 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Kiểm tra: Đối chiếu phạm vi module và contract đã thiết lập; không chạy test vì không thay đổi code.
 - Còn thiếu: Các thành viên thực hiện và báo cáo kết quả trước mốc tích hợp.
 
-### 2026-11-08 — Cập nhật kết quả nghiệm thu TV4
-- Thành viên: TV4 (Tùng).
-- AI: Codex.
-- Yêu cầu: Ghi rõ trạng thái kiểm tra sau triển khai Agent/trace theo điều kiện bổ sung.
-- File thay đổi: docs/verification.md, docs/README.md.
-- Nội dung và lý do: Giữ kết quả khởi tạo như snapshot cũ, bổ sung trạng thái TV4 và giới hạn chưa tích hợp; không sửa API/schema.
-- Kiểm tra: 74 test đạt và Ruff check/format; test runtime Python 3.12.6, chưa có 3.11.
-- Còn thiếu: Runtime Python 3.11 và nghiệm thu tích hợp thật.
-
 ### 2026-11-07 — Hoàn thành TV1 giai đoạn 2
+
 - Thành viên: TV1 — Dương Thiên Phú.
 - AI: OpenAI Codex.
 - Yêu cầu: Dựa trên hai file phân công và repo, code phần deadline TV1 (Phú).
@@ -47,6 +46,25 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Kiểm tra: python -m pytest tests -q (70 passed); Ruff check và format check đạt toàn Source; Python 3.12.14/Linux.
 - Còn thiếu: Tích hợp verifier thật/GUI/SAT uniqueness khi TV2–TV5 hoàn thiện; chưa kiểm tra Python 3.11/Windows.
 
+### 2026-11-08 — Cập nhật kết quả nghiệm thu TV4
+
+- Thành viên: TV4 (Tùng).
+- AI: Codex.
+- Yêu cầu: Ghi rõ trạng thái kiểm tra sau triển khai Agent/trace theo điều kiện bổ sung.
+- File thay đổi: docs/verification.md, docs/README.md.
+- Nội dung và lý do: Giữ kết quả khởi tạo như snapshot cũ, bổ sung trạng thái TV4 và giới hạn chưa tích hợp; không sửa API/schema.
+- Kiểm tra: 74 test đạt và Ruff check/format; test runtime Python 3.12.6, chưa có 3.11.
+- Còn thiếu: Runtime Python 3.11 và nghiệm thu tích hợp thật.
+
+### 2026-11-12 — TV1 nghiệm thu giai đoạn 3
+
+- Thành viên: TV1 — Dương Thiên Phú.
+- AI: OpenAI Codex.
+- Yêu cầu: Đọc integration_v1 và quy ước, hoàn thành phần TV1 giai đoạn 3.
+- File thay đổi: tv1_stage3_acceptance.md; README.md.
+- Nội dung và lý do: Bổ sung hai puzzle demo forced/unknown và STUCK, kịch bản nghiệm thu và 6 test backend thật; xác nhận proof/query deepcopy và token sau Load/Restart. Giữ bản sửa query accounting đã có của TV4, không đổi API/dependency/production code.
+- Kiểm tra: 523 test đạt (6 mới), Ruff check đạt và 40 file đạt format; Python 3.12/Linux. git diff --check đạt.
+- Còn thiếu: Chưa nghiệm thu GUI trực tiếp hoặc Python 3.11/Windows; benchmark toàn hệ thống do TV3 phụ trách. Chưa commit/push.
 
 ### 2026-11-14 — Đồng bộ chỉ dẫn tài liệu TV3 giai đoạn 3
 
