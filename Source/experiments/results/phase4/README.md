@@ -11,8 +11,8 @@ Owner: TV3 (Mạnh). Reproduce from Source with `python -m experiments.phase4`.
 
 ### 2026-11-21 — Ghi nhận bộ kết quả thực nghiệm giai đoạn 4
 
-- Thành viên: TV3 (Mạnh).
-- AI: Antigravity (Gemini).
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
 - Yêu cầu: Chạy benchmark chốt giai đoạn 4 trên `integration_v2`, xuất CSV, bảng tổng hợp, acceptance và biểu đồ.
 - File thay đổi: `acceptance.json`, `combined_summary.md`, các thư mục `normal/`, `errors/`, `timeouts/`, `README.md`.
 - Nội dung và lý do: Chạy `python -m experiments.phase4 --repeats 5 --timeout 10` trên 16 puzzle hợp lệ + 2 fixture lỗi + 16 ca timeout; tách riêng `solve` và `uniqueness`, giữ nguyên dòng `ERROR`/`TIMEOUT`.

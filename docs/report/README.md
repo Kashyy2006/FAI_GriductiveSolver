@@ -44,12 +44,12 @@
 - Kiểm tra: Bảng median đã đối chiếu CSV và metadata ở lượt triển khai; hiện có 531 test đạt và 120 row. Lượt README chỉ kiểm tra tài liệu, không tạo số liệu mới.
 - Còn thiếu: Người dùng/nhóm rà soát bản thảo và ghép vào Report.pdf cuối cùng.
 
-### 2026-11-21 — Hoàn thiện báo cáo thuật toán và thực nghiệm TV3 giai đoạn 4
+### 2026-11-21 — Hoàn thiện báo cáo TV3 giai đoạn 4
 
-- Thành viên: TV3 (Mạnh).
-- AI: Antigravity (Gemini).
-- Yêu cầu: Đồng bộ `integration_v2` và hoàn thiện đầy đủ phần báo cáo thuật toán, hiệu năng TV3 cho deadline 21/11.
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Viết phần báo cáo thuật toán DPLL, uniqueness và thực nghiệm hiệu năng TV3 cho deadline 21/11.
 - File thay đổi: `tv3_phase4.md`, `README.md`.
-- Nội dung và lý do: Tổng hợp đầy đủ thuật toán DPLL, kiểm tra uniqueness trên biến chính, cấu hình thực nghiệm chốt (`repeats=5`, `timeout=10.0s`, 16 puzzle hợp lệ + 2 fixture lỗi + 16 ca timeout), bảng số liệu đầy đủ các cột theo contract, liên kết 3 biểu đồ phân tích đã kiểm tra trực quan và phân tích hiệu năng/giới hạn; giữ nguyên `tv3.md` và `tv3_phase3.md` làm snapshot lịch sử.
-- Kiểm tra: Đối chiếu trực tiếp mọi bảng số liệu với `Source/experiments/results/phase4/combined_summary.md`, `acceptance.json` và `environment.json`; 564 test, Ruff check/format và `pip check` đạt trên Python 3.11.9.
-- Còn thiếu: Nhóm thống nhất phương án cuối với branch TV1 (`ClueType.REMARK` chưa merge vào `integration_v2`) và TV1 ghép vào `Report.pdf` cuối cùng; chưa commit/push.
+- Nội dung và lý do: Tổng hợp thuật toán DPLL, kiểm tra uniqueness trên biến chính, cấu hình đo, bảng số liệu 2 phase, 3 biểu đồ phân tích và giới hạn trên `integration_v2`.
+- Kiểm tra: Đối chiếu bảng số liệu với `Source/experiments/results/phase4/`; 564 test và Ruff đạt trên Python 3.11.9.
+- Còn thiếu: Nhóm rà soát và ghép vào `Report.pdf` cuối; chưa push lên remote.

@@ -7,8 +7,8 @@ Medians grouped by puzzle, phase and outcome; all raw rows remain in CSV.
 
 ### 2026-11-21 — Sinh và kiểm tra trực quan bộ biểu đồ phân tích giai đoạn 4
 
-- Thành viên: TV3 (Mạnh).
-- AI: Antigravity (Gemini) và Matplotlib 3.10.3.
+- Thành viên: Mạnh (TV3).
+- AI: Gemini và Matplotlib 3.10.3.
 - Yêu cầu: Tạo bộ biểu đồ so sánh runtime, số clause, chi phí DPLL và SAT calls/outcomes cho báo cáo giai đoạn 4.
 - File thay đổi: `benchmark.png`, `runtime_by_size_and_phase.png`, `dpll_work_and_clauses.png`, `sat_calls_and_outcomes.png`, `README.md`.
 - Nội dung và lý do: Vẽ biểu đồ từ số liệu CSV thật (median 5 lần lặp, giữ mọi dòng thô trong CSV), hiệu chỉnh lề trục để tránh cắt nhãn số.

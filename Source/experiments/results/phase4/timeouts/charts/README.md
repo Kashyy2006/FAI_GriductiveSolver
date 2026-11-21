@@ -7,8 +7,8 @@ Medians grouped by puzzle, phase and outcome; all raw rows remain in CSV.
 
 ### 2026-11-21 — Sinh biểu đồ profile timeouts giai đoạn 4
 
-- Thành viên: TV3 (Mạnh).
-- AI: Antigravity (Gemini) và Matplotlib 3.10.3.
+- Thành viên: Mạnh (TV3).
+- AI: Gemini và Matplotlib 3.10.3.
 - Yêu cầu: Xuất biểu đồ kèm profile `timeouts` giai đoạn 4.
 - File thay đổi: `benchmark.png`, `README.md`.
 - Nội dung và lý do: Sinh tự động từ `timeouts/benchmark.csv` (160 row `TIMEOUT` được giữ nguyên).

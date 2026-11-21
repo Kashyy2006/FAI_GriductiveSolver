@@ -108,12 +108,12 @@ bản sửa Agent/GUI; không nhận phần việc của TV1/TV2/TV4/TV5 là cod
 - Kiểm tra: Kết quả trước đó: 531 test và Ruff check/format đạt; 120 row benchmark, 54/54 normal khớp query. Lượt này đối chiếu README, không đo lại thời gian.
 - Còn thiếu: Bộ puzzle khó/stress 5x5 cho nghiên cứu tiếp; bộ nghiệm thu hiện tại không đủ kết luận hiệu năng tổng quát.
 
-### 2026-11-21 — Chốt bộ puzzle mở rộng, runner và biểu đồ thực nghiệm giai đoạn 4
+### 2026-11-21 — Hoàn thiện bộ puzzle, runner và biểu đồ giai đoạn 4
 
-- Thành viên: TV3 (Mạnh).
-- AI: Antigravity (Gemini).
-- Yêu cầu: Đồng bộ `integration_v2`, chốt cấu hình benchmark, chạy thực nghiệm giải/uniqueness riêng, giữ lỗi/timeout và sinh CSV, bảng, biểu đồ cho deadline 21/11.
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Chốt cấu hình benchmark, chạy giải/uniqueness riêng, giữ lỗi/timeout và xuất bảng, biểu đồ cho deadline 21/11.
 - File thay đổi: `make_stage4_suite.py`, `phase4.py`, `README.md`.
-- Nội dung và lý do: Thêm generator 5 puzzle 3x3/4x4 dùng Parity (`EVEN`/`ODD`), `COMMON_NEIGHBORS` và ràng buộc đếm chồng lấp tạo branching/backtracking thực sự mà không sửa `make_suite.py` hay `Source/puzzles/`. Thêm `phase4.py` chốt cấu hình `repeats=5`, `timeout=10.0s`, chạy trên 16 puzzle hợp lệ + 2 fixture lỗi + 16 ca timeout, xuất `combined_summary.md`, `acceptance.json` và 3 biểu đồ phân tích Matplotlib; giữ nguyên API/schema/dependency v1.
-- Kiểm tra: `python -m experiments.phase4 --repeats 5 --timeout 10` đạt `passed=True` (340 row, 160/160 normal khớp trace/calls, 10.390 actual calls); 564 test toàn repo, Ruff check/format và `pip check` đạt trên Python 3.11.9; đã kiểm tra trực quan các biểu đồ PNG.
-- Còn thiếu: Chạy lại nếu nhóm chốt merge thêm puzzle mới từ branch TV1 (`ClueType.REMARK`); chưa commit/push.
+- Nội dung và lý do: Thêm 5 puzzle 3×3/4×4 dùng Parity, `COMMON_NEIGHBORS` và branching; thêm runner `phase4.py` (`repeats=5`, `timeout=10s`) xuất CSV, `combined_summary.md`, `acceptance.json` và 3 biểu đồ phân tích.
+- Kiểm tra: `python -m experiments.phase4 --repeats 5 --timeout 10` đạt `passed=True` (340 row, 160/160 normal khớp trace/calls); 564 test và Ruff đạt trên Python 3.11.9.
+- Còn thiếu: Chưa push lên remote.
