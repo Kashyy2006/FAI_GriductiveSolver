@@ -65,3 +65,13 @@ kiểm tra; không có cơ chế kill dependency đang treo. Chi tiết nghiệm
 - Nội dung và lý do: Codex trực tiếp viết validation, unit propagation, conflict detection, branching/backtracking deterministic, complete assignment và counters từng call. Bổ sung assumptions, deadline chung và kiểm tra uniqueness bằng blocking clause chỉ trên biến chính; copy container để giữ đầu vào. Không thay chữ ký API hoặc dùng solver ngoài.
 - Kiểm tra: DPLL được đối chiếu vét cạn trên 5.120 tổ hợp hai biến và 600 ca seed cố định. Test kiểm tra counters, timeout, immutability, concurrent calls và uniqueness không đọc nhãn ẩn. Bộ test toàn repo đạt 403 ca; sau chỉnh deadline, 25 test uniqueness/benchmark liên quan đạt; Ruff check/format đạt.
 - Còn thiếu: Đánh giá công thức khó hơn và nghiệm thu với Engine thật; DPLL hiện là bản đệ quy cơ bản, chưa có heuristic nâng cao. Lượt ghi log không sửa code hoặc chạy lại các test trên.
+
+### 2026-11-21 — Nghiệm thu lại DPLL và uniqueness giai đoạn 4 trên Python 3.11.9
+
+- Thành viên: TV3 (Mạnh).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Nghiệm thu DPLL, assumptions, timeout, complete assignment và uniqueness trên biến chính trên base `integration_v2` cho deadline 21/11.
+- File thay đổi: Không sửa file code trong `Source/solver/`; cập nhật nhật ký `README.md`.
+- Nội dung và lý do: Xác nhận `dpll.py`, `uniqueness.py` và `_timing.py` đáp ứng đủ yêu cầu giai đoạn 4, bao gồm branching/backtracking thực tế trên puzzle 3x3/4x4 dùng Parity và `COMMON_NEIGHBORS`, không đọc `hidden_status` và không chuyển timeout thành `UNSAT`; giữ nguyên API/Protocol v1.
+- Kiểm tra: Toàn bộ 564 test (gồm `test_dpll.py`, `test_uniqueness.py`, `test_phase3_backend.py` và `test_phase4_acceptance.py`), Ruff check/format và `pip check` đạt trên Python 3.11.9.
+- Còn thiếu: Theo dõi đề xuất `ClueType.REMARK` trên branch TV1 chưa merge; DPLL giữ bản đệ quy cơ bản theo contract v1. Chưa commit/push.

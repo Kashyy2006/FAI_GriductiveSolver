@@ -85,6 +85,19 @@ Runtime kiểm thử local: Python 3.12.6; chưa chạy Python 3.11 tại máy n
 - Kiểm tra ba profile benchmark, giữ raw ERROR/TIMEOUT và CLI thất bại khi run normal
   không đạt kỳ vọng. Kết quả cuối: 531 test, Ruff check/format và pip check đạt.
 
+## Nghiệm thu TV3 giai đoạn 4
+
+- `test_phase4_acceptance.py` thêm 6 ca nghiệm thu cho deadline 21/11:
+  - Kiểm tra DPLL branching/backtracking, complete assignment (điền `False` cho biến tự do),
+    assumptions và UNSAT contradiction trên hệ parity chồng lấp.
+  - Kiểm tra bộ 5 puzzle Stage 4 tái lập được, hợp lệ schema, `UNIQUE` với Encoder/DPLL thật,
+    đạt `SOLVED`/`STUCK` đúng kỳ vọng và phát sinh `decisions > 0`, `backtracks > 0`.
+  - Kiểm tra `check_uniqueness` không đọc `hidden_status` trên puzzle 4x4 dùng extensions thật.
+  - Kiểm tra timeout giữa quá trình branching/rút gọn DPLL raise `SolverTimeout` (không thành `UNSAT`).
+  - Kiểm tra runner `experiments.phase4` xuất đủ CSV/metadata/bảng/4 biểu đồ PNG, giữ raw
+    `ERROR`/`TIMEOUT`, không lộ `hidden_status` và CLI trả mã thoát 1 khi `normal` timeout.
+- Kết quả cuối trên Python 3.11.9: **564 passed**, Ruff check/format và `pip check` đạt.
+
 ## Nhật ký AI
 
 
@@ -198,3 +211,13 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Nội dung và lý do: Cập nhật mô tả test GUI/Engine thật; số liệu lịch sử được giữ tách khỏi trạng thái mới nhất.
 - Kiểm tra: Kết quả gần nhất là 26 test GUI/tích hợp và 517 test toàn bộ đạt trên Python 3.11.9; Ruff check và format check đạt. Lượt sửa README này chỉ kiểm tra `git diff --check`.
 - Còn thiếu: Không.
+
+### 2026-11-21 — Bổ sung bộ test nghiệm thu TV3 giai đoạn 4
+
+- Thành viên: TV3 (Mạnh).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Nghiệm thu DPLL, assumptions, timeout, complete assignment, uniqueness trên biến chính và bộ benchmark/biểu đồ giai đoạn 4 cho deadline 21/11.
+- File thay đổi: `test_phase4_acceptance.py`, `README.md`.
+- Nội dung và lý do: Thêm 6 test kiểm tra DPLL branching/backtracking trên hệ parity, tính tái lập/uniqueness/branching của 5 puzzle Stage 4, guard không đọc `hidden_status` trên puzzle extensions thật, timeout giữa lúc DPLL đang rút gọn, và end-to-end runner `experiments.phase4` kèm kiểm tra ảnh biểu đồ PNG và CLI exit code.
+- Kiểm tra: `python -m pytest tests -q -p no:cacheprovider` đạt 564 passed (6 mới + 558 nền `integration_v2`), Ruff check/format và `pip check` đạt trên Python 3.11.9.
+- Còn thiếu: Chưa chạy lại sau khi nhóm chốt merge branch TV1 (`ClueType.REMARK`); chưa commit/push.
