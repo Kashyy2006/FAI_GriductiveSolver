@@ -1,132 +1,138 @@
 {
   "schema_version": "1.0",
-  "puzzle_id": "example_3x3_chain",
+  "puzzle_id": "museum_shift",
   "size": 3,
   "characters": [
     {
       "id": "A1",
-      "name": "Person 01",
-      "profession": "Detective",
+      "name": "An",
+      "profession": "Curator",
       "row": 0,
       "col": 0,
-      "hidden_status": "CRIMINAL",
+      "hidden_status": "INNOCENT",
       "clue": {
-        "id": "clue_01",
-        "type": "FACT",
-        "person": "B1",
-        "status": "INNOCENT"
+        "id": "clue_A1",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "ROW",
+          "index": 0
+        },
+        "k": 0
       }
     },
     {
       "id": "B1",
-      "name": "Person 02",
-      "profession": "Detective",
+      "name": "Bảo",
+      "profession": "Guide",
       "row": 0,
       "col": 1,
       "hidden_status": "INNOCENT",
       "clue": {
-        "id": "clue_02",
-        "type": "FACT",
-        "person": "C1",
-        "status": "CRIMINAL"
+        "id": "clue_B1",
+        "type": "ODD",
+        "region": {
+          "kind": "COMMON_NEIGHBORS",
+          "first": "A1",
+          "second": "C3"
+        }
       }
     },
     {
       "id": "C1",
-      "name": "Person 03",
-      "profession": "Detective",
+      "name": "Chi",
+      "profession": "Musician",
       "row": 0,
       "col": 2,
-      "hidden_status": "CRIMINAL",
+      "hidden_status": "INNOCENT",
       "clue": {
-        "id": "clue_03",
-        "type": "FACT",
-        "person": "A2",
-        "status": "INNOCENT"
+        "id": "clue_C1",
+        "type": "AT_MOST",
+        "region": {
+          "kind": "COLUMN",
+          "index": 2
+        },
+        "k": 0
       }
     },
     {
       "id": "A2",
-      "name": "Person 04",
-      "profession": "Detective",
+      "name": "Duy",
+      "profession": "Teacher",
       "row": 1,
       "col": 0,
-      "hidden_status": "INNOCENT",
+      "hidden_status": "CRIMINAL",
       "clue": {
-        "id": "clue_04",
-        "type": "FACT",
-        "person": "B2",
-        "status": "CRIMINAL"
+        "id": "clue_A2",
+        "type": "SAME",
+        "first": "A2",
+        "second": "A3"
       }
     },
     {
       "id": "B2",
-      "name": "Person 05",
-      "profession": "Detective",
+      "name": "Giang",
+      "profession": "Baker",
       "row": 1,
       "col": 1,
       "hidden_status": "CRIMINAL",
       "clue": {
-        "id": "clue_05",
-        "type": "FACT",
-        "person": "C2",
-        "status": "INNOCENT"
+        "id": "clue_B2",
+        "type": "SAME",
+        "first": "A2",
+        "second": "B2"
       }
     },
     {
       "id": "C2",
-      "name": "Person 06",
-      "profession": "Detective",
+      "name": "Hà",
+      "profession": "Gardener",
       "row": 1,
       "col": 2,
       "hidden_status": "INNOCENT",
       "clue": {
-        "id": "clue_06",
-        "type": "FACT",
-        "person": "A3",
-        "status": "CRIMINAL"
+        "id": "clue_C2",
+        "type": "DIFFERENT",
+        "first": "A3",
+        "second": "B3"
       }
     },
     {
       "id": "A3",
-      "name": "Person 07",
-      "profession": "Detective",
+      "name": "Khanh",
+      "profession": "Tailor",
       "row": 2,
       "col": 0,
       "hidden_status": "CRIMINAL",
       "clue": {
-        "id": "clue_07",
-        "type": "FACT",
-        "person": "B3",
-        "status": "INNOCENT"
+        "id": "clue_A3",
+        "type": "REMARK",
+        "text": "Hôm nay trời đẹp, tan ca mình đi bộ về thôi."
       }
     },
     {
       "id": "B3",
-      "name": "Person 08",
-      "profession": "Detective",
+      "name": "Lan",
+      "profession": "Librarian",
       "row": 2,
       "col": 1,
       "hidden_status": "INNOCENT",
       "clue": {
-        "id": "clue_08",
-        "type": "FACT",
-        "person": "C3",
-        "status": "CRIMINAL"
+        "id": "clue_B3",
+        "type": "REMARK",
+        "text": "Sáng nay mình làm đổ cà phê lên tay áo."
       }
     },
     {
       "id": "C3",
-      "name": "Person 09",
-      "profession": "Detective",
+      "name": "Mai",
+      "profession": "Pilot",
       "row": 2,
       "col": 2,
-      "hidden_status": "CRIMINAL",
+      "hidden_status": "INNOCENT",
       "clue": {
-        "id": "clue_09",
-        "type": "FACT",
-        "person": "A1",
-        "status": "CRIMINAL"
+        "id": "clue_C3",
+        "type": "REMARK",
+        "text": "Đứng cả buổi, giờ chỉ muốn ngồi tháo giày."
       }
     }
   ],

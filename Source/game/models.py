@@ -24,6 +24,7 @@ class Classification(str, Enum):
 
 
 class ClueType(str, Enum):
+    REMARK = "REMARK"
     FACT = "FACT"
     SAME = "SAME"
     DIFFERENT = "DIFFERENT"
@@ -122,6 +123,7 @@ class Clue:
     second: str | None = None
     region: Region | None = None
     k: int | None = None
+    text: str | None = None
 
 
 @dataclass(frozen=True)

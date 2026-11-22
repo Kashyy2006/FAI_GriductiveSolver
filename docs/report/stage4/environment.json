@@ -1,0 +1,93 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "processor": "",
+  "packages": {
+    "pytest": "8.3.5",
+    "ruff": "0.11.13",
+    "jsonschema": "4.24.0",
+    "matplotlib": "3.10.8"
+  },
+  "timeout_seconds_per_phase": 10.0,
+  "repeats": 3,
+  "mode": "all",
+  "puzzles": [
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/puzzles/3x3/demo_forced_unknown.json",
+      "sha256": "17a8076067a948205a0ae015e2ef338000f9e22789fe16b1723cbcdc685c9013"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/puzzles/3x3/demo_stuck.json",
+      "sha256": "4d74b17978740efdea8b07d44579e6a403bef6c44af1493f8901b2c0b9308631"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/puzzles/3x3/example_01.json",
+      "sha256": "4f7277b6ccde9372e183c4fef530eab42c62c47f4877865c0ccb3ed97a1c0cbc"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/puzzles/3x3/museum_shift.json",
+      "sha256": "6b56e55237b5173d5b8c5359e7e9aa7bb8753d1124f9c675dd57f7a575393d70"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/puzzles/4x4/example_01.json",
+      "sha256": "6772756f2168f9d134cf0664dcb3cbe048e9197c644f44be32ffc8d6c451d2bb"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/puzzles/4x4/night_market.json",
+      "sha256": "651dc25af1166d102a9a95422c985a656fd20ca3aa48c069ef67258f55f40c04"
+    }
+  ],
+  "backend_sources": {
+    "encoder": {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/logic/cnf_encoder.py",
+      "sha256": "f4d077ebc2bb6aa3ed30fd3aaf138370233e4fb4f9a0ae4c8fdd6ef877441d04"
+    },
+    "solver": {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/solver/dpll.py",
+      "sha256": "cb28671c0925a0aece9d80206c58f484103abe5003d40e6eb7433d0dfe892b85"
+    },
+    "agent": {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/agent/agent.py",
+      "sha256": "a7e3d8d2b84b2b5a1593dcc32109a52e61d7077d1e7431d8c701d3e72775eb5a"
+    },
+    "engine": {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/game/engine.py",
+      "sha256": "cd454a218572998f0c7a6502a8d55078f0d3557a4a516ea68e242ac34c09b193"
+    }
+  },
+  "support_sources": [
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/game/models.py",
+      "sha256": "b98eba7b8f99c9c8a687e977cd22f193e14d3ff37b9f6d809833aae35d2edb58"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/game/contracts.py",
+      "sha256": "ebae09dfec4fdcbed29ef5bb5929a29264bcc4fba60678f2d5e44c8da7ead472"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/solver/_timing.py",
+      "sha256": "64887806e82d5407622ec9791883531021f14ba659ac05911f8b813dd3ec730c"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/solver/uniqueness.py",
+      "sha256": "1e363dbf95eb8fb0ec309fbc5178c50bbc59907be05ade68c3fb8f9621885eff"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/experiments/benchmark.py",
+      "sha256": "23d0311b272dedfc81a673d4925aa208150c67b6d9976b39fa3788f7e965a61f"
+    },
+    {
+      "path": "/workspace/scratch/3cebebfb574f/FAI_GriductiveSolver/Source/experiments/phase3.py",
+      "sha256": "f946ff84a3e4437e7890fbff9bf8121b426d228fd12c5214c1e18f3d74b41d7c"
+    }
+  ],
+  "measurement": {
+    "runtime": "Per phase wall time; includes encoding and engine/verifier; excludes loading, GUI and export",
+    "sat_calls": "Actual calls, including calls that raise; no summing nested trace queries",
+    "query_accounting": "Completed runs compare ordered assumptions/status/stats against the Solver ledger; failed runs leave trace fields unavailable",
+    "charts": "Median across repeats, grouped separately by puzzle/phase/outcome; raw rows retained in CSV",
+    "partial_metrics": "Counters include completed calls only when a call raises",
+    "uniqueness_clauses": "Includes the primary blocking clause in maximum/final counts",
+    "deadline": "Cooperative; checked around dependencies and inside DPLL, not a hard process kill"
+  }
+}

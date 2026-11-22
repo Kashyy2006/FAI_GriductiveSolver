@@ -14,7 +14,7 @@ from solver.dpll import DPLLSolver
 def main() -> None:
     """Create the canonical logic stack and open the GUI."""
     source_dir = Path(__file__).resolve().parent
-    puzzle = load_puzzle(source_dir / "puzzles" / "3x3" / "example_01.json")
+    puzzle = load_puzzle(source_dir / "puzzles" / "3x3" / "museum_shift.json")
     encoder = CNFEncoder()
     solver = DPLLSolver()
     agent = DeductiveAgent(encoder, solver)

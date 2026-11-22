@@ -473,6 +473,8 @@ class BoardView(ttk.Frame):
     def _format_clue(clue: Clue | None) -> str:
         if clue is None:
             return "Clue locked"
+        if clue.type == ClueType.REMARK:
+            return clue.text or ""
         if clue.type == ClueType.FACT:
             if clue.person is None or clue.status is None:
                 return "Incomplete fact clue"
