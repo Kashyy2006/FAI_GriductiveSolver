@@ -9,12 +9,45 @@
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - GUI đã nối Engine/Encoder/DPLL/Agent thật; các API công khai vẫn giữ nguyên.
 
+## Chơi, ghi chú và tiếp tục
+
+- `Case Library` thay hộp chọn file bằng thư viện sáu màn, lọc Easy / Medium / Practice.
+  Độ khó là phân loại biên soạn, không phải chỉ số SAT; các màn Practice có thể dừng
+  khi thiếu dữ kiện và được ghi rõ trong mô tả. Hai ví dụ có cùng puzzle_id được lưu
+  riêng theo đường dẫn màn để không ghi đè tiến độ.
+- Các màn dùng tên tiếng Anh. `clue_text.py` chỉ định dạng clue công khai: FACT,
+  SAME/DIFFERENT và tham chiếu vùng hiển thị tên người; REMARK giữ nguyên văn bản.
+- Chọn thẻ rồi dùng `Temporary color` để đặt dấu màu, `Used clue` để làm mờ và gạch
+  clue công khai. Chọn None / Restore clue để bỏ dấu. Các ghi chú chỉ thuộc GUI,
+  không xóa clue khỏi KB, không tạo verdict và không reveal thẻ.
+- `play_session.py` ghi các receipt ACCEPTED từ Engine, snapshot công khai và
+  DeductionStep canonical. Nó không truy cập Puzzle/Character riêng tư. Khôi phục
+  qua worker gọi lại submit_verdict cho từng nước với token phiên mới; không dùng
+  bản lưu làm bằng chứng hoặc bypass verifier. Bản lưu lỗi được báo và giữ nguyên.
+- Tiến độ, thời gian, bộ đếm và ghi chú từng màn tự lưu nguyên tử vào
+  `Source/outputs/player_progress.json` (được gitignore). Lưu ngay sau thao tác và
+  mỗi 15 giây, khi đổi màn/đóng app. Thời gian không tính khoảng ứng dụng đã đóng;
+  dừng khi hoàn thành. Restart xóa tiến độ và bộ đếm của màn hiện tại.
+- `Case Results` hiện thời gian, số lần yêu cầu Hint, số verdict NOT_PROVABLE /
+  CONTRADICTED / INCONSISTENT và nút sang màn tiếp theo. `Show SAT details` chứa
+  calls/decisions/propagations/backtracks/runtime; calls của Auto Solve thay phần
+  ledger của chính run đó, không cộng trùng proof. Chi phí chứng minh lại khi resume
+  không tính vào thống kê chơi. Run bị ngắt/lỗi được ghi rõ metrics chưa đầy đủ.
+- `Replay` và `Save Trace…` dùng cả lịch sử thủ công và Auto Solve. Replay có
+  Previous/Next và phím trái/phải; board, clue và proof chỉ lấy từ snapshot đang
+  xem. Viewer không có tham chiếu Engine. Snapshot 0 không hiển thị clue tương lai.
+  Nếu Auto Solve lỗi sau reveal, chỉ receipt thực đã nhận được lưu; không tạo
+  AutoSolveResult hoàn tất giả.
+- Nút `?` mở hướng dẫn tĩnh chọn clue → đọc highlight → tự chứng minh → submit,
+  kèm glossary minh họa neighbors tám hướng, giao common neighbors, parity,
+  hàng/cột và vùng rỗng. Sidebar cuộn độc lập khi cửa sổ thấp; board không cuộn.
+
 ## Tác vụ, bố cục, highlight và trace
 
 - Bố cục 2 cột thích ứng (`1280×820`, tối thiểu `990×680`): board căn giữa, thẻ dùng
   font theo pixel (`-px`) tự co giãn theo kích thước thẻ để không cắt chữ trên board
-  3×3/4×4 và màn hình Windows High-DPI; sidebar xếp nút theo cặp 2 cột để luôn hiển
-  thị đủ `PUBLIC CLUES` và `STATUS`.
+  3×3/4×4 và màn hình Windows High-DPI; sidebar xếp nút theo cặp 2 cột và có thanh
+  cuộn để truy cập đủ `PUBLIC CLUES`, `STATUS` và kết quả ở cửa sổ thấp.
 - Highlight dùng màu vàng hổ phách (`#d58b28` / `#faebd2`) phân biệt rõ với thẻ
   Criminal (đỏ) và Innocent (xanh); thẻ đã mở khi được highlight giữ nguyên nền
   trạng thái và đổi viền sang vàng hổ phách. `_clue_cells` dùng trực tiếp ID ô cho
@@ -37,13 +70,17 @@
   trên Python 3.12.6; mốc Python 3.11 phía dưới là lần nghiệm thu trước đó.
 - Reset xóa selection/highlight, sidebar clue, toast, trace đã lưu trong bộ nhớ và
   đóng cửa sổ trace cũ. `refresh` đọc lại clue của ô đang chọn từ `PublicState`.
-- Sau Auto Solve, `View Trace` hiển thị accepted steps, clue trước/sau reveal và
-  mọi SAT call hoàn tất (kể cả kiểm tra cuối). `Save Trace…` xuất steps JSON bằng
-  `agent.trace.save_trace`. Trace rỗng của STUCK vẫn có thể xem/lưu.
+- `Replay` hiển thị snapshot và accepted step đang chọn. `Save Trace…` xuất steps
+  JSON bằng `agent.trace.save_trace`. Trace rỗng của STUCK vẫn có thể xem/lưu.
 - Nút trace bị khóa trước run/khi đang chạy/sau reset. Dialog hủy không ghi file;
   lỗi xuất file được hiển thị, không xóa kết quả. Đóng app cũng hủy worker.
 
 ## Kiểm tra
+
+Regression mới: `tests/test_player_session.py`, `tests/test_player_windows.py` và
+các ca controller trong `tests/test_gui.py` kiểm tra resume qua verifier, bản lưu
+bị sửa/lỗi I/O, ghi chú không đổi KB, đếm SAT, replay lùi không lộ clue, thư viện,
+glossary, kết quả và nút màn tiếp theo bằng Tkinter thật.
 
 Chạy từ `Source/`: `python -m pytest tests/test_gui.py tests/test_integration.py -q`.
 `tests/test_gui.py` gồm **21 test** (controller dùng Engine/Encoder/DPLL/Agent thật,

@@ -10,9 +10,11 @@ from tkinter import (
     BOTH,
     LEFT,
     RIGHT,
+    Canvas,
+    Event,
     Frame,
     Label,
-    Text,
+    StringVar,
     Tk,
     Toplevel,
     X,
@@ -42,6 +44,9 @@ from game.models import (
 )
 from game.puzzle_loader import load_puzzle
 from gui.board_view import BoardView
+from gui.clue_text import format_clue
+from gui.dialogs import show_help, show_library, show_replay
+from gui.play_session import LEVELS, MARK_COLORS, SOURCE, PlaySession, ProgressStore
 from logic.regions import resolve_region
 
 
@@ -60,6 +65,12 @@ class MainWindow:
         self.engine = engine
         self.agent = agent
         self._state = engine.get_public_state()
+        self.session = PlaySession(engine)
+        self._progress_store: ProgressStore | None = None
+        self._level_key: str | None = None
+        self._result_window: Toplevel | None = None
+        self._result_shown = False
+        self._clock_ticks = 0
         self._selected_id: str | None = None
         self._busy = False
         self._active_task: object | None = None
@@ -77,17 +88,24 @@ class MainWindow:
         self.refresh()
         self.root.protocol("WM_DELETE_WINDOW", self._close)
         self.root.after(80, self._poll_messages)
+        self.root.after(1000, self._tick_clock)
 
     def refresh(self) -> None:
         """Render the latest public snapshot and update action state."""
         self._state = self.engine.get_public_state()
+        if self.session.snapshots[0].token.session_id != self._state.token.session_id:
+            self.session = PlaySession(self.engine)
         self._render_state(self._state)
 
     def _render_state(self, state: PublicState) -> None:
         """Render a public snapshot without querying the engine again."""
         self._state = state
         self.board.render(self._state)
-        self.puzzle_title.configure(text=self._format_title(self._state.puzzle_id))
+        self.board.set_notes(self.session.marks, self.session.used_clues)
+        level = next((level for level in LEVELS if level.key == self._level_key), None)
+        self.puzzle_title.configure(
+            text=level.title if level else self._format_title(self._state.puzzle_id)
+        )
         revealed = sum(item.status is not None for item in self._state.characters)
         self.progress_label.configure(
             text=f"{revealed:02d} / {len(self._state.characters):02d} cards revealed"
@@ -104,6 +122,13 @@ class MainWindow:
             self.clue_label.configure(text="This card is sealed. Its status and clue stay hidden.")
         else:
             self.clue_label.configure(text=self._describe_clue(selected.clue))
+        self.note_color.set(self.session.marks.get(self._selected_id or "", "None"))
+        used = bool(selected and selected.clue and selected.clue.id in self.session.used_clues)
+        self.used_button.configure(text="Restore clue" if used else "Used clue ✓")
+        self.clue_label.configure(
+            foreground=self._MUTED if used else self._TEXT,
+            font=("Segoe UI", -13, "overstrike" if used else "normal"),
+        )
         self._update_controls()
 
     @staticmethod
@@ -236,6 +261,9 @@ class MainWindow:
         self.puzzle_title.pack(anchor="w", pady=(2, 0))
         self.progress_label = ttk.Label(header, text="", style="Body.TLabel")
         self.progress_label.pack(side=RIGHT, anchor="s", pady=(0, 5))
+        ttk.Button(header, text="?", width=3, command=lambda: show_help(self.root)).pack(
+            side=RIGHT, padx=12
+        )
 
         body = ttk.Frame(shell, style="App.TFrame")
         body.pack(fill=BOTH, expand=True)
@@ -244,9 +272,41 @@ class MainWindow:
         self.board = BoardView(board_panel, self._select_cell)
         self.board.pack(fill=BOTH, expand=True)
 
-        sidebar = ttk.Frame(body, style="App.TFrame", width=310)
-        sidebar.pack(side=RIGHT, fill=Y, padx=(18, 0))
-        sidebar.pack_propagate(False)
+        sidebar_shell = ttk.Frame(body, style="App.TFrame", width=330)
+        sidebar_shell.pack(side=RIGHT, fill=Y, padx=(18, 0))
+        sidebar_shell.pack_propagate(False)
+        sidebar_scroll = ttk.Scrollbar(sidebar_shell)
+        sidebar_scroll.pack(side=RIGHT, fill=Y)
+        self._sidebar_canvas = Canvas(
+            sidebar_shell,
+            bg=self._BASE,
+            highlightthickness=0,
+            bd=0,
+            yscrollcommand=sidebar_scroll.set,
+        )
+        self._sidebar_canvas.pack(fill=BOTH, expand=True)
+        sidebar_scroll.configure(command=self._sidebar_canvas.yview)
+        sidebar = ttk.Frame(self._sidebar_canvas, style="App.TFrame")
+        sidebar_window = self._sidebar_canvas.create_window(0, 0, window=sidebar, anchor="nw")
+        sidebar.bind(
+            "<Configure>",
+            lambda _: self._sidebar_canvas.configure(scrollregion=self._sidebar_canvas.bbox("all")),
+        )
+        self._sidebar_canvas.bind(
+            "<Configure>",
+            lambda event: self._sidebar_canvas.itemconfigure(sidebar_window, width=event.width),
+        )
+
+        def scroll_notes(event: Event) -> None:
+            canvas = self._sidebar_canvas
+            x, y = canvas.winfo_pointerxy()
+            if (
+                canvas.winfo_rootx() <= x < canvas.winfo_rootx() + canvas.winfo_width()
+                and canvas.winfo_rooty() <= y < canvas.winfo_rooty() + canvas.winfo_height()
+            ):
+                canvas.yview_scroll(-int(event.delta / 120), "units")
+
+        self.root.bind("<MouseWheel>", scroll_notes, add="+")
         ttk.Label(sidebar, text="CASE NOTES", style="Kicker.TLabel").pack(anchor="w")
         selected_box = ttk.Frame(sidebar, style="CardBox.TFrame", padding=(10, 8))
         selected_box.pack(fill=X, pady=(6, 12))
@@ -274,6 +334,22 @@ class MainWindow:
         )
         self.innocent_button.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=2)
 
+        note_row = ttk.Frame(sidebar, style="App.TFrame")
+        note_row.pack(fill=X, pady=(8, 0))
+        ttk.Label(note_row, text="Temporary color", style="Muted.TLabel").pack(side=LEFT)
+        self.note_color = StringVar(self.root, "None")
+        self.note_picker = ttk.Combobox(
+            note_row,
+            textvariable=self.note_color,
+            values=("None", *MARK_COLORS),
+            state="readonly",
+            width=9,
+        )
+        self.note_picker.pack(side=LEFT, padx=6)
+        self.note_picker.bind("<<ComboboxSelected>>", lambda _: self._set_mark())
+        self.used_button = ttk.Button(note_row, text="Used clue ✓", command=self._toggle_used)
+        self.used_button.pack(side=LEFT)
+
         ttk.Separator(sidebar).pack(fill=X, pady=12)
         ttk.Label(sidebar, text="Deduction & Trace", style="Muted.TLabel").pack(
             anchor="w", pady=(0, 4)
@@ -294,7 +370,7 @@ class MainWindow:
         trace_row.pack(fill=X, pady=(4, 0))
         trace_row.columnconfigure((0, 1), weight=1, uniform="trace")
         self.view_trace_button = ttk.Button(
-            trace_row, text="View Trace", style="Action.TButton", command=self._view_trace
+            trace_row, text="Replay", style="Action.TButton", command=self._view_trace
         )
         self.view_trace_button.grid(row=0, column=0, sticky="ew", padx=(0, 4), pady=2)
         self.save_trace_button = ttk.Button(
@@ -310,7 +386,7 @@ class MainWindow:
         session_row.pack(fill=X)
         session_row.columnconfigure((0, 1), weight=1, uniform="session")
         self.load_button = ttk.Button(
-            session_row, text="Load Puzzle…", style="Action.TButton", command=self._load
+            session_row, text="Case Library", style="Action.TButton", command=self._load
         )
         self.load_button.grid(row=0, column=0, sticky="ew", padx=(0, 4), pady=2)
         self.restart_button = ttk.Button(
@@ -340,10 +416,16 @@ class MainWindow:
             status_box, text="Ready", style="Body.TLabel", wraplength=300, justify=LEFT
         )
         self.status_label.pack(anchor="w", pady=(4, 0))
+        self.clock_label = ttk.Label(status_box, text="", style="Muted.TLabel")
+        self.clock_label.pack(anchor="w", pady=(4, 0))
+        self.results_button = ttk.Button(
+            status_box, text="Results / Details", command=self._show_results
+        )
+        self.results_button.pack(anchor="w", pady=(4, 0))
 
     def _select_cell(self, character_id: str) -> None:
         self._selected_id = character_id
-        self.refresh()
+        self._render_state(self._state)
         character = next((item for item in self._state.characters if item.id == character_id), None)
         if character is not None:
             self.board.highlight(
@@ -361,9 +443,8 @@ class MainWindow:
             return resolve_region(clue.region, self._state)
         return (owner_id,)
 
-    @staticmethod
-    def _describe_clue(clue: Clue) -> str:
-        return BoardView._format_clue(clue)
+    def _describe_clue(self, clue: Clue) -> str:
+        return format_clue(clue, self._state)
 
     def _submit(self, status: Status) -> None:
         if self._busy:
@@ -386,11 +467,17 @@ class MainWindow:
             )
         self._start_task(
             "verdict",
-            lambda: self.engine.submit_verdict(character_id, status, expected_token=snapshot.token),
+            lambda: self.session.submit_verdict(
+                character_id, status, expected_token=snapshot.token
+            ),
             snapshot.token,
         )
 
     def _request_hint(self) -> None:
+        if self._busy:
+            return
+        self.session.hints += 1
+        self.session.persist()
         snapshot = self._state
         self._start_task("hint", lambda: self.agent.next_hint(snapshot), snapshot.token)
 
@@ -411,27 +498,48 @@ class MainWindow:
 
         self._last_solve = None
         self._close_trace()
+        session = self.session
+        self._metrics_partial_before_run = session.metrics_partial
+        self._solve_query_start = len(session.queries)
+        session.metrics_partial = True
+        session.persist()
         self._start_task(
             "solve",
-            lambda: self.agent.auto_solve(self.engine, should_cancel=should_cancel),
+            lambda: self.agent.auto_solve(session, should_cancel=should_cancel),
             snapshot.token,
             cancel_event=cancel,
         )
 
     def _load(self) -> None:
-        selected_path = filedialog.askopenfilename(
-            title="Load a Griductive puzzle",
-            initialdir=Path(__file__).resolve().parents[1] / "puzzles",
-            filetypes=(("Puzzle JSON", "*.json"), ("All files", "*.*")),
+        show_library(
+            self.root,
+            self._progress_store.data["levels"] if self._progress_store else {},
+            self._load_level,
         )
-        if not selected_path:
-            return
+
+    def _load_level(self, key: str) -> None:
+        if key not in {level.key for level in LEVELS}:
+            raise ValueError("Unknown case")
+        self._load_path(SOURCE / "puzzles" / key, key)
+
+    def _load_path(self, path: Path, key: str | None = None) -> None:
         try:
-            puzzle = load_puzzle(Path(selected_path))
+            puzzle = load_puzzle(path)
+            self.session.pause()
+            self.session.persist()
             self._state = self.engine.load(puzzle)
+            self._level_key = key
+            if self._progress_store:
+                self._progress_store.active_key = key
             self._reset_view()
             self.status_label.configure(text="Puzzle loaded.")
             self.refresh()
+            record = self._progress_store.data["levels"].get(key) if self._progress_store else None
+            if record:
+                session = self.session
+                self._start_task("restore", lambda: session.restore(record), self._state.token)
+            else:
+                self._attach_progress()
         except Exception as error:
             if not self._busy:
                 self.status_label.configure(
@@ -442,10 +550,12 @@ class MainWindow:
 
     def _restart(self) -> None:
         try:
+            self.session.pause()
             self._state = self.engine.restart()
             self._reset_view()
             self.status_label.configure(text="Case restarted.")
             self.refresh()
+            self._attach_progress()
         except Exception as error:
             self._show_error("Could not restart case", error)
 
@@ -472,6 +582,11 @@ class MainWindow:
         self._last_solve = None
         self._verdict_context = None
         self._close_trace()
+        if self._result_window is not None and self._result_window.winfo_exists():
+            self._result_window.destroy()
+        self._result_window = None
+        self._result_shown = False
+        self.session = PlaySession(self.engine)
         self.board.highlight(())
         self.clue_label.configure(text=self._EMPTY_CLUE)
 
@@ -480,7 +595,141 @@ class MainWindow:
         self.board.cancel_animations()
         self._dismiss_toast()
         self._cancel_task()
+        self.session.pause()
+        self.session.persist()
+        if self.session.save_error:
+            self._show_error("Could not save progress", self.session.save_error)
         self.root.destroy()
+
+    def enable_progress(self, initial_key: str) -> None:
+        """Enable local resume in the application composition root, not in isolated tests."""
+        self._level_key = initial_key
+        try:
+            self._progress_store = ProgressStore(SOURCE / "outputs" / "player_progress.json")
+        except (OSError, ValueError, TypeError) as error:
+            self._show_error("Could not read progress; existing file kept", error)
+            return
+        key = self._progress_store.data["last_level"] or initial_key
+        self._load_level(key)
+
+    def _attach_progress(self) -> None:
+        self.session.store = self._progress_store
+        self.session.key = self._level_key
+        self.session.persist()
+
+    def _set_mark(self) -> None:
+        if self._selected_id is None or self._busy:
+            return
+        color = self.note_color.get()
+        if color in MARK_COLORS:
+            self.session.marks[self._selected_id] = color
+        else:
+            self.session.marks.pop(self._selected_id, None)
+        self.session.persist()
+        self._render_state(self._state)
+
+    def _toggle_used(self) -> None:
+        if self._busy:
+            return
+        selected = next((c for c in self._state.characters if c.id == self._selected_id), None)
+        if selected is None or selected.clue is None:
+            return
+        clue_id = selected.clue.id
+        if clue_id in self.session.used_clues:
+            self.session.used_clues.remove(clue_id)
+        else:
+            self.session.used_clues.add(clue_id)
+        self.session.persist()
+        self._render_state(self._state)
+
+    def _tick_clock(self) -> None:
+        minutes, seconds = divmod(int(self.session.elapsed), 60)
+        self.clock_label.configure(
+            text=(
+                f"Time {minutes:02d}:{seconds:02d} · Hints {self.session.hints} · "
+                f"Rejected {self.session.rejected}"
+            )
+        )
+        if self.session.save_error:
+            self.status_label.configure(
+                text=f"Progress could not be saved: {self.session.save_error}"
+            )
+        self._clock_ticks += 1
+        if self._clock_ticks % 15 == 0:
+            self.session.persist()
+        self.root.after(1000, self._tick_clock)
+
+    def _maybe_completed(self) -> None:
+        if not self._result_shown and all(c.status is not None for c in self._state.characters):
+            self.session.pause()
+            self.session.persist()
+            self._result_shown = True
+            self._show_results()
+
+    def _show_results(self) -> None:
+        if self._result_window is not None and self._result_window.winfo_exists():
+            self._result_window.destroy()
+        window = Toplevel(self.root)
+        self._result_window = window
+        complete = all(c.status is not None for c in self._state.characters)
+        window.title("Case Results" if complete else "Session Details")
+        window.geometry("520x440")
+        panel = ttk.Frame(window, padding=22)
+        panel.pack(fill=BOTH, expand=True)
+        ttk.Label(
+            panel,
+            text="Case complete" if complete else "Case in progress",
+            font=("Segoe UI", 19, "bold"),
+        ).pack(anchor="w", pady=(0, 14))
+        minutes, seconds = divmod(int(self.session.elapsed), 60)
+        for label, value in (
+            ("Play time", f"{minutes:02d}:{seconds:02d}"),
+            ("Hints requested", str(self.session.hints)),
+            ("Rejected verdicts", str(self.session.rejected)),
+        ):
+            ttk.Label(panel, text=f"{label}: {value}", font=("Segoe UI", 12)).pack(
+                anchor="w", pady=3
+            )
+        details = ttk.Frame(panel)
+        queries = self.session.queries
+        stats = [q.stats for q in queries]
+        text = (
+            f"Completed SAT calls: {len(queries)}\n"
+            f"Decisions: {sum(s.decisions for s in stats)}\n"
+            f"Propagations: {sum(s.propagations for s in stats)}\n"
+            f"Backtracks: {sum(s.backtracks for s in stats)}\n"
+            f"SAT runtime: {sum(s.runtime_seconds for s in stats):.4f} s"
+        )
+        if self.session.metrics_partial:
+            text += "\nPartial metrics: an interrupted operation did not return its full ledger."
+        ttk.Label(details, text=text, wraplength=460).pack(anchor="w")
+
+        def toggle() -> None:
+            if details.winfo_manager():
+                details.pack_forget()
+                detail_button.configure(text="Show SAT details ▾")
+            else:
+                details.pack(fill=X, pady=8)
+                detail_button.configure(text="Hide SAT details ▴")
+                window.geometry("520x560")
+
+        detail_button = ttk.Button(panel, text="Show SAT details ▾", command=toggle)
+        detail_button.pack(anchor="w", pady=10)
+        if complete:
+            next_level = next(
+                (i + 1 for i, level in enumerate(LEVELS) if level.key == self._level_key),
+                len(LEVELS),
+            )
+            if next_level < len(LEVELS) and LEVELS[next_level].difficulty != "Practice":
+                ttk.Button(
+                    panel,
+                    text="Play next case →",
+                    command=lambda: self._load_level(LEVELS[next_level].key),
+                ).pack(anchor="w")
+            else:
+                ttk.Button(panel, text="Return to Case Library", command=self._load).pack(
+                    anchor="w"
+                )
 
     def _start_task(
         self,
@@ -529,6 +778,7 @@ class MainWindow:
                 self._active_task = None
                 self._cancel_event = None
                 if isinstance(result, Exception):
+                    self.session.metrics_partial = True
                     context = self._verdict_context if kind == "verdict" else None
                     self._verdict_context = None
                     self.refresh()
@@ -560,6 +810,21 @@ class MainWindow:
                             self._show_toast(f"Could not check {context[0]}", str(result), "error")
                         else:
                             self._show_error("Operation failed", result)
+                    if kind == "restore":
+                        self.engine.restart()
+                        self._reset_view()
+                        self.refresh()
+                        self.status_label.configure(
+                            text="Saved progress could not be restored. Fresh public board loaded. "
+                            "The saved record was kept."
+                        )
+                    else:
+                        self.session.persist()
+                elif kind == "restore":
+                    self.refresh()
+                    self._attach_progress()
+                    self.status_label.configure(text="Saved case resumed.")
+                    self._maybe_completed()
                 elif kind == "verdict" and isinstance(result, VerdictResult):
                     context = self._verdict_context
                     self._verdict_context = None
@@ -578,6 +843,15 @@ class MainWindow:
         result: VerdictResult,
         context: tuple[str, Status, bool] | None = None,
     ) -> None:
+        if result.proof is not None and result.outcome != VerdictOutcome.ACCEPTED:
+            self.session.queries.extend(result.proof.queries)
+        if result.outcome in (
+            VerdictOutcome.NOT_PROVABLE,
+            VerdictOutcome.CONTRADICTED,
+            VerdictOutcome.INCONSISTENT,
+        ):
+            self.session.rejected += 1
+        self.session.persist()
         labels = {
             VerdictOutcome.ACCEPTED: "Verdict accepted. New clue revealed.",
             VerdictOutcome.NOT_PROVABLE: "Not provable yet. No card was changed.",
@@ -618,6 +892,7 @@ class MainWindow:
                     self._update_controls()
                     if context is not None and context[2]:
                         self._show_unrevealed_verdict_message(context, result.outcome)
+                    self._maybe_completed()
 
             self.board.flip_card(character_id or "", reveal, done)
         else:
@@ -742,6 +1017,8 @@ class MainWindow:
     def _handle_hint(self, result: HintResult) -> None:
         if result.token != self._state.token:
             return
+        self.session.queries.extend(result.queries)
+        self.session.persist()
         if result.character_id is None or result.status is None:
             all_revealed = all(item.status is not None for item in self._state.characters)
             if result.kb_status == KBStatus.INCONSISTENT:
@@ -764,6 +1041,9 @@ class MainWindow:
         if result.final_state.token != self.engine.get_public_state().token:
             self.refresh()
             return
+        self.session.queries[self._solve_query_start :] = result.queries
+        self.session.metrics_partial = self._metrics_partial_before_run
+        self.session.persist()
         self._animation_generation += 1
         generation = self._animation_generation
         snapshots: list[tuple[str, PublicState]] = []
@@ -796,17 +1076,17 @@ class MainWindow:
                 self.status_label.configure(
                     text=(
                         f"Auto Solve: {result.outcome.value.title()} · "
-                        f"{len(result.steps)} {step_word} · {len(result.queries)} SAT calls."
+                        f"{len(result.steps)} {step_word}."
                     )
                 )
                 self._update_controls()
                 if result.outcome == SolveOutcome.SOLVED:
                     self._show_toast(
                         "Case Solved",
-                        f"All cards proven in {len(result.steps)} steps "
-                        f"({len(result.queries)} SAT calls).",
+                        f"All cards proven in {len(result.steps)} steps.",
                         "success",
                     )
+                    self._maybe_completed()
                 elif result.outcome == SolveOutcome.STUCK:
                     self._show_toast(
                         "Auto Solve Stuck",
@@ -830,63 +1110,16 @@ class MainWindow:
 
         show_step(0)
 
-    @staticmethod
-    def _trace_text(result: AutoSolveResult) -> str:
-        """Format only public, accepted steps and the recorded SAT queries."""
-        lines = [
-            f"Outcome: {result.outcome.value}",
-            f"Accepted steps: {len(result.steps)} | SAT calls: {len(result.queries)}",
-            "",
-        ]
-        if not result.steps:
-            lines.append("No accepted deduction steps.")
-        for step in result.steps:
-            lines.extend(
-                [
-                    f"Step {step.step}: {step.character_id} = {step.verdict.value}",
-                    f"Version: {step.token_before.version} -> {step.token_after.version}",
-                    f"Active clues before reveal: {', '.join(step.active_clue_ids)}",
-                    f"New clue: {step.newly_revealed_clue.id} — "
-                    f"{BoardView._format_clue(step.newly_revealed_clue)}",
-                    f"SAT calls in step: {len(step.queries)}",
-                    "",
-                ]
-            )
-        lines.append("All completed SAT calls (including the final consistency check):")
-        for index, query in enumerate(result.queries, 1):
-            lines.append(
-                f"{index}. {query.purpose} | assumptions={query.assumptions} | {query.result.value}"
-            )
-        return "\n".join(lines)
-
     def _view_trace(self) -> None:
-        if self._last_solve is None or self._busy:
+        if self._busy or (not self.session.steps and self._last_solve is None):
             return
         self._close_trace()
-        window = Toplevel(self.root)
-        window.title("Deduction Trace")
-        window.geometry("820x580")
-        scrollbar = ttk.Scrollbar(window)
-        scrollbar.pack(side=RIGHT, fill=Y)
-        text = Text(
-            window,
-            wrap="word",
-            yscrollcommand=scrollbar.set,
-            bg="#fffaf2",
-            fg=self._TEXT,
-            font=("Consolas", -13),
-            padx=14,
-            pady=12,
-            relief="flat",
+        self._trace_window = show_replay(
+            self.root, tuple(self.session.snapshots), tuple(self.session.steps)
         )
-        text.pack(fill=BOTH, expand=True)
-        scrollbar.configure(command=text.yview)
-        text.insert("1.0", self._trace_text(self._last_solve))
-        text.configure(state="disabled")
-        self._trace_window = window
 
     def _save_trace(self) -> None:
-        if self._last_solve is None or self._busy:
+        if self._busy or (not self.session.steps and self._last_solve is None):
             return
         destination = filedialog.asksaveasfilename(
             title="Save deduction trace",
@@ -897,7 +1130,7 @@ class MainWindow:
         )
         if destination:
             try:
-                save_trace(self._last_solve.steps, Path(destination))
+                save_trace(self.session.steps, Path(destination))
                 self.status_label.configure(text="Trace saved.")
             except Exception as error:
                 self._show_error("Could not save trace", error)
@@ -911,9 +1144,14 @@ class MainWindow:
         self.innocent_button.configure(state="normal" if can_mark else "disabled")
         self.hint_button.configure(state="disabled" if self._busy else "normal")
         self.solve_button.configure(state="disabled" if self._busy else "normal")
-        can_trace = not self._busy and self._last_solve is not None
+        can_trace = not self._busy and (bool(self.session.steps) or self._last_solve is not None)
         self.view_trace_button.configure(state="normal" if can_trace else "disabled")
         self.save_trace_button.configure(state="normal" if can_trace else "disabled")
+        self.note_picker.configure(state="readonly" if selected and not self._busy else "disabled")
+        self.used_button.configure(
+            state="normal" if selected and selected.clue and not self._busy else "disabled"
+        )
+        self.results_button.configure(state="disabled" if self._busy else "normal")
 
     @staticmethod
     def _show_error(title: str, error: Exception) -> None:

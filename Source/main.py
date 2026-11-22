@@ -20,7 +20,8 @@ def main() -> None:
     agent = DeductiveAgent(encoder, solver)
     engine = GameEngine(puzzle, agent.verify_verdict)
     root = Tk()
-    MainWindow(root, engine, agent)
+    window = MainWindow(root, engine, agent)
+    window.enable_progress("3x3/museum_shift.json")
     root.mainloop()
 
 

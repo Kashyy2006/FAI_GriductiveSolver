@@ -5,7 +5,7 @@
   "characters": [
     {
       "id": "A1",
-      "name": "Eva",
+      "name": "Alice",
       "profession": "Curator",
       "row": 0,
       "col": 0,
@@ -22,7 +22,7 @@
     },
     {
       "id": "B1",
-      "name": "Beethoven",
+      "name": "Ben",
       "profession": "Guide",
       "row": 0,
       "col": 1,
@@ -56,7 +56,7 @@
     },
     {
       "id": "A2",
-      "name": "Damian",
+      "name": "David",
       "profession": "Teacher",
       "row": 1,
       "col": 0,
@@ -70,7 +70,7 @@
     },
     {
       "id": "B2",
-      "name": "Mia",
+      "name": "Emma",
       "profession": "Baker",
       "row": 1,
       "col": 1,
@@ -84,7 +84,7 @@
     },
     {
       "id": "C2",
-      "name": "David",
+      "name": "Felix",
       "profession": "Gardener",
       "row": 1,
       "col": 2,
@@ -98,7 +98,7 @@
     },
     {
       "id": "A3",
-      "name": "Oliver",
+      "name": "Grace",
       "profession": "Tailor",
       "row": 2,
       "col": 0,
@@ -111,7 +111,7 @@
     },
     {
       "id": "B3",
-      "name": "Lily",
+      "name": "Henry",
       "profession": "Librarian",
       "row": 2,
       "col": 1,
@@ -124,7 +124,7 @@
     },
     {
       "id": "C3",
-      "name": "Victor",
+      "name": "Iris",
       "profession": "Pilot",
       "row": 2,
       "col": 2,

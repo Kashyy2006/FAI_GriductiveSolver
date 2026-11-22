@@ -24,6 +24,7 @@ from game.models import (
 from game.puzzle_loader import load_puzzle
 from gui.board_view import BoardView
 from gui.main_window import MainWindow
+from gui.play_session import LEVELS, ProgressStore
 from logic.cnf_encoder import CNFEncoder
 from solver.dpll import DPLLSolver
 
@@ -47,6 +48,9 @@ class Widget:
     def highlight(self, cells: tuple[str, ...]) -> None:
         self.highlighted = tuple(cells)
 
+    def set_notes(self, marks: dict[str, str], used_clues: set[str]) -> None:
+        self.marks, self.used_clues = dict(marks), set(used_clues)
+
     def flip_card(
         self,
         character_id: str,
@@ -68,7 +72,10 @@ class Widget:
         pass
 
     def set(self, *args: object) -> None:
-        pass
+        self.values["value"] = args[0] if args else None
+
+    def get(self) -> object:
+        return self.values.get("value")
 
     def yview(self, *args: object) -> None:
         pass
@@ -126,12 +133,18 @@ def ui(monkeypatch: pytest.MonkeyPatch) -> MainWindow:
             "restart_button",
             "view_trace_button",
             "save_trace_button",
+            "note_color",
+            "note_picker",
+            "used_button",
+            "clock_label",
+            "results_button",
         ):
             setattr(window, name, Widget())
 
     monkeypatch.setattr(MainWindow, "_configure_window", lambda self: None)
     monkeypatch.setattr(MainWindow, "_build_layout", build)
     monkeypatch.setattr(MainWindow, "_show_toast", lambda self, title, message, tone: None)
+    monkeypatch.setattr(MainWindow, "_show_results", lambda self: None)
     DeferredThread.pending = []
     monkeypatch.setattr("gui.main_window.threading.Thread", DeferredThread)
     agent = DeductiveAgent(CNFEncoder(), DPLLSolver())
@@ -151,11 +164,7 @@ def reset(ui: MainWindow, mode: str, monkeypatch: pytest.MonkeyPatch) -> None:
     if mode == "restart":
         ui._restart()
     else:
-        monkeypatch.setattr(
-            "gui.main_window.filedialog.askopenfilename",
-            lambda **kwargs: str(SOURCE / "puzzles/4x4/example_01.json"),
-        )
-        ui._load()
+        ui._load_path(SOURCE / "puzzles/4x4/example_01.json")
 
 
 @pytest.mark.parametrize("mode", ["restart", "load"])
@@ -308,16 +317,19 @@ def test_auto_solve_trace_can_be_viewed_and_saved(
     assert ui._last_solve.outcome == SolveOutcome.SOLVED
     assert len(ui._last_solve.steps) == 8 and len(ui._last_solve.queries) == 105
     assert ui.view_trace_button.values["state"] == ui.save_trace_button.values["state"] == "normal"
-    popup, text, scrollbar = Widget(), Widget(), Widget()
-    monkeypatch.setattr("gui.main_window.Toplevel", lambda root: popup)
-    monkeypatch.setattr("gui.main_window.Text", lambda *args, **kwargs: text)
-    monkeypatch.setattr("gui.main_window.ttk.Scrollbar", lambda *args, **kwargs: scrollbar)
+    popup = Widget()
+    viewed = []
+    monkeypatch.setattr(
+        "gui.main_window.show_replay",
+        lambda root, snapshots, steps: (viewed.append((snapshots, steps)) or popup),
+    )
     ui._view_trace()
-    assert "SAT calls: 105" in text.contents
-    assert "Step 1: B1 = INNOCENT" in text.contents
-    assert "ASSUME_INNOCENT:B1" in text.contents
-    assert text.values["state"] == "disabled"
-    assert "assignment" not in text.contents and "hidden_status" not in text.contents
+    snapshots, steps = viewed[0]
+    assert len(snapshots) == 9 and len(steps) == 8
+    assert snapshots[0].characters[1].clue is None
+    assert snapshots[1].characters[1].clue == steps[0].newly_revealed_clue
+    assert steps[0].character_id == "B1" and steps[0].verdict == Status.INNOCENT
+    assert ui._trace_window is popup
     destination = tmp_path / "nested" / "trace.json"
     monkeypatch.setattr(
         "gui.main_window.filedialog.asksaveasfilename", lambda **kwargs: str(destination)
@@ -354,11 +366,7 @@ def test_failed_load_preserves_existing_game_and_running_task(
 ) -> None:
     ui._request_hint()
     token, event = ui._state.token, ui._cancel_event
-    monkeypatch.setattr(
-        "gui.main_window.filedialog.askopenfilename",
-        lambda **kwargs: str(tmp_path / "missing.json"),
-    )
-    ui._load()
+    ui._load_path(tmp_path / "missing.json")
     assert ui._state.token == token
     assert ui._busy and not event.is_set()
     assert len(ui.errors) == 1
@@ -384,7 +392,7 @@ def test_empty_trace_is_viewable_and_exportable_for_stuck_run(
     ui._auto_solve()
     run_task(ui)
     assert ui._last_solve.outcome == SolveOutcome.STUCK
-    assert "No accepted deduction steps." in ui._trace_text(ui._last_solve)
+    assert ui.session.steps == [] and len(ui.session.snapshots) == 1
     destination = tmp_path / "empty.json"
     monkeypatch.setattr(
         "gui.main_window.filedialog.asksaveasfilename", lambda **kwargs: str(destination)
@@ -514,7 +522,7 @@ def test_auto_solve_error_reports_committed_progress(
     else:
         assert "No cards were changed." in message
     assert ui._last_solve is None
-    assert ui.save_trace_button.values["state"] == "disabled"
+    assert ui.save_trace_button.values["state"] == ("normal" if accepted_reveals else "disabled")
     assert isinstance(ui.errors[-1][1], error_type)
 
 
@@ -523,11 +531,7 @@ def test_loading_invalid_puzzle_fixture_keeps_existing_game(
     ui: MainWindow, monkeypatch: pytest.MonkeyPatch, fixture_name: str
 ) -> None:
     before = ui.engine.get_public_state()
-    monkeypatch.setattr(
-        "gui.main_window.filedialog.askopenfilename",
-        lambda **kwargs: str(SOURCE / "tests/fixtures" / fixture_name),
-    )
-    ui._load()
+    ui._load_path(SOURCE / "tests/fixtures" / fixture_name)
     assert ui.engine.get_public_state() == before
     assert len(ui.errors) == 1
     assert isinstance(ui.errors[0][1], PuzzleValidationError)
@@ -550,7 +554,7 @@ def test_real_tk_board_renders_3x3_and_4x4_with_revealed_highlight() -> None:
         root.update()
         assert len(window.board._buttons) == 9
         assert window.board._card_labels["B1"]["clue"].cget("text") == "Clue locked"
-        assert window.board._card_labels["A1"]["clue"].cget("text") == "B1 is Innocent"
+        assert window.board._card_labels["A1"]["clue"].cget("text") == "Ben is Innocent"
 
         # Highlighting an already-revealed card uses the amber highlight border
         # while keeping its Criminal/Innocent fill intact.
@@ -579,10 +583,94 @@ def test_real_tk_board_renders_3x3_and_4x4_with_revealed_highlight() -> None:
         window._reset_view()
         window.refresh()
         root.update()
-        assert window.board._card_labels["A1"]["name"].cget("text") == "Person 01"
+        assert window.board._card_labels["A1"]["name"].cget("text") == "Alice"
         assert window.board._card_labels["A1"]["profession"].cget("text") == "Detective"
         window._close()
         closed = True
     finally:
         if not closed:
             root.destroy()
+
+
+def test_notes_only_change_presentation_and_survive_level_resume(
+    ui: MainWindow, tmp_path: Path
+) -> None:
+    store = ProgressStore(tmp_path / "player.json")
+    ui._progress_store, ui._level_key = store, LEVELS[0].key
+    ui._attach_progress()
+    initial = ui.engine.get_public_state()
+    initial_kb = CNFEncoder().encode(initial)
+    ui._select_cell("A1")
+    ui.note_color.set("Blue")
+    ui._set_mark()
+    ui._toggle_used()
+    assert ui.engine.get_public_state() == initial
+    assert CNFEncoder().encode(ui.engine.get_public_state()) == initial_kb
+    assert ui.board.marks == {"A1": "Blue"}
+    assert ui.board.used_clues == {initial.characters[0].clue.id}
+    ui._select_cell("B1")
+    ui._submit(Status.INNOCENT)
+    run_task(ui)
+    ui._request_hint()
+    run_task(ui)
+    previous = ui.engine.get_public_state()
+    ui._load_level(LEVELS[2].key)
+    assert len(ui._state.characters) == 16 and not ui.session.marks
+    ui._load_level(LEVELS[0].key)
+    assert ui._busy
+    run_task(ui)
+    assert ui.engine.get_public_state().characters == previous.characters
+    assert ui.engine.get_public_state().token.session_id != previous.token.session_id
+    assert ui.session.marks == {"A1": "Blue"}
+    assert ui.session.hints == 1
+    assert len(ui.session.snapshots) == 2
+    assert ui.session.snapshots[0].characters[1].clue is None
+
+
+def test_hint_rejection_and_auto_solve_metrics_count_each_call_once(ui: MainWindow) -> None:
+    ui._request_hint()
+    run_task(ui)
+    hint_calls = len(ui.session.queries)
+    ui._select_cell("B1")
+    ui._submit(Status.CRIMINAL)
+    run_task(ui)
+    before_auto = len(ui.session.queries)
+    assert before_auto > hint_calls > 0
+    assert ui.session.hints == ui.session.rejected == 1
+    assert len(ui.session.snapshots) == 1
+    ui._auto_solve()
+    run_task(ui)
+    assert len(ui.session.queries) == before_auto + len(ui._last_solve.queries)
+    assert ui.session.started is None
+    assert ui._result_shown
+
+
+def test_library_replaces_file_explorer(ui: MainWindow, monkeypatch: pytest.MonkeyPatch) -> None:
+    seen = []
+    monkeypatch.setattr(
+        "gui.main_window.show_library", lambda root, records, choose: seen.append(choose)
+    )
+    ui._load()
+    seen[0](LEVELS[2].key)
+    assert ui._level_key == LEVELS[2].key
+    assert ui.puzzle_title.values["text"] == "City Detectives"
+
+
+def test_bad_resume_resets_partial_restoration_and_keeps_saved_record(
+    ui: MainWindow, tmp_path: Path
+) -> None:
+    store = ProgressStore(tmp_path / "player.json")
+    ui._progress_store, ui._level_key = store, LEVELS[0].key
+    ui._attach_progress()
+    record = store.data["levels"][LEVELS[0].key]
+    record["moves"] = [["B1", "INNOCENT"], ["A2", "CRIMINAL"]]
+    record["step_queries"] = [[], []]
+    ui._load_level(LEVELS[2].key)
+    # Install a deliberately unprovable second move after leaving the first case.
+    store.data["levels"][LEVELS[0].key] = record
+    ui._load_level(LEVELS[0].key)
+    run_task(ui)
+    assert ui._state.token.version == 0
+    assert len(ui.session.snapshots) == 1
+    assert "saved record was kept" in ui.status_label.values["text"]
+    assert store.data["levels"][LEVELS[0].key]["moves"] == record["moves"]

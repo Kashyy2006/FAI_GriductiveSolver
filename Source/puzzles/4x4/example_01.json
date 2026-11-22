@@ -5,7 +5,7 @@
   "characters": [
     {
       "id": "A1",
-      "name": "Person 01",
+      "name": "Alice",
       "profession": "Detective",
       "row": 0,
       "col": 0,
@@ -19,7 +19,7 @@
     },
     {
       "id": "B1",
-      "name": "Person 02",
+      "name": "Ben",
       "profession": "Detective",
       "row": 0,
       "col": 1,
@@ -33,7 +33,7 @@
     },
     {
       "id": "C1",
-      "name": "Person 03",
+      "name": "Chloe",
       "profession": "Detective",
       "row": 0,
       "col": 2,
@@ -47,7 +47,7 @@
     },
     {
       "id": "D1",
-      "name": "Person 04",
+      "name": "David",
       "profession": "Detective",
       "row": 0,
       "col": 3,
@@ -61,7 +61,7 @@
     },
     {
       "id": "A2",
-      "name": "Person 05",
+      "name": "Emma",
       "profession": "Detective",
       "row": 1,
       "col": 0,
@@ -75,7 +75,7 @@
     },
     {
       "id": "B2",
-      "name": "Person 06",
+      "name": "Felix",
       "profession": "Detective",
       "row": 1,
       "col": 1,
@@ -89,7 +89,7 @@
     },
     {
       "id": "C2",
-      "name": "Person 07",
+      "name": "Grace",
       "profession": "Detective",
       "row": 1,
       "col": 2,
@@ -103,7 +103,7 @@
     },
     {
       "id": "D2",
-      "name": "Person 08",
+      "name": "Henry",
       "profession": "Detective",
       "row": 1,
       "col": 3,
@@ -117,7 +117,7 @@
     },
     {
       "id": "A3",
-      "name": "Person 09",
+      "name": "Iris",
       "profession": "Detective",
       "row": 2,
       "col": 0,
@@ -131,7 +131,7 @@
     },
     {
       "id": "B3",
-      "name": "Person 10",
+      "name": "Jack",
       "profession": "Detective",
       "row": 2,
       "col": 1,
@@ -145,7 +145,7 @@
     },
     {
       "id": "C3",
-      "name": "Person 11",
+      "name": "Kate",
       "profession": "Detective",
       "row": 2,
       "col": 2,
@@ -159,7 +159,7 @@
     },
     {
       "id": "D3",
-      "name": "Person 12",
+      "name": "Lily",
       "profession": "Detective",
       "row": 2,
       "col": 3,
@@ -173,7 +173,7 @@
     },
     {
       "id": "A4",
-      "name": "Person 13",
+      "name": "Mia",
       "profession": "Detective",
       "row": 3,
       "col": 0,
@@ -187,7 +187,7 @@
     },
     {
       "id": "B4",
-      "name": "Person 14",
+      "name": "Noah",
       "profession": "Detective",
       "row": 3,
       "col": 1,
@@ -201,7 +201,7 @@
     },
     {
       "id": "C4",
-      "name": "Person 15",
+      "name": "Oliver",
       "profession": "Detective",
       "row": 3,
       "col": 2,
@@ -215,7 +215,7 @@
     },
     {
       "id": "D4",
-      "name": "Person 16",
+      "name": "Paul",
       "profession": "Detective",
       "row": 3,
       "col": 3,

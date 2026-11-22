@@ -4,10 +4,13 @@ from collections.abc import Callable, Sequence
 from math import cos, pi
 from pathlib import Path
 from tkinter import Canvas, Event, Frame, Label, Misc, ttk
+from tkinter.font import Font
 
 from PIL import Image, ImageTk  # pyright: ignore[reportMissingImports]
 
-from game.models import Clue, ClueType, PublicCharacter, PublicState, RegionType, Status
+from game.models import PublicCharacter, PublicState, Status
+from gui.clue_text import format_clue
+from gui.play_session import MARK_COLORS
 
 
 class BoardView(ttk.Frame):
@@ -32,6 +35,8 @@ class BoardView(ttk.Frame):
         self._on_select = on_select
         self._state: PublicState | None = None
         self._highlighted: set[str] = set()
+        self._marks: dict[str, str] = {}
+        self._used_clues: set[str] = set()
         self._buttons: dict[str, Canvas] = {}
         self._card_labels: dict[str, dict[str, Label]] = {}
         self._card_parts: dict[str, tuple[int, int, Frame, tuple[int, ...]]] = {}
@@ -102,6 +107,15 @@ class BoardView(ttk.Frame):
         self._highlighted = set(cell_ids)
         self._refresh_card_colors()
 
+    def set_notes(self, marks: dict[str, str], used_clues: set[str]) -> None:
+        """Set visual-only annotations, never modifying a supplied public snapshot."""
+        self._marks = dict(marks)
+        self._used_clues = set(used_clues)
+        if self._state is not None:
+            for character in self._state.characters:
+                self._update_card(character)
+        self._refresh_card_colors()
+
     def _coordinate_label(self, text: str) -> Label:
         return Label(
             self._grid_frame,
@@ -149,8 +163,11 @@ class BoardView(ttk.Frame):
         portrait_width = max(28, min(64, width - 28))
         self._bind_card(border, character.id)
         self._bind_card(content, character.id)
+        card_header = Frame(content, bg=self.CARD)
+        card_header.pack(fill="x")
+        self._bind_card(card_header, character.id)
         id_label = Label(
-            content,
+            card_header,
             text=(
                 f"{character.id} · {character.status.value.title()}"
                 if character.status is not None
@@ -161,8 +178,11 @@ class BoardView(ttk.Frame):
             font=("Segoe UI", -id_px, "bold"),
             anchor="w",
         )
-        id_label.pack(fill="x")
+        id_label.pack(side="left", fill="x", expand=True)
         self._bind_card(id_label, character.id)
+        note = Label(card_header, text="", font=("Segoe UI", -id_px, "bold"), bg=self.CARD)
+        note.pack(side="right")
+        self._bind_card(note, character.id)
         portrait_index = (character.row * 5 + character.col) % len(self._portraits)
         portrait = self._portraits[portrait_index]
         cache_key = (portrait_width, portrait_height, portrait_index)
@@ -200,7 +220,7 @@ class BoardView(ttk.Frame):
             clue_text = "Clue locked"
             clue_color = self.MUTED
         else:
-            clue_text = self._format_clue(character.clue)
+            clue_text = format_clue(character.clue, self._state)
             clue_color = self.INK
         clue = Label(
             content,
@@ -218,6 +238,7 @@ class BoardView(ttk.Frame):
             "name": name,
             "profession": profession,
             "clue": clue,
+            "note": note,
         }
         self._card_parts[character.id] = (border_id, content_window, content, border_points)
         return border
@@ -235,10 +256,22 @@ class BoardView(ttk.Frame):
         )
         labels["name"].configure(text=character.name)
         labels["profession"].configure(text=character.profession)
-        labels["clue"].configure(
-            text=self._format_clue(character.clue) if character.clue else "Clue locked",
-            fg=self.INK if character.clue else self.MUTED,
+        mark = self._marks.get(character.id)
+        labels["note"].configure(
+            text="●" if mark in MARK_COLORS else "", fg=MARK_COLORS.get(mark, self.MUTED)
         )
+        labels["clue"].configure(
+            text=format_clue(character.clue, self._state),
+            fg=self.MUTED
+            if character.clue is None or character.clue.id in self._used_clues
+            else self.INK,
+        )
+        clue_font = Font(font=labels["clue"].cget("font"))
+        clue_font.configure(
+            overstrike=bool(character.clue and character.clue.id in self._used_clues)
+        )
+        labels["clue"].configure(font=clue_font)
+        setattr(labels["clue"], "note_font", clue_font)
 
     def flip_card(
         self,
@@ -394,6 +427,9 @@ class BoardView(ttk.Frame):
                 content.configure({"bg": fill})
                 for child in content.winfo_children():
                     child.configure({"bg": fill})
+                    if isinstance(child, Frame):
+                        for label in child.winfo_children():
+                            label.configure(bg=fill)
                     if isinstance(child, Label) and str(child.cget("text")).startswith(
                         character.id
                     ):
@@ -407,6 +443,13 @@ class BoardView(ttk.Frame):
                         child.configure(fg=status_color)
                     elif isinstance(child, Label) and child.cget("text") == character.name:
                         child.configure(fg=self.INK)
+            self._card_labels[character.id]["id"].configure(
+                fg=self.CRIMINAL
+                if character.status == Status.CRIMINAL
+                else self.INNOCENT
+                if character.status == Status.INNOCENT
+                else self.MUTED
+            )
 
     def _load_portraits(self) -> list[Image.Image]:
         path = Path(__file__).resolve().parent / "assets" / "avatar_sheet.png"
@@ -468,45 +511,3 @@ class BoardView(ttk.Frame):
             1,
             1,
         )
-
-    @staticmethod
-    def _format_clue(clue: Clue | None) -> str:
-        if clue is None:
-            return "Clue locked"
-        if clue.type == ClueType.REMARK:
-            return clue.text or ""
-        if clue.type == ClueType.FACT:
-            if clue.person is None or clue.status is None:
-                return "Incomplete fact clue"
-            return f"{clue.person} is {clue.status.value.title()}"
-        if clue.type in (ClueType.SAME, ClueType.DIFFERENT):
-            relation = "same status as" if clue.type == ClueType.SAME else "different from"
-            return f"{clue.first} is {relation} {clue.second}"
-        if clue.region is None:
-            return clue.type.value.replace("_", " ").title()
-        region = clue.region
-        region_text = BoardView._format_region(
-            region.kind, region.index, region.cell, region.cells, region.first, region.second
-        )
-        if clue.type in (ClueType.EVEN, ClueType.ODD):
-            return f"{clue.type.value.title()} criminals in {region_text}"
-        return f"{clue.type.value.replace('_', ' ').title()} {clue.k} criminals in {region_text}"
-
-    @staticmethod
-    def _format_region(
-        kind: RegionType,
-        index: int | None,
-        cell: str | None,
-        cells: tuple[str, ...],
-        first: str | None,
-        second: str | None,
-    ) -> str:
-        if kind == RegionType.ROW:
-            return f"row {index + 1}" if index is not None else "row ?"
-        if kind == RegionType.COLUMN:
-            return f"column {chr(65 + index)}" if index is not None else "column ?"
-        if kind == RegionType.NEIGHBORS:
-            return f"neighbors of {cell}"
-        if kind == RegionType.COMMON_NEIGHBORS:
-            return f"common neighbors of {first} and {second}"
-        return ", ".join(cells) if cells else "an empty region"

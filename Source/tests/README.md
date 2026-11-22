@@ -7,6 +7,17 @@
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - Giữ test TV4 độc lập và bổ sung test tích hợp Engine/Encoder/DPLL/Agent thật.
 
+## Regression trải nghiệm chơi
+
+- `test_player_session.py`: khôi phục từ hành động công khai qua verifier thật,
+  chống reveal từ verdict lưu sai, không lưu hidden labels/assignment, snapshot
+  chỉ thêm một reveal mỗi bước, file lỗi/I/O, tên tiếng Anh và định dạng clue.
+- `test_player_windows.py`: widget Tkinter thật cho Previous/Next không lộ clue
+  tương lai, ghi chú không đổi state, sidebar ở 990×680, kết quả/SAT details/màn
+  tiếp theo, bộ lọc thư viện và glossary có minh họa.
+- `test_gui.py`: kiểm tra thêm ghi chú không đổi KB, chuyển màn rồi resume riêng,
+  Hint/rejected counters và query ledger không đếm trùng.
+
 ## Kiểm thử Agent và trace — TV4 (Tùng)
 
 - `test_agent.py`: 54 ca theo bảng phản hồi FakeSolver; đầy đủ consistency,
