@@ -217,3 +217,13 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Nội dung và lý do: Sửa trạng thái runtime/test và ghi rõ test tích hợp Engine thật; giữ các mục cũ làm lịch sử.
 - Kiểm tra: Theo kết quả vừa chạy, 517 test đạt trên Python 3.11.9; Ruff check và format check đạt.
 - Còn thiếu: Chưa rà giao diện trên kích thước màn hình khác.
+
+### 2026-11-21 — Đồng bộ integration_v2 và hoàn thiện TV3 giai đoạn 4
+
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Đồng bộ nhánh tích hợp và hoàn thiện phần việc TV3 cho deadline 21/11.
+- File thay đổi: Cập nhật phần thực nghiệm, kiểm thử, kết quả, báo cáo TV3 và README liên quan.
+- Nội dung và lý do: Hợp nhất nhánh tích hợp vào nhánh TV3; bổ sung bộ puzzle thử nghiệm 3×3/4×4 có mở rộng Parity, hàng xóm chung và phân nhánh; chốt cấu hình benchmark, đo tách biệt giải tuần tự và uniqueness, giữ nguyên các ca lỗi/timeout; tạo bảng số liệu, biểu đồ phân tích và hoàn thiện báo cáo TV3; giữ nguyên contract v1.
+- Kiểm tra: 564 test đạt, Ruff check/format và kiểm tra gói phụ thuộc đạt trên Python 3.11.9; benchmark đạt 340 dòng kết quả (160/160 ca bình thường khớp số truy vấn).
+- Còn thiếu: Chưa push lên remote; chờ nhóm chốt bộ puzzle TV1 để ghép báo cáo cuối.

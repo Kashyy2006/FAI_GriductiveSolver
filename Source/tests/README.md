@@ -42,7 +42,6 @@ vì pytest xóa nội dung thư mục này lúc bắt đầu.
 - Fixture progressive riêng dùng PublicTestEngine để cô lập test, không thay
   nghiệm thu backend thật tại test_integration.py và test_phase3_backend.py.
 
-
 ## Kiểm thử logic độc lập
 
 - `conftest.py`: fixture PublicState 3×3/4×4/5×5 chỉ dùng model công khai,
@@ -100,8 +99,20 @@ Chạy riêng: `python -m pytest tests/test_tv4_stage4.py -q -p no:cacheprovider
 Toàn suite hiện tại **565 passed** trên Python 3.12.6/Windows; Ruff check/format
 đạt. Mốc 558 phía trên là kết quả trước khi thêm bảy ca này. Chưa chạy Python 3.11.
 
-## Nhật ký AI
+## Nghiệm thu TV3 giai đoạn 4
 
+- `test_phase4_acceptance.py` thêm 6 ca nghiệm thu cho deadline 21/11:
+  - Kiểm tra DPLL branching/backtracking, complete assignment (điền `False` cho biến tự do),
+    assumptions và UNSAT contradiction trên hệ parity chồng lấp.
+  - Kiểm tra bộ 5 puzzle Stage 4 tái lập được, hợp lệ schema, `UNIQUE` với Encoder/DPLL thật,
+    đạt `SOLVED`/`STUCK` đúng kỳ vọng và phát sinh `decisions > 0`, `backtracks > 0`.
+  - Kiểm tra `check_uniqueness` không đọc `hidden_status` trên puzzle 4x4 dùng extensions thật.
+  - Kiểm tra timeout giữa quá trình branching/rút gọn DPLL raise `SolverTimeout` (không thành `UNSAT`).
+  - Kiểm tra runner `experiments.phase4` xuất đủ CSV/metadata/bảng/4 biểu đồ PNG, giữ raw
+    `ERROR`/`TIMEOUT`, không lộ `hidden_status` và CLI trả mã thoát 1 khi `normal` timeout.
+- Kết quả cuối trên Python 3.11.9: **564 passed**, Ruff check/format và `pip check` đạt.
+
+## Nhật ký AI
 
 Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 
@@ -213,3 +224,13 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Nội dung và lý do: Cập nhật mô tả test GUI/Engine thật; số liệu lịch sử được giữ tách khỏi trạng thái mới nhất.
 - Kiểm tra: Kết quả gần nhất là 26 test GUI/tích hợp và 517 test toàn bộ đạt trên Python 3.11.9; Ruff check và format check đạt. Lượt sửa README này chỉ kiểm tra `git diff --check`.
 - Còn thiếu: Không.
+
+### 2026-11-21 — Bổ sung test nghiệm thu TV3 giai đoạn 4
+
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Bổ sung kiểm thử nghiệm thu DPLL, uniqueness và benchmark giai đoạn 4 cho deadline 21/11.
+- File thay đổi: `test_phase4_acceptance.py`, `README.md`.
+- Nội dung và lý do: Thêm 6 test kiểm tra branching/backtracking trên parity, tính tái lập 5 puzzle Stage 4, guard không đọc `hidden_status`, timeout giữa DPLL và runner `experiments.phase4` cùng biểu đồ PNG.
+- Kiểm tra: 564 test, Ruff check/format và `pip check` đạt trên Python 3.11.9.
+- Còn thiếu: Chưa push lên remote.

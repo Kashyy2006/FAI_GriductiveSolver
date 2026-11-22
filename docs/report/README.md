@@ -9,12 +9,17 @@
 
 ## Phần TV3
 
-- [tv3_phase3.md](tv3_phase3.md): bản bàn giao hiện tại cho deadline 14/11, gồm
+- [tv3_phase4.md](tv3_phase4.md): bản báo cáo chốt giai đoạn 4 (deadline 21/11),
+  tổng hợp thuật toán DPLL, kiểm tra uniqueness trên biến chính, cấu hình thực
+  nghiệm chốt (`repeats=5`, `timeout=10.0s`), bảng số liệu đầy đủ, 3 biểu đồ phân
+  tích và đánh giá hiệu năng trên `integration_v2`.
+- [tv3_phase3.md](tv3_phase3.md): bản bàn giao lịch sử cho deadline 14/11, gồm
   test backend thật, đối chiếu query, timeout và số liệu của cả hai phase.
 - [tv3.md](tv3.md): snapshot thuật toán và nghiệm thu ngày 09/11, được giữ riêng.
-- Kết quả mới: `../../Source/experiments/results/phase3/acceptance.json` và CSV,
-  environment.json, summary.md, charts/ trong ba profile normal/errors/timeouts.
-- Kết quả nghiệm thu: 531 test; 120 row benchmark; 54/54 run hoàn tất khớp trace/calls.
+- Kết quả giai đoạn 4: `../../Source/experiments/results/phase4/acceptance.json`,
+  `combined_summary.md` và CSV, environment.json, summary.md, charts/ trong ba
+  profile normal/errors/timeouts (340 row; 160/160 normal khớp trace/calls).
+- Kết quả nghiệm thu trên Python 3.11.9: 564 test đạt, Ruff check/format và pip check đạt.
 - Cần nhóm rà soát để ghép vào Report.pdf; chưa commit/push phần TV3 mới.
 
 ## Phần TV4 — nghiệm thu 20/11 và bản thảo cho 24/11
@@ -52,3 +57,13 @@
 - Nội dung và lý do: Codex soạn báo cáo giai đoạn 3 từ kết quả chạy thật, tách snapshot 09/11, nêu phương pháp đối chiếu query và giới hạn bộ puzzle. Phân biệt timeout benchmark trước SAT với timeout giữa SAT trong test backend thật; không ghi nhận bản tích hợp của thành viên khác là phần TV3 tự viết.
 - Kiểm tra: Bảng median đã đối chiếu CSV và metadata ở lượt triển khai; hiện có 531 test đạt và 120 row. Lượt README chỉ kiểm tra tài liệu, không tạo số liệu mới.
 - Còn thiếu: Người dùng/nhóm rà soát bản thảo và ghép vào Report.pdf cuối cùng.
+
+### 2026-11-21 — Hoàn thiện báo cáo TV3 giai đoạn 4
+
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Viết phần báo cáo thuật toán DPLL, uniqueness và thực nghiệm hiệu năng TV3 cho deadline 21/11.
+- File thay đổi: `tv3_phase4.md`, `README.md`.
+- Nội dung và lý do: Tổng hợp thuật toán DPLL, kiểm tra uniqueness trên biến chính, cấu hình đo, bảng số liệu 2 phase, 3 biểu đồ phân tích và giới hạn trên `integration_v2`.
+- Kiểm tra: Đối chiếu bảng số liệu với `Source/experiments/results/phase4/`; 564 test và Ruff đạt trên Python 3.11.9.
+- Còn thiếu: Nhóm rà soát và ghép vào `Report.pdf` cuối; chưa push lên remote.

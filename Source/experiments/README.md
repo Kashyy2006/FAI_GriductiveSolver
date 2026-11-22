@@ -11,9 +11,11 @@
 
 ```powershell
 python -m experiments.make_suite
+python -m experiments.make_stage4_suite
 python -m experiments.benchmark --mode uniqueness --repeats 3 --timeout 10
 python -m experiments.benchmark --mode all --repeats 3 --timeout 10
 python -m experiments.phase3 --repeats 3 --timeout 10
+python -m experiments.phase4 --repeats 5 --timeout 10
 ```
 
 Backend thật đã tích hợp từ integration_v1 commit 23de657. Lệnh benchmark dùng
@@ -98,10 +100,22 @@ giữ đủ 11 row ERROR/SolverTimeout và exit 1.
 
 Phân tích và hướng dẫn tái lập: [báo cáo TV4](../../docs/report/tv4.md).
 
+## Nghiệm thu giai đoạn 4
+
+- Cấu hình chốt (`experiments.phase4`): 16 puzzle hợp lệ (4 puzzle chung `Source/puzzles/`,
+  6 synthetic baseline, 5 puzzle extensions/branching tại `experiments/puzzles/stage4/`,
+  1 fixture ambiguous) + 2 fixture lỗi; `repeats=5`, `timeout=10.0s` (`1e-12`s cho profile
+  `timeouts`), tách riêng hai phase `solve` và `uniqueness`.
+- Kết quả tại `results/phase4/`: 340 row CSV (160 `normal` khớp 100% query/calls với
+  10.390 actual SAT calls, 20 `errors`, 160 `timeouts`), `combined_summary.md`,
+  `acceptance.json` (`passed=true`) và 3 biểu đồ phân tích (`runtime_by_size_and_phase.png`,
+  `dpll_work_and_clauses.png`, `sat_calls_and_outcomes.png`).
+- Chi tiết thuật toán và phân tích hiệu năng: `docs/report/tv3_phase4.md`.
+
 ## Nhật ký AI
 
-
 ### 2026-11-09 — Xây runner và đo uniqueness
+
 - Thành viên: TV3 (Mạnh, theo phân công).
 - AI: Codex.
 - Yêu cầu: Tổng hợp việc xây dựng và kiểm chứng phần thực nghiệm TV3.
@@ -119,3 +133,13 @@ Phân tích và hướng dẫn tái lập: [báo cáo TV4](../../docs/report/tv4
 - Nội dung và lý do: Codex bổ sung ledger để so sánh thứ tự assumptions/result/stats với trace và actual calls; thêm trace_query_count/query_count_matches, giữ trường trace trống khi run chưa hoàn tất. Tạo runner ba profile normal/errors/timeouts, acceptance.json và biểu đồ median theo puzzle/phase/outcome. Giữ dữ liệu lỗi/timeout, không coi timeout là UNSAT; không đổi API solver hoặc dependency.
 - Kiểm tra: Kết quả trước đó: 531 test và Ruff check/format đạt; 120 row benchmark, 54/54 normal khớp query. Lượt này đối chiếu README, không đo lại thời gian.
 - Còn thiếu: Bộ puzzle khó/stress 5x5 cho nghiên cứu tiếp; bộ nghiệm thu hiện tại không đủ kết luận hiệu năng tổng quát.
+
+### 2026-11-21 — Hoàn thiện bộ puzzle, runner và biểu đồ giai đoạn 4
+
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Chốt cấu hình benchmark, chạy giải/uniqueness riêng, giữ lỗi/timeout và xuất bảng, biểu đồ cho deadline 21/11.
+- File thay đổi: `make_stage4_suite.py`, `phase4.py`, `README.md`.
+- Nội dung và lý do: Thêm 5 puzzle 3×3/4×4 dùng Parity, `COMMON_NEIGHBORS` và branching; thêm runner `phase4.py` (`repeats=5`, `timeout=10s`) xuất CSV, `combined_summary.md`, `acceptance.json` và 3 biểu đồ phân tích.
+- Kiểm tra: `python -m experiments.phase4 --repeats 5 --timeout 10` đạt `passed=True` (340 row, 160/160 normal khớp trace/calls); 564 test và Ruff đạt trên Python 3.11.9.
+- Còn thiếu: Chưa push lên remote.

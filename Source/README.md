@@ -17,9 +17,11 @@
 - Backend thật giải được các demo 3x3 và example 4x4 còn tồn tại; giới hạn và
   bảng kiểm tra từng thành viên tại [review giai đoạn 2](../docs/phase2_review.md).
 - Runner benchmark: `python -m experiments.benchmark --mode all --repeats 3`.
-- Runner nghiệm thu: `python -m experiments.phase3 --repeats 3 --timeout 10`.
-- Kết quả lưu trong experiments/results/phase3/ là snapshot nghiệm thu cũ,
-  không tự trở thành kết quả của checkout hiện tại sau merge.
+- Runner nghiệm thu: `python -m experiments.phase3 --repeats 3 --timeout 10` (giai đoạn 3),
+  `python -m experiments.phase4 --repeats 5 --timeout 10` (giai đoạn 4).
+- Kết quả giai đoạn 4 (Python 3.11.9): **564 passed**, Ruff check/format và `pip check` đạt;
+  kết quả lưu tại `experiments/results/phase4/` và báo cáo tại `../docs/report/tv3_phase4.md`.
+- Kết quả trong `experiments/results/phase3/` là snapshot giai đoạn 3.
 
 ## Nhật ký AI
 
@@ -85,3 +87,13 @@
 - Nội dung và lý do: Ghi kết quả mới nhất của bộ test và Ruff để README tổng hợp khớp trạng thái hiện tại.
 - Kiểm tra: 517 test đạt; Ruff check và format check đạt.
 - Còn thiếu: Chưa rà bố cục GUI ở các kích thước màn hình khác.
+
+### 2026-11-21 — Cập nhật trạng thái TV3 giai đoạn 4
+
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Cập nhật lệnh chạy và kết quả kiểm tra TV3 giai đoạn 4.
+- File thay đổi: `README.md`.
+- Nội dung và lý do: Thêm lệnh `experiments.phase4` và đường dẫn kết quả/báo cáo giai đoạn 4.
+- Kiểm tra: 564 test, Ruff check/format và `pip check` đạt trên Python 3.11.9.
+- Còn thiếu: Chưa push lên remote.
