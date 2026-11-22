@@ -1,7 +1,7 @@
 """Resume and replay must preserve Engine proof checks and public information boundaries."""
 
 import json
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import pytest
@@ -142,19 +142,73 @@ def test_clue_names_cover_fact_binary_and_regions_without_rewriting_remarks() ->
         "Alice has the same status as Ben"
     )
     for region, expected in (
-        (Region(RegionType.NEIGHBORS, cell="B1"), "neighbors of Ben"),
+        (
+            Region(RegionType.NEIGHBORS, cell="B1"),
+            "Even number of criminals among neighbors of Ben",
+        ),
         (
             Region(RegionType.COMMON_NEIGHBORS, first="A1", second="C1"),
-            "common neighbors of Alice and Chloe",
+            "Even number of criminals among common neighbors of Alice and Chloe",
         ),
-        (Region(RegionType.EXPLICIT, cells=("A1", "B1")), "Alice, Ben"),
-        (Region(RegionType.EXPLICIT), "an empty region"),
+        (
+            Region(RegionType.EXPLICIT, cells=("A1", "B1")),
+            "The number of criminals among Alice, Ben is even",
+        ),
+        (Region(RegionType.EXPLICIT), "Even number of criminals in an empty region"),
     ):
-        assert format_clue(Clue("even", ClueType.EVEN, region=region), state) == (
-            f"Even criminals in {expected}"
-        )
+        assert format_clue(Clue("even", ClueType.EVEN, region=region), state) == expected
     remark = Clue("story", ClueType.REMARK, text="A1 remembers B1. This is not evidence.")
     assert format_clue(remark, state) == remark.text
+
+
+@pytest.mark.parametrize(
+    "clue_type,k,expected",
+    [
+        (ClueType.EXACTLY, 1, "Tom is Criminal"),
+        (ClueType.EXACTLY, 0, "Tom is Innocent"),
+        (ClueType.AT_LEAST, 1, "Tom is Criminal"),
+        (ClueType.AT_LEAST, 0, "Tom may be Criminal or Innocent"),
+        (ClueType.AT_MOST, 0, "Tom is Innocent"),
+        (ClueType.AT_MOST, 1, "Tom may be Criminal or Innocent"),
+        (ClueType.EVEN, None, "Tom is Innocent"),
+        (ClueType.ODD, None, "Tom is Criminal"),
+    ],
+)
+def test_single_person_region_describes_the_person_not_a_location(
+    clue_type: ClueType,
+    k: int | None,
+    expected: str,
+) -> None:
+    session, _ = make_session()
+    original = session.get_public_state()
+    state = replace(
+        original,
+        characters=tuple(
+            replace(c, name="Tom") if c.id == "A1" else c for c in original.characters
+        ),
+    )
+    clue = Clue("one_person", clue_type, region=Region(RegionType.EXPLICIT, cells=("A1",)), k=k)
+    assert format_clue(clue, state) == expected
+    assert session.get_public_state() == original
+
+
+@pytest.mark.parametrize(
+    "clue_type,k,expected",
+    [
+        (ClueType.EXACTLY, 1, "Exactly 1 of these people is Criminal: Alice, Ben"),
+        (ClueType.AT_LEAST, 1, "At least 1 of these people is Criminal: Alice, Ben"),
+        (ClueType.AT_MOST, 2, "At most 2 of these people are Criminal: Alice, Ben"),
+        (ClueType.EXACTLY, 0, "Exactly 0 of these people are Criminal: Alice, Ben"),
+    ],
+)
+def test_multiple_person_count_uses_a_group(
+    clue_type: ClueType,
+    k: int,
+    expected: str,
+) -> None:
+    session, _ = make_session()
+    clue = Clue("group", clue_type, region=Region(RegionType.EXPLICIT, cells=("A1", "B1")), k=k)
+    assert format_clue(clue, session.get_public_state()) == expected
 
 
 def test_catalogue_names_are_english_and_sorted_without_changing_logic() -> None:

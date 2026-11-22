@@ -17,9 +17,12 @@
   riêng theo đường dẫn màn để không ghi đè tiến độ.
 - Các màn dùng tên tiếng Anh. `clue_text.py` chỉ định dạng clue công khai: FACT,
   SAME/DIFFERENT và tham chiếu vùng hiển thị tên người; REMARK giữ nguyên văn bản.
-- Chọn thẻ rồi dùng `Temporary color` để đặt dấu màu, `Used clue` để làm mờ và gạch
+  Vùng một người diễn đạt trực tiếp (ví dụ `Tom is Criminal`); vùng nhiều người
+  dùng câu đếm nhóm, không coi tên người là địa điểm sau chữ `in`.
+- Chọn thẻ rồi dùng `Temporary color` để tô toàn bộ khung viền, `Used clue` để làm mờ và gạch
   clue công khai. Chọn None / Restore clue để bỏ dấu. Các ghi chú chỉ thuộc GUI,
-  không xóa clue khỏi KB, không tạo verdict và không reveal thẻ.
+  không xóa clue khỏi KB, không tạo verdict và không reveal thẻ. Khi highlight,
+  viền ngoài màu hổ phách vẫn hiện cùng khung màu tạm và nền trạng thái của thẻ.
 - `play_session.py` ghi các receipt ACCEPTED từ Engine, snapshot công khai và
   DeductionStep canonical. Nó không truy cập Puzzle/Character riêng tư. Khôi phục
   qua worker gọi lại submit_verdict cho từng nước với token phiên mới; không dùng
@@ -38,7 +41,7 @@
   xem. Viewer không có tham chiếu Engine. Snapshot 0 không hiển thị clue tương lai.
   Nếu Auto Solve lỗi sau reveal, chỉ receipt thực đã nhận được lưu; không tạo
   AutoSolveResult hoàn tất giả.
-- Nút `?` mở hướng dẫn tĩnh chọn clue → đọc highlight → tự chứng minh → submit,
+- Nút `?` cạnh `CASE NOTES` mở hướng dẫn tĩnh chọn clue → đọc highlight → tự chứng minh → submit,
   kèm glossary minh họa neighbors tám hướng, giao common neighbors, parity,
   hàng/cột và vùng rỗng. Sidebar cuộn độc lập khi cửa sổ thấp; board không cuộn.
 

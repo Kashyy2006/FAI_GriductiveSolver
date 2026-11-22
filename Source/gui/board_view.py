@@ -180,9 +180,6 @@ class BoardView(ttk.Frame):
         )
         id_label.pack(side="left", fill="x", expand=True)
         self._bind_card(id_label, character.id)
-        note = Label(card_header, text="", font=("Segoe UI", -id_px, "bold"), bg=self.CARD)
-        note.pack(side="right")
-        self._bind_card(note, character.id)
         portrait_index = (character.row * 5 + character.col) % len(self._portraits)
         portrait = self._portraits[portrait_index]
         cache_key = (portrait_width, portrait_height, portrait_index)
@@ -238,7 +235,6 @@ class BoardView(ttk.Frame):
             "name": name,
             "profession": profession,
             "clue": clue,
-            "note": note,
         }
         self._card_parts[character.id] = (border_id, content_window, content, border_points)
         return border
@@ -256,10 +252,6 @@ class BoardView(ttk.Frame):
         )
         labels["name"].configure(text=character.name)
         labels["profession"].configure(text=character.profession)
-        mark = self._marks.get(character.id)
-        labels["note"].configure(
-            text="●" if mark in MARK_COLORS else "", fg=MARK_COLORS.get(mark, self.MUTED)
-        )
         labels["clue"].configure(
             text=format_clue(character.clue, self._state),
             fg=self.MUTED
@@ -358,7 +350,13 @@ class BoardView(ttk.Frame):
             for cell_id in cell_ids:
                 card = self._buttons.get(cell_id)
                 if card is not None:
-                    card.itemconfigure("card_border", fill=color, outline=color)
+                    mark_color = MARK_COLORS.get(self._marks.get(cell_id))
+                    card.itemconfigure(
+                        "card_border",
+                        fill=mark_color or color,
+                        outline=color,
+                        width=2 if mark_color else 1,
+                    )
             self._schedule(tick, index + 1, delay=20)
 
         tick(0)
@@ -422,7 +420,15 @@ class BoardView(ttk.Frame):
                 fill, border = self.HIGHLIGHT_FILL, self.HIGHLIGHT
             else:
                 fill, border = self.CARD, self.BORDER
-            card.itemconfigure("card_border", fill=border, outline=border)
+            mark_color = MARK_COLORS.get(self._marks.get(character.id))
+            if mark_color:
+                border = mark_color
+            card.itemconfigure(
+                "card_border",
+                fill=border,
+                outline=self.HIGHLIGHT if is_highlighted else border,
+                width=2 if is_highlighted and mark_color else 1,
+            )
             for content in card.winfo_children():
                 content.configure({"bg": fill})
                 for child in content.winfo_children():

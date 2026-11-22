@@ -12,7 +12,7 @@ from game.puzzle_loader import load_puzzle
 from gui.board_view import BoardView
 from gui.dialogs import show_help, show_library, show_replay
 from gui.main_window import MainWindow
-from gui.play_session import LEVELS, SOURCE, PlaySession
+from gui.play_session import LEVELS, MARK_COLORS, SOURCE, PlaySession
 from logic.cnf_encoder import CNFEncoder
 from solver.dpll import DPLLSolver
 
@@ -69,7 +69,7 @@ def test_replay_next_previous_never_display_future_clues(root: Tk) -> None:
     button(replay, "← Previous").invoke()
     root.update()
     assert board._state == session.snapshots[0]
-    assert "Odd criminals" not in info.get("1.0", "end")
+    assert "Odd number of criminals" not in info.get("1.0", "end")
     assert board._card_labels["B1"]["clue"].cget("text") == "Clue locked"
     for _ in session.steps:
         button(replay, "Next →").invoke()
@@ -90,7 +90,9 @@ def test_notes_and_results_remain_accessible_at_minimum_size(root: Tk) -> None:
     window._toggle_used()
     label = window.board._card_labels["A1"]["clue"]
     assert Font(font=label.cget("font")).actual("overstrike") == 1
-    assert window.board._card_labels["A1"]["note"].cget("text") == "●"
+    card = window.board._buttons["A1"]
+    assert card.itemcget("card_border", "fill") == MARK_COLORS["Purple"]
+    assert card.itemcget("card_border", "outline") == BoardView.HIGHLIGHT
     assert window.board._buttons["A1"].winfo_children()[0].cget("bg") == BoardView.INNOCENT_FILL
     assert engine.get_public_state() == initial
     window._sidebar_canvas.yview_moveto(1)
@@ -102,6 +104,59 @@ def test_notes_and_results_remain_accessible_at_minimum_size(root: Tk) -> None:
     )
     window._toggle_used()
     assert Font(font=label.cget("font")).actual("overstrike") == 0
+
+
+def test_temporary_frame_survives_highlighting_and_can_be_cleared(root: Tk) -> None:
+    engine, agent = stack()
+    initial = engine.get_public_state()
+    session = PlaySession(engine)
+    agent.auto_solve(session)
+    final = engine.get_public_state()
+    criminal = next(c.id for c in final.characters if c.status.value == "CRIMINAL")
+    board = BoardView(root, lambda _: None)
+    board.pack()
+    for state, cell, fill in (
+        (initial, "A1", BoardView.INNOCENT_FILL),
+        (initial, "B1", BoardView.CARD),
+        (final, criminal, BoardView.CRIMINAL_FILL),
+    ):
+        board.highlight(())
+        board.render(state)
+        board.set_notes({cell: "Blue"}, set())
+        card = board._buttons[cell]
+        assert card.itemcget("card_border", "fill") == MARK_COLORS["Blue"]
+        assert card.winfo_children()[0].cget("bg") == fill
+        board.highlight((cell,))
+        assert card.itemcget("card_border", "fill") == MARK_COLORS["Blue"]
+        assert card.itemcget("card_border", "outline") == BoardView.HIGHLIGHT
+        board.pulse((cell,))
+        assert card.itemcget("card_border", "fill") == MARK_COLORS["Blue"]
+        board.cancel_animations()
+        board.highlight(())
+        board.set_notes({}, set())
+        expected = BoardView.INNOCENT if cell == "A1" else BoardView.BORDER
+        if state == final:
+            expected = BoardView.CRIMINAL
+        assert card.itemcget("card_border", "fill") == expected
+    assert engine.get_public_state() == final
+
+
+def test_help_button_is_next_to_case_notes(root: Tk, monkeypatch: pytest.MonkeyPatch) -> None:
+    engine, agent = stack()
+    window = MainWindow(root, engine, agent)
+    root.update()
+    help_button = window.help_button
+    heading = next(
+        c
+        for c in help_button.master.winfo_children()
+        if isinstance(c, ttk.Label) and c.cget("text") == "CASE NOTES"
+    )
+    assert help_button.winfo_y() <= heading.winfo_y() + heading.winfo_height()
+    assert 0 <= help_button.winfo_x() - (heading.winfo_x() + heading.winfo_width()) <= 12
+    opened = []
+    monkeypatch.setattr("gui.main_window.show_help", lambda parent: opened.append(parent))
+    help_button.invoke()
+    assert opened == [root]
 
 
 def test_results_details_and_next_case_button(root: Tk) -> None:

@@ -261,9 +261,6 @@ class MainWindow:
         self.puzzle_title.pack(anchor="w", pady=(2, 0))
         self.progress_label = ttk.Label(header, text="", style="Body.TLabel")
         self.progress_label.pack(side=RIGHT, anchor="s", pady=(0, 5))
-        ttk.Button(header, text="?", width=3, command=lambda: show_help(self.root)).pack(
-            side=RIGHT, padx=12
-        )
 
         body = ttk.Frame(shell, style="App.TFrame")
         body.pack(fill=BOTH, expand=True)
@@ -307,7 +304,13 @@ class MainWindow:
                 canvas.yview_scroll(-int(event.delta / 120), "units")
 
         self.root.bind("<MouseWheel>", scroll_notes, add="+")
-        ttk.Label(sidebar, text="CASE NOTES", style="Kicker.TLabel").pack(anchor="w")
+        notes_header = ttk.Frame(sidebar, style="App.TFrame")
+        notes_header.pack(fill=X)
+        ttk.Label(notes_header, text="CASE NOTES", style="Kicker.TLabel").pack(side=LEFT)
+        self.help_button = ttk.Button(
+            notes_header, text="?", width=3, command=lambda: show_help(self.root)
+        )
+        self.help_button.pack(side=LEFT, padx=(8, 0))
         selected_box = ttk.Frame(sidebar, style="CardBox.TFrame", padding=(10, 8))
         selected_box.pack(fill=X, pady=(6, 12))
         self.selected_label = ttk.Label(
