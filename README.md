@@ -7,7 +7,6 @@ COMMON_NEIGHBORS. Model, Protocol, schema và dependency giữ nguyên.
 ## Trạng thái kiểm tra hiện tại — 20/11/2026
 
 - Review giai đoạn 2: [bảng đối chiếu và các điểm đang bị chặn](docs/phase2_review.md).
-  <<<<<<< HEAD
 - Nghiệm thu GUI & môi trường sạch giai đoạn 4 (TV5): [checklist nghiệm thu](docs/tv5_stage4_acceptance.md) và [báo cáo GUI/tích hợp](docs/report/tv5.md) kèm 11 ảnh chụp thực tế tại `docs/report/screenshots/`.
 - Đã kiểm tra cài đặt và chạy trên **môi trường ảo Python 3.11.9 sạch** (Windows 64-bit, cài từ `Source/requirements.txt`, đủ 22 gói lockfile, `pip check` đạt, Tk/Tcl 8.6):
   - Suite hiện tại: **564 passed**, không failed/skipped/error (gồm 21 test GUI có kiểm thử Tkinter thật cho board 3×3/4×4, highlight mọi loại vùng, timeout/error và reload puzzle cùng kích thước).
@@ -23,7 +22,6 @@ COMMON_NEIGHBORS. Model, Protocol, schema và dependency giữ nguyên.
   số liệu cũ trong nhật ký; mỗi mục lịch sử phản ánh thời điểm riêng.
 - Đã chạy backend thật với các puzzle còn tồn tại: demo_forced_unknown 3x3
   SOLVED/8 bước/105 queries, example 4x4 SOLVED/15 bước/301 queries.
-  > > > > > > > origin/feature/TV2-logic-cnf-encoder
 
 ## Cài đặt và chạy
 
@@ -41,8 +39,6 @@ python main.py
 ```
 
 _(Nếu máy không cài launcher `py`, dùng đường dẫn trực tiếp tới `python.exe` của Python 3.11 để tạo `.venv`.)_
-
-<<<<<<< HEAD
 
 ### Lệnh kiểm thử, lint và thực nghiệm (chạy từ `Source/`)
 
@@ -74,7 +70,6 @@ python -m experiments.phase3 --repeats 3 --timeout 10
 - Snapshot kết quả giai đoạn 3: Source/experiments/results/phase3/;
   snapshot uniqueness cũ: các file trực tiếp trong Source/experiments/results/.
 - Phân công: docs/task_distribution.md. Môi trường: docs/dependencies.md.
-  > > > > > > > origin/feature/TV2-logic-cnf-encoder
 - Lịch sử AI theo ngày: [chỉ mục](docs/ai_usage.md). Không coi thứ tự merge commit
   là thời gian thực hiện từng thao tác hoặc tự sửa ngày sự kiện.
 
