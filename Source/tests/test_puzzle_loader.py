@@ -14,7 +14,7 @@ SOURCE = Path(__file__).resolve().parents[1]
 
 @pytest.fixture
 def raw():
-    return json.loads((SOURCE / "puzzles/3x3/example_01.json").read_text())
+    return json.loads((SOURCE / "puzzles/3x3/example_01.json").read_text(encoding="utf-8"))
 
 
 @pytest.mark.parametrize(
@@ -115,8 +115,12 @@ def test_loader_normalizes_order_and_detaches_data(raw):
     puzzle = puzzle_from_dict(raw)
     assert raw == before
     assert puzzle.characters[0].id == "A1"
-    raw["characters"][-1]["clue"]["person"] = "C3"
-    assert puzzle.characters[0].clue.person == "B1"
+    expected_clue = copy.deepcopy(puzzle.characters[0].clue)
+    raw_clue = raw["characters"][-1]["clue"]
+    raw_clue["id"] = "changed_after_load"
+    if "region" in raw_clue:
+        raw_clue["region"]["index"] = 1
+    assert puzzle.characters[0].clue == expected_clue
 
 
 @pytest.mark.parametrize("payload", [b"{", b"\xff", b"[]", b"null"])

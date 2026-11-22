@@ -63,6 +63,9 @@ class CountingSolver:
 
 
 def chain_puzzle(size: int = 3) -> Puzzle:
+    # The demo is the fixed FACT chain; example_01 may contain other clue types.
+    if size == 3:
+        return load_puzzle(SOURCE / "puzzles/3x3/demo_forced_unknown.json")
     return load_puzzle(SOURCE / f"puzzles/{size}x{size}/example_01.json")
 
 

@@ -112,6 +112,18 @@ Toàn suite hiện tại **565 passed** trên Python 3.12.6/Windows; Ruff check/
     `ERROR`/`TIMEOUT`, không lộ `hidden_status` và CLI trả mã thoát 1 khi `normal` timeout.
 - Kết quả cuối trên Python 3.11.9: **564 passed**, Ruff check/format và `pip check` đạt.
 
+## Kiểm tra sau merge — TV4, 22/11/2026
+
+- Fixture loader đọc UTF-8 và kiểm tra snapshot độc lập với nội dung clue mẫu.
+- Các test parity/FACT chain dùng demo_forced_unknown; test GUI giữ museum_shift
+  và dùng ô UNKNOWN/vùng highlight đúng của puzzle hiện tại.
+- `test_remark.py`: 5 ca cho narrative True dưới mọi assignment, không thêm
+  ràng buộc uniqueness, schema lỗi và reveal/trace giữ text UTF-8.
+- `test_gui.py`: thêm 6 ca lỗi/timeout/data mismatch trước và sau accepted reveal;
+  chỉ báo không đổi thẻ nếu chưa có commit, giữ đúng state và khóa trace lỗi.
+- Chạy toàn suite không ép UTF-8 môi trường: **599 passed** trên Python 3.12.6;
+  Ruff check/format đạt. Các số test bên trên là mốc nghiệm thu trước merge.
+
 ## Nhật ký AI
 
 Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.

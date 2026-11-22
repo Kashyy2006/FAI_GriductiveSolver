@@ -112,6 +112,15 @@ Phân tích và hướng dẫn tái lập: [báo cáo TV4](../../docs/report/tv4
   `dpll_work_and_clauses.png`, `sat_calls_and_outcomes.png`).
 - Chi tiết thuật toán và phân tích hiệu năng: `docs/report/tv3_phase4.md`.
 
+## TV4 cập nhật nghiệm thu sau merge — 22/11/2026
+
+Runner dùng phân loại thật để chọn ô UNKNOWN cho chẩn đoán NOT_PROVABLE,
+không cố định C1 theo puzzle cũ. Với museum_shift hiện tại, ô này là A2.
+CSV/metadata/trace ở docs/report đã tạo lại bằng `--as-of 2026-11-22`:
+11/11 ca đạt, khớp cả số lượng và thứ tự SAT queries. Bộ đường dẫn giữ nguyên,
+nhưng example_01 hiện là museum_shift; xem input/source hash để phân biệt với
+kết quả cũ. Không ghi đè benchmark phase3/phase4 của TV3.
+
 ## Nhật ký AI
 
 ### 2026-11-09 — Xây runner và đo uniqueness

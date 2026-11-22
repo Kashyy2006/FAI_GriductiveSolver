@@ -1,5 +1,5 @@
 group,puzzle_path,puzzle_id,size,initial_known,initial_criminal,initial_innocent,initial_unknown,outcome,deduction_steps,actual_sat_calls,trace_queries,query_order_matches,decisions,propagations,backtracks,uniqueness,expected_outcome,expected_uniqueness,checks_passed,error_type
-shared_phase3,puzzles/3x3/example_01.json,example_3x3_chain,3,1,0,1,7,SOLVED,8,105,105,True,0,393,0,UNIQUE,SOLVED,UNIQUE,True,
+shared_phase3,puzzles/3x3/example_01.json,museum_shift,3,1,0,2,6,SOLVED,8,105,105,True,0,472,0,UNIQUE,SOLVED,UNIQUE,True,
 shared_phase3,puzzles/4x4/example_01.json,example_4x4_chain,4,1,0,1,14,SOLVED,15,301,301,True,0,1856,0,UNIQUE,SOLVED,UNIQUE,True,
 shared_phase3,experiments/puzzles/synthetic_3x3_fact_chain.json,synthetic_3x3_fact_chain,3,1,0,1,7,SOLVED,8,105,105,True,0,393,0,UNIQUE,SOLVED,UNIQUE,True,
 shared_phase3,experiments/puzzles/synthetic_3x3_row_counts.json,synthetic_3x3_row_counts,3,1,0,3,5,SOLVED,8,105,105,True,0,469,0,UNIQUE,SOLVED,UNIQUE,True,

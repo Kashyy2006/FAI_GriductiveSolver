@@ -122,7 +122,12 @@ def _diagnostics(budget: float) -> dict[str, object]:
     state = engine.get_public_state()
     classified = agent.classify_all(state)
     wrong = engine.submit_verdict("B1", Status.CRIMINAL, expected_token=state.token)
-    unknown = engine.submit_verdict("C1", Status.CRIMINAL, expected_token=state.token)
+    unknown_id = next(
+        cell_id
+        for cell_id, value in classified.classifications.items()
+        if value == Classification.UNKNOWN
+    )
+    unknown = engine.submit_verdict(unknown_id, Status.CRIMINAL, expected_token=state.token)
     unchanged = engine.get_public_state() == state
     bad_a1 = replace(
         state.characters[0],
@@ -153,6 +158,7 @@ def _diagnostics(budget: float) -> dict[str, object]:
             key: value.value for key, value in classified.classifications.items()
         },
         "wrong_verdict": wrong.outcome.value,
+        "unforced_character_id": unknown_id,
         "unforced_verdict": unknown.outcome.value,
         "rejected_actions_leave_state_unchanged": unchanged,
         "inconsistent_kb_status": inconsistent_classified.kb_status.value,

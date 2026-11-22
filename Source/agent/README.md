@@ -142,6 +142,20 @@ chưa thay thế kiểm thử runtime Python 3.11. Các phần AI note không ch
 - Đây là nghiệm thu chức năng và số calls; benchmark hiệu năng lặp thuộc TV3.
   Không đổi production Agent/API hoặc thêm nhật ký AI trong lượt này.
 
+## TV4 chốt các phần sau merge — 22/11/2026
+
+- Đã sửa fixture đọc JSON bằng UTF-8; test cần chuỗi FACT dùng demo chain riêng,
+  không thay puzzle museum_shift đang dùng. Không bỏ hoặc nới kiểm tra entailment.
+- Contract REMARK được thống nhất: narrative không tạo clause hoặc active ID;
+  khi reveal, trace giữ nguyên type/text. Thêm `tests/test_remark.py` với 5 ca.
+- GUI báo số accepted reveal được giữ nếu lỗi giữa Auto Solve; 6 regression
+  kiểm tra lỗi thường/timeout/lỗi dữ liệu trước và sau reveal. Không tạo trace giả.
+- Runner chọn ô UNKNOWN từ phân loại thực tế. Đã tạo lại CSV/metadata/trace
+  ngày 22/11; 11/11 ca khớp outcome, uniqueness và query ledger.
+- Toàn suite hiện tại **599 passed**, Ruff check/format đạt trên Python 3.12.6;
+  target Python 3.11 chưa chạy lại trong lượt này. Báo cáo TV4 đã cập nhật ví dụ
+  museum_shift và các phần bàn giao trong [tv4.md](../../docs/report/tv4.md).
+
 ## Nhật ký AI
 
 

@@ -286,7 +286,7 @@ def test_reset_clears_sidebar_selection_highlights_and_trace(
 
 
 def test_verdict_refresh_updates_selected_clue_and_unknown_does_not_reveal(ui: MainWindow) -> None:
-    ui._select_cell("C1")
+    ui._select_cell("A2")
     initial = ui.engine.get_public_state()
     ui._submit(Status.CRIMINAL)
     run_task(ui)
@@ -450,7 +450,7 @@ def test_contradicted_verdict_and_hint_preserve_state_and_highlight_on_accept(
     run_task(ui)
     after = ui.engine.get_public_state()
     assert after.token.version == 1
-    assert ui.board.highlighted == ("C1",)
+    assert ui.board.highlighted == ("B2",)
 
 
 def test_solver_timeout_and_solution_mismatch_report_distinct_errors(
@@ -480,6 +480,42 @@ def test_solver_timeout_and_solution_mismatch_report_distinct_errors(
     assert not ui._busy
     assert "Puzzle data error" in str(ui.status_label.values["text"])
     assert ui.errors[-1][0] == "Puzzle data error"
+
+
+@pytest.mark.parametrize("accepted_reveals", [0, 1])
+@pytest.mark.parametrize("error_type", [RuntimeError, SolverTimeout, SolutionMismatchError])
+def test_auto_solve_error_reports_committed_progress(
+    ui: MainWindow, accepted_reveals: int, error_type: type[Exception]
+) -> None:
+    class FailingSolver(DPLLSolver):
+        def solve(self, *args, **kwargs):
+            if engine.get_public_state().token.version >= accepted_reveals:
+                raise error_type("Injected failure")
+            return super().solve(*args, **kwargs)
+
+    agent = DeductiveAgent(CNFEncoder(), FailingSolver())
+    engine = GameEngine(load_puzzle(SOURCE / "puzzles/3x3/example_01.json"), agent.verify_verdict)
+    ui.agent, ui.engine = agent, engine
+    ui.refresh()
+    initial = engine.get_public_state()
+    ui._auto_solve()
+    run_task(ui)
+
+    current = engine.get_public_state()
+    assert current.token.version == initial.token.version + accepted_reveals
+    assert ui._state == current and not ui._busy
+    assert sum(c.status is not None for c in current.characters) == (
+        sum(c.status is not None for c in initial.characters) + accepted_reveals
+    )
+    message = str(ui.status_label.values["text"])
+    if accepted_reveals:
+        assert "Progress kept: 1 accepted reveal." in message
+        assert "unchanged" not in message and "No cards were changed" not in message
+    else:
+        assert "No cards were changed." in message
+    assert ui._last_solve is None
+    assert ui.save_trace_button.values["state"] == "disabled"
+    assert isinstance(ui.errors[-1][1], error_type)
 
 
 @pytest.mark.parametrize("fixture_name", ["invalid_reference.json", "inconsistent.json"])

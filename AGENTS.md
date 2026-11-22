@@ -28,6 +28,9 @@ Người dùng đã cho phép thiết lập các định nghĩa v1 trong lần t
 - Engine giữ nhãn ẩn/clue chưa mở; GUI và Agent chỉ nhận PublicState.
 - KB chỉ có clue đã reveal và unit verdict đã biết; mọi clue đều đúng bất kể
   chủ thẻ Criminal hay Innocent. Không suy luận từ một model đơn lẻ.
+- REMARK là văn bản mô tả, không tạo ràng buộc SAT và không nằm trong
+  active_clue_ids. Chỉ công khai khi reveal; trace vẫn lưu nguyên Clue/text trong
+  newly_revealed_clue. Không dùng nội dung text để suy nhãn hoặc tính extension.
 - Kiểm tra consistency trước; UNSAT(KB AND NOT Ci) chứng minh Criminal,
   UNSAT(KB AND Ci) chứng minh Innocent. Cả hai SAT -> Unknown.
 - Hint/rejected verdict không sửa trạng thái hoặc reveal dữ liệu.

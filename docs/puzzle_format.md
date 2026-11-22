@@ -49,6 +49,21 @@ Không cho key thừa ở bất kỳ object JSON nào. Không truyền JSON này
 | AT_MOST | region, k | Nhiều nhất k Criminal |
 | EVEN | region | Số Criminal chẵn |
 | ODD | region | Số Criminal lẻ |
+| REMARK | text | Văn bản mô tả, không tạo ràng buộc logic |
+
+REMARK có đúng id/type/text; text phải chứa ký tự không phải khoảng trắng.
+Không cho tham số person/status/first/second/region/k. Ví dụ:
+
+```json
+{"id":"remark_C3","type":"REMARK","text":"A quiet evening at the museum."}
+```
+
+REMARK luôn được evaluator coi là True dưới assignment hợp lệ; Encoder không
+tạo clause hoặc đưa ID vào active_clue_ids. Trạng thái công khai của chủ thẻ
+vẫn tạo unit như bình thường. Nội dung không phải dữ kiện để suy luận nhãn.
+Text chỉ reveal cùng thẻ; newly_revealed_clue trong trace lưu nguyên type/text.
+Uniqueness bỏ qua REMARK và không tính nó là extension; hai extensions vẫn là
+Parity và COMMON_NEIGHBORS.
 
 Ví dụ binary: `{"id":"b","type":"SAME","first":"A1","second":"B1"}`.
 SAME với hai ID giống nhau là tautology, DIFFERENT với hai ID giống nhau luôn

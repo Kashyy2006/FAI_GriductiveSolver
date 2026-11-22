@@ -30,6 +30,11 @@
 - Lỗi dữ liệu (`PuzzleValidationError`, `SolutionMismatchError`) và `SolverTimeout`
   được hiển thị tách biệt, cập nhật rõ `STATUS` và không bao giờ báo timeout là
   UNSAT, STUCK hoặc hoàn thành; Load lỗi giữ nguyên game trước đó.
+- TV4 sửa thông báo sau merge ngày 22/11: khi lỗi giữa Auto Solve, đọc lại Engine
+  và báo số accepted reveal đã giữ so với token bắt đầu. Chỉ báo không đổi thẻ
+  khi version chưa tăng; không tạo partial trace giả. Sáu regression bao phủ lỗi
+  thường, timeout và lỗi dữ liệu trước/sau reveal. Toàn suite mới: 599 passed
+  trên Python 3.12.6; mốc Python 3.11 phía dưới là lần nghiệm thu trước đó.
 - Reset xóa selection/highlight, sidebar clue, toast, trace đã lưu trong bộ nhớ và
   đóng cửa sổ trace cũ. `refresh` đọc lại clue của ô đang chọn từ `PublicState`.
 - Sau Auto Solve, `View Trace` hiển thị accepted steps, clue trước/sau reveal và

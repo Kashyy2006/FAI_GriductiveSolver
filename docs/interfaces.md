@@ -22,6 +22,9 @@ Không tạo bộ class hoặc enum riêng để né API.
 - PublicState.characters luôn đủ N*N ô row-major; token không phải bằng chứng.
 - Dataclass frozen ngăn thay field; dict/list bên trong vẫn mutable, phải xem là
   read-only và copy sâu khi xử lý. Không chia sẻ container với trạng thái private.
+- ClueType.REMARK dùng Clue.text là chuỗi có ký tự không phải khoảng trắng;
+  không có person/status/first/second/region/k. Đây là narrative, không phải
+  ràng buộc logic hay một extension; không phân tích text để suy luận.
 
 ## TV1 — loader và Engine
 
@@ -72,6 +75,9 @@ Encode rebuild mỗi snapshot, clue theo ID, known status theo row-major. Chỉ 
 đã mở, unit status đã biết; primary count=N*N, clause_count=len(cnf).
 CNF=[] là True, CNF có [] là False, không literal 0.
 Cardinality dùng tổ hợp trực tiếp; parity cấm assignment sai parity.
+REMARK được validate nhưng không sinh clause; evaluator trả True dưới mọi
+assignment hợp lệ. active_clue_ids chỉ gồm ID clue logic đang encode, sắp theo
+ID, loại REMARK. Unit status công khai của thẻ REMARK vẫn được thêm bình thường.
 
 ## TV3 — DPLL và uniqueness
 
@@ -123,7 +129,8 @@ verify_verdict kiểm tra ID chưa mở, consistency rồi entailment; Unknown -
 NOT_PROVABLE, opposite forced -> CONTRADICTED, requested forced -> ACCEPTED.
 
 Hint chọn ô forced đầu row-major; nếu không có hoặc inconsistent thì
-character_id/status=None. active_clue_ids là toàn bộ clue public đang dùng,
+character_id/status=None. active_clue_ids là toàn bộ clue logic public đang dùng
+(không gồm REMARK),
 không được trình bày như minimal explanation. Hint không mutate state.
 
 Auto Solve submit từng verdict với token; mỗi ACCEPTED tạo DeductionStep,
@@ -143,6 +150,9 @@ lấy từ queries toàn run, không cộng thêm queries lồng nhau lần nữ
 
 DeductionStep chứa token_before/after, active_clue_ids trước reveal, verdict,
 newly_revealed_clue (chỉ lấy sau ACCEPTED). Không có SAT assignment ẩn trong log.
+Nếu thẻ vừa mở chứa REMARK, newly_revealed_clue vẫn giữ type/text đầy đủ dù ID
+đó không xuất hiện trong active_clue_ids của các bước sau. REMARK chưa mở vẫn
+ẩn trong PublicState như mọi clue khác; uniqueness cũng không thêm ràng buộc từ text.
 save_trace ghi UTF-8 JSON array; Enum -> .value, tuple -> array, các tên field
 đúng dataclass, indent=2, sort_keys=True; tạo parent nếu cần, không sửa steps.
 
@@ -163,6 +173,9 @@ public snapshot. Chọn clue dùng resolver để highlight, FACT/binary dùng I
 Tk widget chỉ main thread. Load/Restart trong lúc solve phải loại kết quả token
 cũ; engine bảo vệ state, GUI bỏ result thuộc phiên khác. Hiển thị lỗi/timeout
 riêng, không gọi đó là UNSAT, STUCK hoặc kết quả hoàn thành.
+Nếu Auto Solve lỗi sau accepted reveal, GUI refresh từ Engine và báo số reveal
+đã được giữ kể từ token khởi chạy. Không báo board unchanged hoặc tạo trace
+hoàn tất giả; model v1 chưa trả partial AutoSolveResult khi exception.
 
 ## Thực nghiệm
 

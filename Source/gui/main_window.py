@@ -532,9 +532,17 @@ class MainWindow:
                     context = self._verdict_context if kind == "verdict" else None
                     self._verdict_context = None
                     self.refresh()
+                    accepted = self._state.token.version - token.version
+                    progress = (
+                        f" Progress kept: {accepted} accepted "
+                        f"{'reveal' if accepted == 1 else 'reveals'}."
+                        if accepted > 0
+                        else " No cards were changed."
+                    )
                     if isinstance(result, SolverTimeout):
                         self.status_label.configure(
                             text="Solver timed out before finishing. No result was assumed."
+                            + progress
                         )
                         if context is not None and context[2]:
                             self._show_toast("Solver timed out", str(result), "error")
@@ -543,10 +551,11 @@ class MainWindow:
                     elif isinstance(result, SolutionMismatchError):
                         self.status_label.configure(
                             text="Puzzle data error: proved verdict conflicts with puzzle data."
+                            + progress
                         )
                         self._show_error("Puzzle data error", result)
                     else:
-                        self.status_label.configure(text="Operation failed. Board state unchanged.")
+                        self.status_label.configure(text="Operation failed." + progress)
                         if context is not None and context[2]:
                             self._show_toast(f"Could not check {context[0]}", str(result), "error")
                         else:
