@@ -3,14 +3,26 @@
 import json
 import threading
 from pathlib import Path
+from tkinter import TclError, Tk
 from typing import Callable
 
 import pytest
 
 from agent.agent import DeductiveAgent
 from game.engine import GameEngine
-from game.models import SolveOutcome, Status
+from game.models import (
+    Clue,
+    ClueType,
+    PuzzleValidationError,
+    Region,
+    RegionType,
+    SolutionMismatchError,
+    SolveOutcome,
+    SolverTimeout,
+    Status,
+)
 from game.puzzle_loader import load_puzzle
+from gui.board_view import BoardView
 from gui.main_window import MainWindow
 from logic.cnf_encoder import CNFEncoder
 from solver.dpll import DPLLSolver
@@ -379,3 +391,162 @@ def test_empty_trace_is_viewable_and_exportable_for_stuck_run(
     )
     ui._save_trace()
     assert json.loads(destination.read_text(encoding="utf-8")) == []
+
+
+def test_clue_highlight_resolves_fact_binary_and_all_region_types(ui: MainWindow) -> None:
+    ui.engine.load(load_puzzle(SOURCE / "puzzles/4x4/example_01.json"))
+    ui.refresh()
+
+    fact = Clue(id="c1", type=ClueType.FACT, person="B1", status=Status.INNOCENT)
+    same = Clue(id="c2", type=ClueType.SAME, first="A1", second="C2")
+    diff = Clue(id="c3", type=ClueType.DIFFERENT, first="B2", second="D4")
+    row = Clue(id="c4", type=ClueType.EXACTLY, region=Region(kind=RegionType.ROW, index=1), k=1)
+    col = Clue(id="c5", type=ClueType.AT_LEAST, region=Region(kind=RegionType.COLUMN, index=2), k=1)
+    nbrs = Clue(
+        id="c6", type=ClueType.AT_MOST, region=Region(kind=RegionType.NEIGHBORS, cell="A1"), k=2
+    )
+    explicit = Clue(
+        id="c7", type=ClueType.EVEN, region=Region(kind=RegionType.EXPLICIT, cells=("A1", "D4"))
+    )
+    common = Clue(
+        id="c8",
+        type=ClueType.ODD,
+        region=Region(kind=RegionType.COMMON_NEIGHBORS, first="A1", second="C1"),
+    )
+    empty_common = Clue(
+        id="c9",
+        type=ClueType.EVEN,
+        region=Region(kind=RegionType.COMMON_NEIGHBORS, first="A1", second="D4"),
+    )
+
+    assert ui._clue_cells(fact, "A1") == ("B1",)
+    assert ui._clue_cells(same, "A1") == ("A1", "C2")
+    assert ui._clue_cells(diff, "A1") == ("B2", "D4")
+    assert ui._clue_cells(row, "A1") == ("A2", "B2", "C2", "D2")
+    assert ui._clue_cells(col, "A1") == ("C1", "C2", "C3", "C4")
+    assert ui._clue_cells(nbrs, "A1") == ("B1", "A2", "B2")
+    assert ui._clue_cells(explicit, "A1") == ("A1", "D4")
+    assert ui._clue_cells(common, "A1") == ("B1", "B2")
+    assert ui._clue_cells(empty_common, "A1") == ()
+
+
+def test_contradicted_verdict_and_hint_preserve_state_and_highlight_on_accept(
+    ui: MainWindow,
+) -> None:
+    initial = ui.engine.get_public_state()
+    ui._request_hint()
+    run_task(ui)
+    assert ui.engine.get_public_state() == initial
+    assert ui._selected_id == "B1"
+    assert ui.board.highlighted == ("B1",)
+    assert "Hint: B1 is forced Innocent." in ui.status_label.values["text"]
+
+    ui._submit(Status.CRIMINAL)
+    run_task(ui)
+    assert ui.engine.get_public_state() == initial
+    assert "contradicts" in ui.status_label.values["text"]
+
+    ui._submit(Status.INNOCENT)
+    run_task(ui)
+    after = ui.engine.get_public_state()
+    assert after.token.version == 1
+    assert ui.board.highlighted == ("C1",)
+
+
+def test_solver_timeout_and_solution_mismatch_report_distinct_errors(
+    ui: MainWindow, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    initial = ui.engine.get_public_state()
+    monkeypatch.setattr(
+        ui.agent, "next_hint", lambda _state: (_ for _ in ()).throw(SolverTimeout("deadline hit"))
+    )
+    ui._request_hint()
+    run_task(ui)
+    assert not ui._busy
+    assert ui.engine.get_public_state() == initial
+    status_text = str(ui.status_label.values["text"]).lower()
+    assert "timed out" in status_text
+    assert "unsat" not in status_text and "stuck" not in status_text
+    assert ui.errors[-1][0] == "Solver timed out"
+
+    monkeypatch.setattr(
+        ui.engine,
+        "submit_verdict",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(SolutionMismatchError("hidden conflict")),
+    )
+    ui._select_cell("B1")
+    ui._submit(Status.INNOCENT)
+    run_task(ui)
+    assert not ui._busy
+    assert "Puzzle data error" in str(ui.status_label.values["text"])
+    assert ui.errors[-1][0] == "Puzzle data error"
+
+
+@pytest.mark.parametrize("fixture_name", ["invalid_reference.json", "inconsistent.json"])
+def test_loading_invalid_puzzle_fixture_keeps_existing_game(
+    ui: MainWindow, monkeypatch: pytest.MonkeyPatch, fixture_name: str
+) -> None:
+    before = ui.engine.get_public_state()
+    monkeypatch.setattr(
+        "gui.main_window.filedialog.askopenfilename",
+        lambda **kwargs: str(SOURCE / "tests/fixtures" / fixture_name),
+    )
+    ui._load()
+    assert ui.engine.get_public_state() == before
+    assert len(ui.errors) == 1
+    assert isinstance(ui.errors[0][1], PuzzleValidationError)
+    assert "Previous game kept" in str(ui.status_label.values["text"])
+
+
+def test_real_tk_board_renders_3x3_and_4x4_with_revealed_highlight() -> None:
+    try:
+        root = Tk()
+    except TclError as error:
+        pytest.skip(f"Tk display unavailable: {error}")
+    root.withdraw()
+    closed = False
+    try:
+        agent = DeductiveAgent(CNFEncoder(), DPLLSolver())
+        engine = GameEngine(
+            load_puzzle(SOURCE / "puzzles/3x3/demo_forced_unknown.json"), agent.verify_verdict
+        )
+        window = MainWindow(root, engine, agent)
+        root.update()
+        assert len(window.board._buttons) == 9
+        assert window.board._card_labels["B1"]["clue"].cget("text") == "Clue locked"
+        assert window.board._card_labels["A1"]["clue"].cget("text") == "B1 is Innocent"
+
+        # Highlighting an already-revealed card uses the amber highlight border
+        # while keeping its Criminal/Innocent fill intact.
+        window.board.highlight(("A1", "B1"))
+        a1_canvas = window.board._buttons["A1"]
+        assert a1_canvas.itemcget("card_border", "outline") == BoardView.HIGHLIGHT
+        a1_content = a1_canvas.winfo_children()[0]
+        assert a1_content.cget("bg") == BoardView.CRIMINAL_FILL
+
+        # Switch to a 4x4 puzzle and check minimum window size layout.
+        window._state = engine.load(
+            load_puzzle(SOURCE / "experiments/puzzles/synthetic_4x4_row_counts.json")
+        )
+        window._reset_view()
+        window.refresh()
+        root.geometry("990x680")
+        root.update()
+        assert len(window.board._buttons) == 16
+        assert window.board._card_labels["A1"]["name"].cget("text") == "Person 00"
+        assert window.board._card_labels["A1"]["profession"].cget("text") == "Researcher"
+        window._select_cell("A1")
+        assert window.board._highlighted == {"A2", "B2", "C2", "D2"}
+
+        # Loading another puzzle of the same size must refresh names and professions.
+        window._state = engine.load(load_puzzle(SOURCE / "puzzles/4x4/example_01.json"))
+        window._reset_view()
+        window.refresh()
+        root.update()
+        assert window.board._card_labels["A1"]["name"].cget("text") == "Person 01"
+        assert window.board._card_labels["A1"]["profession"].cget("text") == "Detective"
+        window._close()
+        closed = True
+    finally:
+        if not closed:
+            root.destroy()

@@ -10,12 +10,14 @@
 ## Trạng thái kiểm tra hiện tại
 
 - Engine, core/parity Encoder, regions/evaluator, DPLL/uniqueness, Agent/trace
-  và GUI đã triển khai. Đã khôi phục puzzles/3x3/example_01.json đúng bản gốc.
-- Kiểm tra sau khắc phục ngày 18/11/2026: **558 passed**, Ruff check/format
-  và pip check đạt. main.py/Tkinter thật chạy Auto Solve và Restart thành công.
+  và GUI đã triển khai đầy đủ theo contract v1.
+- Kiểm tra trên môi trường ảo Python 3.11.9 sạch ngày 20/11/2026: **564 passed**,
+  Ruff check/format (41 file Python), `pip check` và `main.py` Tkinter thật đạt.
+- Checklist nghiệm thu GUI & báo cáo TV5: [tv5_stage4_acceptance.md](../docs/tv5_stage4_acceptance.md)
+  và [tv5.md](../docs/report/tv5.md).
+- Lệnh chạy ứng dụng: `python main.py`.
 - Lệnh test: `python -m pytest tests -q -p no:cacheprovider`.
-- Backend thật giải được các demo 3x3 và example 4x4 còn tồn tại; giới hạn và
-  bảng kiểm tra từng thành viên tại [review giai đoạn 2](../docs/phase2_review.md).
+- Lệnh lint/format: `python -m ruff check . --no-cache` và `python -m ruff format --check . --no-cache`.
 - Runner benchmark: `python -m experiments.benchmark --mode all --repeats 3`.
 - Runner nghiệm thu: `python -m experiments.phase3 --repeats 3 --timeout 10` (giai đoạn 3),
   `python -m experiments.phase4 --repeats 5 --timeout 10` (giai đoạn 4).
@@ -24,7 +26,6 @@
 - Kết quả trong `experiments/results/phase3/` là snapshot giai đoạn 3.
 
 ## Nhật ký AI
-
 
 ### 2026-11-08 — Nối composition root cho GUI
 
@@ -88,6 +89,8 @@
 - Kiểm tra: 517 test đạt; Ruff check và format check đạt.
 - Còn thiếu: Chưa rà bố cục GUI ở các kích thước màn hình khác.
 
+<<<<<<< HEAD
+
 ### 2026-11-21 — Cập nhật trạng thái TV3 giai đoạn 4
 
 - Thành viên: Mạnh (TV3).
@@ -96,4 +99,15 @@
 - File thay đổi: `README.md`.
 - Nội dung và lý do: Thêm lệnh `experiments.phase4` và đường dẫn kết quả/báo cáo giai đoạn 4.
 - Kiểm tra: 564 test, Ruff check/format và `pip check` đạt trên Python 3.11.9.
-- Còn thiếu: Chưa push lên remote.
+- # Còn thiếu: Chưa push lên remote.
+
+### 2026-11-20 — Đồng bộ trạng thái kiểm tra môi trường sạch TV5
+
+- Thành viên: Phúc (TV5).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Hoàn thiện README và nghiệm thu chạy sạch giai đoạn 4.
+- File thay đổi: `README.md`.
+- Nội dung và lý do: Cập nhật kết quả kiểm tra trên venv Python 3.11.9 sạch và bổ sung liên kết tới checklist/báo cáo TV5.
+- Kiểm tra: 564/564 test đạt, Ruff check/format 41 file, `pip check` và smoke test `main.py` đạt trên Python 3.11.9.
+- Còn thiếu: Không.
+  > > > > > > > origin/feature/GUI

@@ -4,50 +4,61 @@ Engine, CNF Encoder, DPLL, Deductive Agent và GUI Tkinter đã được triển
 và nối theo API v1. Encoder hỗ trợ sáu clue core, Parity (EVEN/ODD) và vùng
 COMMON_NEIGHBORS. Model, Protocol, schema và dependency giữ nguyên.
 
-## Trạng thái kiểm tra hiện tại — 18/11/2026
+## Trạng thái kiểm tra hiện tại — 20/11/2026
 
 - Review giai đoạn 2: [bảng đối chiếu và các điểm đang bị chặn](docs/phase2_review.md).
-- Đã khôi phục Source/puzzles/3x3/example_01.json từ bản gốc trước commit xóa
-  7e99d7a; không sửa yếu test hoặc thay đổi kỳ vọng của fixture.
-- Suite hiện tại: **558 passed**, không failed/error, trên Python 3.12.6/Windows.
-- Đã smoke test composition root main.py và Tkinter thật ở chế độ ẩn: tải puzzle
-  mặc định, Auto Solve 8 bước/105 queries và Restart thành công.
-- Ruff check/format đạt (41 file Python). Không dùng kết quả này để thay các
-  số liệu cũ trong nhật ký; mỗi mục lịch sử phản ánh thời điểm riêng.
-- Đã chạy backend thật với các puzzle còn tồn tại: demo_forced_unknown 3x3
-  SOLVED/8 bước/105 queries, example 4x4 SOLVED/15 bước/301 queries.
+- Nghiệm thu GUI & môi trường sạch giai đoạn 4 (TV5): [checklist nghiệm thu](docs/tv5_stage4_acceptance.md) và [báo cáo GUI/tích hợp](docs/report/tv5.md) kèm 11 ảnh chụp thực tế tại `docs/report/screenshots/`.
+- Đã kiểm tra cài đặt và chạy trên **môi trường ảo Python 3.11.9 sạch** (Windows 64-bit, cài từ `Source/requirements.txt`, đủ 22 gói lockfile, `pip check` đạt, Tk/Tcl 8.6):
+  - Suite hiện tại: **564 passed**, không failed/skipped/error (gồm 21 test GUI có kiểm thử Tkinter thật cho board 3×3/4×4, highlight mọi loại vùng, timeout/error và reload puzzle cùng kích thước).
+  - Ruff check và `ruff format --check` đạt toàn bộ **41 file Python**.
+  - Smoke test `Source/main.py` và nghiệm thu GUI thật trên 3×3 (`demo_forced_unknown.json`: SOLVED 8 bước/105 calls; `demo_stuck.json`: STUCK 1 bước), 4×4 (`example_01.json`: SOLVED 15 bước/301 calls; `synthetic_4x4_row_counts.json`: highlight hàng 2), dữ liệu lỗi (`invalid_reference.json`) và kích thước cửa sổ tối thiểu `990×680` đều đạt.
+- Không dùng kết quả này để thay các số liệu cũ trong nhật ký; mỗi mục lịch sử phản ánh thời điểm riêng.
 
 ## Cài đặt và chạy
 
-Đọc AGENTS.md, docs/interfaces.md, docs/puzzle_format.md và README của module.
-Từ gốc repo, dùng PowerShell:
+Đọc `AGENTS.md`, `docs/interfaces.md`, `docs/puzzle_format.md` và README của từng module.
+Yêu cầu **Python 3.11** (kèm `tkinter`/`ttk` từ bộ cài Python; không `pip install tkinter`).
+Từ thư mục gốc repository, dùng PowerShell:
 
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 cd Source
 python -m pip install -r requirements.txt
+python -m pip check
 python main.py
-python -m pytest tests -q
-python -m ruff check . --no-cache
-python -m ruff format --check . --no-cache
 ```
 
-Lệnh main.py tải lại được puzzle mặc định. Các puzzle demo mới vẫn được giữ
-nguyên bên cạnh example_01.json để không phá các đường dẫn tương thích.
-Chế độ --preview đã bị gỡ, không còn là chế độ được hỗ trợ.
+_(Nếu máy không cài launcher `py`, dùng đường dẫn trực tiếp tới `python.exe` của Python 3.11 để tạo `.venv`.)_
 
-- Hướng dẫn Agent/GUI/Logic: README của từng package trong Source/.
-- Nghiệm thu TV3: `python -m experiments.phase3 --repeats 3 --timeout 10`.
-  Test runner/profile đã đạt; snapshot benchmark lưu sẵn không bị ghi đè.
-- Snapshot kết quả giai đoạn 3: Source/experiments/results/phase3/;
-  snapshot uniqueness cũ: các file trực tiếp trong Source/experiments/results/.
-- Phân công: docs/task_distribution.md. Môi trường: docs/dependencies.md.
+### Lệnh kiểm thử, lint và thực nghiệm (chạy từ `Source/`)
+
+```powershell
+python -m pytest tests -q -p no:cacheprovider
+python -m ruff check . --no-cache
+python -m ruff format --check . --no-cache
+python -m experiments.benchmark --mode all --repeats 3
+python -m experiments.phase3 --repeats 3 --timeout 10
+```
+
+## Hướng dẫn sử dụng GUI
+
+- **Mở ứng dụng**: `python main.py` (từ `Source/`) tải puzzle mặc định `Source/puzzles/3x3/example_01.json`. Chế độ `--preview` đã bị gỡ.
+- **Inspect clue & Highlight**: Nhấp vào thẻ đã mở để đọc nội dung clue ở khung `PUBLIC CLUES` và highlight các ô thuộc phạm vi clue (vàng hổ phách, phân biệt rõ với màu đỏ Criminal và xanh Innocent; hoạt động cả trên thẻ úp lẫn thẻ đã mở).
+- **Manual Verdict**: Chọn một thẻ đang úp (`Clue locked`) rồi nhấn `Mark Criminal` hoặc `Mark Innocent`. Engine tự kiểm chứng qua SAT entailment; chỉ verdict được chứng minh mới mở thẻ (`ACCEPTED`), còn `NOT_PROVABLE` / `CONTRADICTED` giữ nguyên board và thông báo rõ.
+- **Get a Hint**: Chọn và pulse ô suy luận bắt buộc đầu tiên theo thứ tự row-major, không reveal thẻ và không đổi `StateToken`.
+- **Auto Solve**: Chạy vòng suy luận nền không chặn giao diện, lật từng thẻ theo thứ tự chứng minh và dừng ở `SOLVED`, `STUCK`, `INCONSISTENT` hoặc `CANCELLED`.
+- **View Trace / Save Trace…**: Khả dụng sau khi `Auto Solve` hoàn tất trong phiên hiện tại; xem toàn bộ bước công khai + SAT calls hoặc lưu JSON bằng `agent.trace.save_trace` vào `Source/outputs/traces/`.
+- **Load Puzzle… / Restart Case**: Đổi puzzle JSON (3×3, 4×4 trong `Source/puzzles/` hoặc `Source/experiments/puzzles/`) hoặc chơi lại bất kỳ lúc nào, kể cả khi `Auto Solve` đang chạy; tác vụ nền cũ bị hủy an toàn và file lỗi không làm hỏng phiên đang chơi.
+
+- Hướng dẫn chi tiết theo module: README của từng package trong `Source/`.
+- Snapshot kết quả giai đoạn 3: `Source/experiments/results/phase3/`;
+  snapshot uniqueness cũ: các file trực tiếp trong `Source/experiments/results/`.
+- Phân công: `docs/task_distribution.md`. Môi trường & dependencies: `docs/dependencies.md`.
 - Lịch sử AI theo ngày: [chỉ mục](docs/ai_usage.md). Không coi thứ tự merge commit
   là thời gian thực hiện từng thao tác hoặc tự sửa ngày sự kiện.
 
 ## Nhật ký AI
-
 
 Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 
@@ -217,6 +228,16 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Nội dung và lý do: Sửa trạng thái runtime/test và ghi rõ test tích hợp Engine thật; giữ các mục cũ làm lịch sử.
 - Kiểm tra: Theo kết quả vừa chạy, 517 test đạt trên Python 3.11.9; Ruff check và format check đạt.
 - Còn thiếu: Chưa rà giao diện trên kích thước màn hình khác.
+
+### 2026-11-20 — Hoàn thiện TV5 giai đoạn 4 và hướng dẫn sử dụng
+
+- Thành viên: Phúc (TV5).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Nghiệm thu GUI thật, chụp ảnh, kiểm tra môi trường sạch, hoàn thiện README/dependencies và viết báo cáo TV5.
+- File thay đổi: `README.md`, `Source/gui/`, `Source/tests/test_gui.py`, `docs/dependencies.md`, `docs/tv5_stage4_acceptance.md`, `docs/report/tv5.md`, `docs/report/screenshots/`.
+- Nội dung và lý do: Cập nhật hướng dẫn cài đặt Python 3.11 sạch, hướng dẫn thao tác GUI và dẫn tới checklist/báo cáo TV5; giữ nguyên model, Protocol, schema và dependency lock.
+- Kiểm tra: Môi trường sạch Python 3.11.9 đạt 564/564 test (21 test GUI), `pip check`, Tk 8.6, `main.py` và Ruff check/format 41 file.
+- Còn thiếu: Chưa ghép vào báo cáo chung cuối cùng.
 
 ### 2026-11-21 — Đồng bộ integration_v2 và hoàn thiện TV3 giai đoạn 4
 

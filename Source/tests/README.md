@@ -225,6 +225,16 @@ Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 - Kiểm tra: Kết quả gần nhất là 26 test GUI/tích hợp và 517 test toàn bộ đạt trên Python 3.11.9; Ruff check và format check đạt. Lượt sửa README này chỉ kiểm tra `git diff --check`.
 - Còn thiếu: Không.
 
+### 2026-11-20 — Bổ sung test nghiệm thu GUI giai đoạn 4
+
+- Thành viên: Phúc (TV5).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Bao phủ kiểm thử highlight, lỗi/timeout và Tkinter thật 3×3/4×4.
+- File thay đổi: `test_gui.py`, `README.md`.
+- Nội dung và lý do: Thêm 6 test cho `_clue_cells` trên mọi loại clue/vùng, `CONTRADICTED`/Hint/accept highlight, `SolverTimeout`/`SolutionMismatchError`, nạp fixture lỗi và test Tkinter thật cho 3×3, 4×4, `990×680` và reload cùng kích thước.
+- Kiểm tra: 21/21 test trong `test_gui.py` và 564/564 test toàn suite đạt trên Python 3.11.9 sạch; Ruff check/format đạt.
+- Còn thiếu: Không.
+
 ### 2026-11-21 — Bổ sung test nghiệm thu TV3 giai đoạn 4
 
 - Thành viên: Mạnh (TV3).
