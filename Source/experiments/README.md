@@ -72,6 +72,32 @@ bản sửa Agent/GUI; không nhận phần việc của TV1/TV2/TV4/TV5 là cod
 - environment.json ghi môi trường và hash inputs/backend; biểu đồ dùng median
   theo puzzle/phase/outcome, CSV giữ tất cả repeats. Chưa đánh giá puzzle khó/stress 5x5.
 
+## Đối chiếu suy luận TV4 — 20/11/2026
+
+TV4 (Tùng) phụ trách riêng `tv4_acceptance.py`, dùng backend thật và đầu vào
+đang có; runner benchmark hiệu năng của TV3 ở trên giữ nguyên.
+
+```powershell
+python -m experiments.tv4_acceptance --as-of 2026-11-20 --output ../docs/report
+```
+
+`--output` phải là thư mục có README; lệnh ghi đè ba artifact TV4: `tv4_cases.csv`,
+`tv4_environment.json`, `tv4_example_trace.json`. `--as-of` là ngày do người chạy
+nhập. Mặc định `--sat-timeout 10` giới hạn mỗi SAT call; uniqueness có budget
+tổng riêng cùng giá trị. Calls chỉ tính auto_solve, không cộng phân loại ban đầu
+hoặc uniqueness. Cả thứ tự assumptions/result/stats và số queries phải khớp
+ledger thực tế. Kết quả: 11/11 ca đạt; đây là một lượt acceptance, chưa phải
+benchmark runtime lặp nhiều lần. Metadata ghi môi trường, HEAD nền và source/input
+hash để kiểm chứng cả nội dung chưa commit.
+
+Runner giữ row ERROR cùng loại exception và trả exit 1 khi thất bại, không giả
+SAT/UNSAT; example trace cũ được xóa nếu run ví dụ không trả result. Không xuất
+hidden assignment. KB inconsistent ở diagnostics là fault injection PublicState,
+không phải fixture sai được loader chấp nhận. Kiểm tra riêng budget `1e-12` đã
+giữ đủ 11 row ERROR/SolverTimeout và exit 1.
+
+Phân tích và hướng dẫn tái lập: [báo cáo TV4](../../docs/report/tv4.md).
+
 ## Nhật ký AI
 
 

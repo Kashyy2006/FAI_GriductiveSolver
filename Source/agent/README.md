@@ -128,6 +128,20 @@ Native Tk smoke ở chế độ ẩn xác nhận Auto Solve, View Trace, Save Tr
 JSON qua controller và Restart xóa sidebar/trace. Runtime Python 3.12.6/Windows;
 chưa thay thế kiểm thử runtime Python 3.11. Các phần AI note không chỉnh sửa.
 
+## Nghiệm thu giai đoạn 4 và bàn giao báo cáo — 20/11/2026
+
+- `tests/test_tv4_stage4.py` bổ sung 7 ca dùng backend thật: thay dữ liệu ẩn mà
+  giữ nguyên thông tin công khai, KB inconsistent, hủy sau reveal và hai run
+  đồng thời dùng chung Agent/DPLL nhưng tách query ledger theo session.
+- Toàn bộ project: **565 passed** trên Python 3.12.6/Windows; Ruff check và
+  format check đạt. Target Python 3.11 vẫn cần nghiệm thu trên interpreter đó.
+- `python -m experiments.tv4_acceptance --as-of 2026-11-20 --output ../docs/report`
+  chạy từ Source/; 11/11 ca khớp outcome, uniqueness và query ledger thực tế.
+- [Báo cáo TV4](../../docs/report/tv4.md) trình bày KB, entailment, loop, token,
+  trace, ví dụ 3x3 và giới hạn. CSV/metadata/trace mẫu ở cùng thư mục báo cáo.
+- Đây là nghiệm thu chức năng và số calls; benchmark hiệu năng lặp thuộc TV3.
+  Không đổi production Agent/API hoặc thêm nhật ký AI trong lượt này.
+
 ## Nhật ký AI
 
 

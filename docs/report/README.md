@@ -17,6 +17,20 @@
 - Kết quả nghiệm thu: 531 test; 120 row benchmark; 54/54 run hoàn tất khớp trace/calls.
 - Cần nhóm rà soát để ghép vào Report.pdf; chưa commit/push phần TV3 mới.
 
+## Phần TV4 — nghiệm thu 20/11 và bản thảo cho 24/11
+
+- [tv4.md](tv4.md): KB công khai, entailment, Hint/deduction loop, token/cancel,
+  query accounting, ví dụ giải và kết quả nghiệm thu; TV4 (Tùng) phụ trách.
+- [tv4_cases.csv](tv4_cases.csv): 11 ca backend thật, toàn bộ outcome/uniqueness
+  đúng kỳ vọng và query ledger khớp; một lượt nghiệm thu, không phải benchmark lặp.
+- [tv4_environment.json](tv4_environment.json): môi trường, hash nguồn/input,
+  scope metrics/budget và chẩn đoán Unknown/Contradicted/Inconsistent.
+- [tv4_example_trace.json](tv4_example_trace.json): 8 accepted steps công khai
+  của puzzle 3x3; tổng calls trong result là 105, bao gồm kiểm tra cuối ngoài step.
+- Chạy lại từ Source/: `python -m experiments.tv4_acceptance --as-of 2026-11-20 --output ../docs/report`.
+- Toàn suite hiện tại 565 passed; Ruff check/format đạt. Python thực chạy 3.12.6,
+  chưa nghiệm thu lại target 3.11. TV1 tổng hợp các phần thành PDF cuối.
+
 ## Nhật ký AI
 
 

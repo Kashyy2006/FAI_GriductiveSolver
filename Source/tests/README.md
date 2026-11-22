@@ -85,6 +85,21 @@ Runtime kiểm thử local: Python 3.12.6; chưa chạy Python 3.11 tại máy n
 - Kiểm tra ba profile benchmark, giữ raw ERROR/TIMEOUT và CLI thất bại khi run normal
   không đạt kỳ vọng. Kết quả cuối: 531 test, Ruff check/format và pip check đạt.
 
+## Nghiệm thu TV4 giai đoạn 4 — 20/11/2026
+
+`test_tv4_stage4.py` thêm 7 ca Engine/Encoder/DPLL/Agent thật:
+
+- Bốn biến thể thay nhãn ẩn/clue chưa mở nhưng giữ nguyên public board ban đầu:
+  vẫn UNKNOWN, không Hint, không đoán; PublicEngine adapter chặn truy cập ngoài API.
+- KB mâu thuẫn được fault-inject trên PublicState: map rỗng, không submit.
+- Hủy sau reveal đầu tiên: giữ đúng một accepted step và 20 queries.
+- Hai run đồng thời dùng chung Agent và DPLL: mỗi session 8 bước/105 queries,
+  khớp ledger riêng, không trộn token hoặc counters.
+
+Chạy riêng: `python -m pytest tests/test_tv4_stage4.py -q -p no:cacheprovider`.
+Toàn suite hiện tại **565 passed** trên Python 3.12.6/Windows; Ruff check/format
+đạt. Mốc 558 phía trên là kết quả trước khi thêm bảy ca này. Chưa chạy Python 3.11.
+
 ## Nhật ký AI
 
 
