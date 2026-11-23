@@ -9,6 +9,7 @@ from tkinter.font import Font
 from PIL import Image, ImageTk  # pyright: ignore[reportMissingImports]
 
 from game.models import PublicCharacter, PublicState, Status
+from gui import theme
 from gui.clue_text import format_clue
 from gui.play_session import MARK_COLORS
 
@@ -16,18 +17,18 @@ from gui.play_session import MARK_COLORS
 class BoardView(ttk.Frame):
     """Render public character cards and report selected cell IDs."""
 
-    PAGE = "#f3ecdf"
-    CARD = "#fffaf2"
-    BORDER = "#312a26"
-    INK = "#312a26"
-    MUTED = "#796f64"
-    CRIMINAL = "#c92f28"
-    INNOCENT = "#577967"
-    CRIMINAL_FILL = "#f7e2dd"
-    INNOCENT_FILL = "#e3eee6"
+    PAGE = theme.PAGE
+    CARD = theme.CARD
+    BORDER = theme.LINE
+    INK = theme.INK
+    MUTED = theme.MUTED
+    CRIMINAL = theme.CRIMINAL
+    INNOCENT = theme.INNOCENT
+    CRIMINAL_FILL = theme.CRIMINAL_FILL
+    INNOCENT_FILL = theme.INNOCENT_FILL
     HIGHLIGHT = "#d58b28"
     HIGHLIGHT_FILL = "#faebd2"
-    _CARD_SIZES = {3: (210, 188), 4: (182, 146), 5: (146, 114)}
+    _CARD_SIZES = {3: (210, 188), 4: (182, 160), 5: (146, 160)}
 
     def __init__(self, master: Misc, on_select: Callable[[str], None]) -> None:
         super().__init__(master, padding=8)
@@ -39,22 +40,36 @@ class BoardView(ttk.Frame):
         self._used_clues: set[str] = set()
         self._buttons: dict[str, Canvas] = {}
         self._card_labels: dict[str, dict[str, Label]] = {}
+        self._clue_views: dict[str, Canvas] = {}
+        self._clue_scrollbars: dict[str, ttk.Scrollbar] = {}
         self._card_parts: dict[str, tuple[int, int, Frame, tuple[int, ...]]] = {}
         self._flipping: set[str] = set()
         self._after_ids: set[str] = set()
         self._card_size: tuple[int, int] | None = None
         self._canvas = Canvas(self, bg=self.PAGE, highlightthickness=0, bd=0)
-        self._canvas.pack(fill="both", expand=True)
+        self._board_scrollbar = ttk.Scrollbar(
+            self,
+            orient="vertical",
+            command=self._canvas.yview,
+            style=theme.scrollbar_style(self, self.PAGE),
+        )
+        self._board_scrollbar.pack(side="right", fill="y")
+        self._canvas.configure(yscrollcommand=self._board_scrollbar.set, yscrollincrement=24)
+        self._canvas.pack(side="left", fill="both", expand=True)
         self._grid_frame = Frame(self._canvas, bg=self.PAGE)
         self._grid_window = self._canvas.create_window(
             (0, 0), window=self._grid_frame, anchor="center"
         )
         self._canvas.bind("<Configure>", self._resize_grid)
+        self._canvas.bind("<MouseWheel>", self._scroll_board)
+        self._grid_frame.bind("<Configure>", lambda _: self._position_grid())
         self._portraits = self._load_portraits()
         self._photo_cache: dict[tuple[int, int, int], ImageTk.PhotoImage] = {}
 
     def render(self, state: PublicState) -> None:
         """Update the board using only the supplied public snapshot."""
+        if self._state is None or self._state.token.session_id != state.token.session_id:
+            self._canvas.yview_moveto(0)
         self._state = state
         self._highlighted.intersection_update(item.id for item in state.characters)
         width, height = self._canvas.winfo_width(), self._canvas.winfo_height()
@@ -77,6 +92,8 @@ class BoardView(ttk.Frame):
             child.destroy()
         self._buttons.clear()
         self._card_labels.clear()
+        self._clue_views.clear()
+        self._clue_scrollbars.clear()
         self._card_parts.clear()
         state = self._state
         for index in range(6):
@@ -117,7 +134,7 @@ class BoardView(ttk.Frame):
         self._refresh_card_colors()
 
     def _coordinate_label(self, text: str) -> Label:
-        return Label(
+        label = Label(
             self._grid_frame,
             text=text,
             bg=BoardView.PAGE,
@@ -125,6 +142,8 @@ class BoardView(ttk.Frame):
             font=("Segoe UI", -13, "bold"),
             anchor="center",
         )
+        label.bind("<MouseWheel>", self._scroll_board)
+        return label
 
     def _make_card(self, character: PublicCharacter, width: int, height: int) -> Canvas:
         border = Canvas(
@@ -219,8 +238,28 @@ class BoardView(ttk.Frame):
         else:
             clue_text = format_clue(character.clue, self._state)
             clue_color = self.INK
+        clue_panel = Frame(content, bg=self.CARD, height=1)
+        clue_panel.pack(fill="both", expand=True, pady=(1, 0))
+        clue_panel.pack_propagate(False)
+        viewport = Canvas(
+            clue_panel,
+            bg=self.CARD,
+            bd=0,
+            highlightthickness=0,
+            width=1,
+            height=1,
+            yscrollincrement=clue_px + 3,
+        )
+        scrollbar = ttk.Scrollbar(
+            clue_panel,
+            orient="vertical",
+            command=viewport.yview,
+            style=theme.scrollbar_style(self, self.CARD, compact=True),
+            takefocus=False,
+        )
+        viewport.pack(side="left", fill="both", expand=True)
         clue = Label(
-            content,
+            viewport,
             text=clue_text,
             bg=self.CARD,
             fg=clue_color,
@@ -228,8 +267,42 @@ class BoardView(ttk.Frame):
             wraplength=width - 20,
             justify="center",
         )
-        clue.pack(fill="both", expand=True, pady=(1, 0))
-        self._bind_card(clue, character.id)
+        clue_window = viewport.create_window(0, 0, window=clue, anchor="nw")
+
+        def scroll_position(first: str, last: str) -> None:
+            scrollbar.set(first, last)
+            if float(last) - float(first) < 0.999:
+                if not scrollbar.winfo_manager():
+                    scrollbar.pack(side="right", fill="y", before=viewport)
+            elif scrollbar.winfo_manager():
+                scrollbar.pack_forget()
+
+        def resize_clue(event: Event) -> None:
+            viewport.itemconfigure(clue_window, width=event.width)
+            clue.configure(wraplength=max(1, event.width - 4))
+
+        def scroll_units(amount: int) -> str:
+            viewport.yview_scroll(amount, "units")
+            return "break"
+
+        def scroll_clue(event: Event) -> str:
+            if viewport.yview() == (0.0, 1.0):
+                return self._scroll_board(event)
+            if event.delta:
+                amount = max(1, abs(event.delta) // 120)
+                return scroll_units(-amount if event.delta > 0 else amount)
+            return "break"
+
+        viewport.configure(yscrollcommand=scroll_position)
+        viewport.bind("<Configure>", resize_clue)
+        clue.bind("<Configure>", lambda _: viewport.configure(scrollregion=viewport.bbox("all")))
+        for widget in (viewport, clue):
+            self._bind_card(widget, character.id)
+            widget.bind("<MouseWheel>", scroll_clue)
+            widget.bind("<Button-4>", lambda _: scroll_units(-1))
+            widget.bind("<Button-5>", lambda _: scroll_units(1))
+        self._clue_views[character.id] = viewport
+        self._clue_scrollbars[character.id] = scrollbar
         self._card_labels[character.id] = {
             "id": id_label,
             "name": name,
@@ -252,8 +325,11 @@ class BoardView(ttk.Frame):
         )
         labels["name"].configure(text=character.name)
         labels["profession"].configure(text=character.profession)
+        clue_text = format_clue(character.clue, self._state)
+        if labels["clue"].cget("text") != clue_text:
+            self._clue_views[character.id].yview_moveto(0)
         labels["clue"].configure(
-            text=format_clue(character.clue, self._state),
+            text=clue_text,
             fg=self.MUTED
             if character.clue is None or character.clue.id in self._used_clues
             else self.INK,
@@ -401,6 +477,13 @@ class BoardView(ttk.Frame):
 
     def _bind_card(self, widget: Misc, character_id: str) -> None:
         widget.bind("<Button-1>", lambda _event: self._on_select(character_id))
+        widget.bind("<MouseWheel>", self._scroll_board)
+
+    def _scroll_board(self, event: Event) -> str:
+        if event.delta:
+            amount = max(1, abs(event.delta) // 120) * 3
+            self._canvas.yview_scroll(-amount if event.delta > 0 else amount, "units")
+        return "break"
 
     def _refresh_card_colors(self) -> None:
         if self._state is None:
@@ -429,26 +512,19 @@ class BoardView(ttk.Frame):
                 outline=self.HIGHLIGHT if is_highlighted else border,
                 width=2 if is_highlighted and mark_color else 1,
             )
+
+            def recolor(widget: Misc) -> None:
+                if isinstance(widget, (Frame, Canvas, Label)):
+                    widget.configure(bg=fill)
+                for child in widget.winfo_children():
+                    recolor(child)
+
             for content in card.winfo_children():
-                content.configure({"bg": fill})
-                for child in content.winfo_children():
-                    child.configure({"bg": fill})
-                    if isinstance(child, Frame):
-                        for label in child.winfo_children():
-                            label.configure(bg=fill)
-                    if isinstance(child, Label) and str(child.cget("text")).startswith(
-                        character.id
-                    ):
-                        status_color = (
-                            self.CRIMINAL
-                            if character.status == Status.CRIMINAL
-                            else self.INNOCENT
-                            if character.status == Status.INNOCENT
-                            else self.MUTED
-                        )
-                        child.configure(fg=status_color)
-                    elif isinstance(child, Label) and child.cget("text") == character.name:
-                        child.configure(fg=self.INK)
+                recolor(content)
+            self._clue_scrollbars[character.id].configure(
+                style=theme.scrollbar_style(self, fill, compact=True)
+            )
+            self._card_labels[character.id]["name"].configure(fg=self.INK)
             self._card_labels[character.id]["id"].configure(
                 fg=self.CRIMINAL
                 if character.status == Status.CRIMINAL
@@ -475,18 +551,24 @@ class BoardView(ttk.Frame):
         return portraits
 
     def _resize_grid(self, event: Event) -> None:
-        self._canvas.coords(self._grid_window, event.width / 2, event.height / 2)
         if self._state is None or event.width < 100 or event.height < 100:
             return
         card_size = self._fit_card_size(self._state.size, event.width, event.height)
         if card_size != self._card_size:
             self._card_size = card_size
             self._render_grid(*card_size)
+        self._position_grid()
+
+    def _position_grid(self) -> None:
+        width, height = self._canvas.winfo_width(), self._canvas.winfo_height()
+        scroll_height = max(height, self._grid_frame.winfo_reqheight())
+        self._canvas.coords(self._grid_window, width / 2, scroll_height / 2)
+        self._canvas.configure(scrollregion=(0, 0, width, scroll_height))
 
     @staticmethod
     def _fit_card_size(board_size: int, width: int, height: int) -> tuple[int, int]:
         card_width = min(230, max(88, (width - 36) // board_size - 8))
-        card_height = min(210, max(88, (height - 36) // board_size - 8))
+        card_height = min(210, max(160, (height - 36) // board_size - 8))
         return card_width, card_height
 
     @staticmethod

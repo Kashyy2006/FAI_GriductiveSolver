@@ -26,8 +26,10 @@ from tkinter import (
 from typing import Callable
 
 from agent.agent import DeductiveAgent
+from agent.hints import find_clue_hint
 from agent.trace import save_trace
 from game.engine import GameEngine
+from game.generator import write_generated_puzzle
 from game.models import (
     AutoSolveResult,
     Clue,
@@ -43,21 +45,31 @@ from game.models import (
     VerdictResult,
 )
 from game.puzzle_loader import load_puzzle
+from gui import theme
 from gui.board_view import BoardView
 from gui.clue_text import format_clue
-from gui.dialogs import show_help, show_library, show_replay
-from gui.play_session import LEVELS, MARK_COLORS, SOURCE, PlaySession, ProgressStore
+from gui.dialogs import show_generator, show_help, show_library, show_replay
+from gui.play_session import (
+    LEVELS,
+    MARK_COLORS,
+    MARK_HELP,
+    MARK_LABELS,
+    SOURCE,
+    PlaySession,
+    ProgressStore,
+    level_for_key,
+)
 from logic.regions import resolve_region
 
 
 class MainWindow:
     """Connect user actions to Engine and Agent while keeping Tk on its main thread."""
 
-    _BASE = "#f3ecdf"
-    _PANEL = "#ebe1d1"
-    _TEXT = "#312a26"
-    _MUTED = "#796f64"
-    _ACCENT = "#c92f28"
+    _BASE = theme.PAGE
+    _PANEL = theme.CARD
+    _TEXT = theme.INK
+    _MUTED = theme.MUTED
+    _ACCENT = theme.ACCENT
     _EMPTY_CLUE = "Select a revealed card to inspect its clue."
 
     def __init__(self, root: Tk, engine: GameEngine, agent: DeductiveAgent) -> None:
@@ -72,6 +84,7 @@ class MainWindow:
         self._result_shown = False
         self._clock_ticks = 0
         self._selected_id: str | None = None
+        self._hint_cache: HintResult | None = None
         self._busy = False
         self._active_task: object | None = None
         self._cancel_event: threading.Event | None = None
@@ -100,9 +113,11 @@ class MainWindow:
     def _render_state(self, state: PublicState) -> None:
         """Render a public snapshot without querying the engine again."""
         self._state = state
+        if self._hint_cache is not None and self._hint_cache.token != state.token:
+            self._hint_cache = None
         self.board.render(self._state)
         self.board.set_notes(self.session.marks, self.session.used_clues)
-        level = next((level for level in LEVELS if level.key == self._level_key), None)
+        level = level_for_key(self._level_key)
         self.puzzle_title.configure(
             text=level.title if level else self._format_title(self._state.puzzle_id)
         )
@@ -110,6 +125,7 @@ class MainWindow:
         self.progress_label.configure(
             text=f"{revealed:02d} / {len(self._state.characters):02d} cards revealed"
         )
+        self.progress_bar.configure(value=100 * revealed / len(self._state.characters))
         selected = next(
             (item for item in self._state.characters if item.id == self._selected_id), None
         )
@@ -123,6 +139,17 @@ class MainWindow:
         else:
             self.clue_label.configure(text=self._describe_clue(selected.clue))
         self.note_color.set(self.session.marks.get(self._selected_id or "", "None"))
+        note = self.note_color.get()
+        self.note_help_label.configure(
+            text=MARK_HELP.get(note, "Choose a card, then add a pencil note."),
+            foreground=theme.blend(MARK_COLORS[note], self._TEXT, 0.25)
+            if note in MARK_COLORS
+            else self._MUTED,
+        )
+        self.selected_note_label.configure(
+            text=f"Pencil note: {MARK_LABELS[note]}" if note in MARK_LABELS else "No pencil note",
+            foreground=MARK_COLORS.get(note, self._MUTED),
+        )
         used = bool(selected and selected.clue and selected.clue.id in self.session.used_clues)
         self.used_button.configure(text="Restore clue" if used else "Used clue ✓")
         self.clue_label.configure(
@@ -148,119 +175,29 @@ class MainWindow:
         self.root.geometry("1280x820")
         self.root.minsize(990, 680)
         self.root.configure(background=self._BASE)
-        style = ttk.Style(self.root)
-        style.theme_use("clam")
-        style.configure("App.TFrame", background=self._BASE)
-        style.configure("Panel.TFrame", background=self._BASE)
-        style.configure("Board.TFrame", background=self._BASE)
-        style.configure("CardBox.TFrame", background=self._PANEL)
-        style.configure(
-            "Title.TLabel",
-            background=self._BASE,
-            foreground=self._TEXT,
-            font=("Segoe UI", -28, "bold"),
-        )
-        style.configure(
-            "Kicker.TLabel",
-            background=self._BASE,
-            foreground=self._ACCENT,
-            font=("Segoe UI", -12, "bold"),
-        )
-        style.configure(
-            "Body.TLabel",
-            background=self._BASE,
-            foreground=self._TEXT,
-            font=("Segoe UI", -13),
-        )
-        style.configure(
-            "CardBody.TLabel",
-            background=self._PANEL,
-            foreground=self._TEXT,
-            font=("Segoe UI", -13),
-        )
-        style.configure(
-            "Muted.TLabel",
-            background=self._BASE,
-            foreground=self._MUTED,
-            font=("Segoe UI", -12),
-        )
-        style.configure(
-            "PanelTitle.TLabel",
-            background=self._PANEL,
-            foreground=self._TEXT,
-            font=("Segoe UI", -15, "bold"),
-        )
-        style.configure(
-            "Coordinate.TLabel",
-            background=self._BASE,
-            foreground=self._MUTED,
-            font=("Segoe UI", -13, "bold"),
-        )
-        style.configure(
-            "Action.TButton",
-            background="#4b4037",
-            foreground="#fffaf2",
-            font=("Segoe UI", -13, "bold"),
-            padding=(10, 9),
-            relief="flat",
-        )
-        style.map(
-            "Action.TButton",
-            background=[("disabled", "#b9afa3"), ("active", "#615449")],
-            foreground=[("disabled", "#efe7dc")],
-        )
-        style.configure(
-            "CriminalAction.TButton",
-            background=BoardView.CRIMINAL,
-            foreground="#fffaf2",
-            font=("Segoe UI", -13, "bold"),
-            padding=(10, 9),
-            relief="flat",
-        )
-        style.map(
-            "CriminalAction.TButton",
-            background=[("disabled", "#c8aca5"), ("active", "#b12620")],
-            foreground=[("disabled", "#f4ece6")],
-        )
-        style.configure(
-            "InnocentAction.TButton",
-            background=BoardView.INNOCENT,
-            foreground="#fffaf2",
-            font=("Segoe UI", -13, "bold"),
-            padding=(10, 9),
-            relief="flat",
-        )
-        style.map(
-            "InnocentAction.TButton",
-            background=[("disabled", "#aebcb4"), ("active", "#476555")],
-            foreground=[("disabled", "#eef3f0")],
-        )
-        style.configure(
-            "Primary.TButton",
-            background="#d58b28",
-            foreground="#fffaf2",
-            font=("Segoe UI", -13, "bold"),
-            padding=(10, 9),
-            relief="flat",
-        )
-        style.map(
-            "Primary.TButton",
-            background=[("disabled", "#d3b992"), ("active", "#e1a544")],
-            foreground=[("disabled", "#f5efe6")],
-        )
+        theme.install_theme(self.root)
 
     def _build_layout(self) -> None:
-        shell = ttk.Frame(self.root, style="App.TFrame", padding=(24, 18))
+        shell = ttk.Frame(self.root, style="App.TFrame", padding=(26, 22))
         shell.pack(fill=BOTH, expand=True)
         header = ttk.Frame(shell, style="App.TFrame")
         header.pack(fill=X, pady=(0, 12))
         heading = ttk.Frame(header, style="App.TFrame")
         heading.pack(side=LEFT, fill=X, expand=True)
-        ttk.Label(heading, text="THE GRIDUCTIVE FILES", style="Kicker.TLabel").pack(anchor="w")
+        ttk.Label(heading, text="GRIDUCTIVE / CASE FILES", style="Kicker.TLabel").pack(anchor="w")
         self.puzzle_title = ttk.Label(heading, text="", style="Title.TLabel")
         self.puzzle_title.pack(anchor="w", pady=(2, 0))
-        self.progress_label = ttk.Label(header, text="", style="Body.TLabel")
-        self.progress_label.pack(side=RIGHT, anchor="s", pady=(0, 5))
+        ttk.Label(heading, text="Read the clues. Build your case.", style="Muted.TLabel").pack(
+            anchor="w", pady=(3, 0)
+        )
+        progress_box = ttk.Frame(header, style="App.TFrame")
+        progress_box.pack(side=RIGHT, anchor="s", padx=(16, 0), pady=(0, 5))
+        self.progress_label = ttk.Label(progress_box, text="", style="Badge.TLabel")
+        self.progress_label.pack(fill=X)
+        self.progress_bar = ttk.Progressbar(
+            progress_box, style="Case.Horizontal.TProgressbar", maximum=100, length=190
+        )
+        self.progress_bar.pack(fill=X, pady=(6, 0))
 
         body = ttk.Frame(shell, style="App.TFrame")
         body.pack(fill=BOTH, expand=True)
@@ -272,7 +209,9 @@ class MainWindow:
         sidebar_shell = ttk.Frame(body, style="App.TFrame", width=330)
         sidebar_shell.pack(side=RIGHT, fill=Y, padx=(18, 0))
         sidebar_shell.pack_propagate(False)
-        sidebar_scroll = ttk.Scrollbar(sidebar_shell)
+        sidebar_scroll = ttk.Scrollbar(
+            sidebar_shell, style=theme.scrollbar_style(self.root, self._BASE)
+        )
         sidebar_scroll.pack(side=RIGHT, fill=Y)
         self._sidebar_canvas = Canvas(
             sidebar_shell,
@@ -308,17 +247,27 @@ class MainWindow:
         notes_header.pack(fill=X)
         ttk.Label(notes_header, text="CASE NOTES", style="Kicker.TLabel").pack(side=LEFT)
         self.help_button = ttk.Button(
-            notes_header, text="?", width=3, command=lambda: show_help(self.root)
+            notes_header,
+            text="?",
+            width=3,
+            style="Quiet.TButton",
+            command=lambda: show_help(self.root),
         )
         self.help_button.pack(side=LEFT, padx=(8, 0))
-        selected_box = ttk.Frame(sidebar, style="CardBox.TFrame", padding=(10, 8))
+        selected_box = ttk.Frame(sidebar, style="CardBox.TFrame", padding=(14, 12))
         selected_box.pack(fill=X, pady=(6, 12))
         self.selected_label = ttk.Label(
             selected_box, text="Select a card", style="PanelTitle.TLabel", wraplength=286
         )
         self.selected_label.pack(anchor="w")
+        self.selected_note_label = ttk.Label(
+            selected_box, style="CardBody.TLabel", font=("Segoe UI", -11), wraplength=280
+        )
+        self.selected_note_label.pack(anchor="w", pady=(5, 0))
 
-        ttk.Label(sidebar, text="Verdict", style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
+        ttk.Label(sidebar, text="PROVE A VERDICT", style="Kicker.TLabel").pack(
+            anchor="w", pady=(0, 5)
+        )
         verdict_row = ttk.Frame(sidebar, style="App.TFrame")
         verdict_row.pack(fill=X)
         verdict_row.columnconfigure((0, 1), weight=1, uniform="actions")
@@ -338,20 +287,43 @@ class MainWindow:
         self.innocent_button.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=2)
 
         note_row = ttk.Frame(sidebar, style="App.TFrame")
-        note_row.pack(fill=X, pady=(8, 0))
-        ttk.Label(note_row, text="Temporary color", style="Muted.TLabel").pack(side=LEFT)
-        self.note_color = StringVar(self.root, "None")
-        self.note_picker = ttk.Combobox(
-            note_row,
-            textvariable=self.note_color,
-            values=("None", *MARK_COLORS),
-            state="readonly",
-            width=9,
+        note_row.pack(fill=X, pady=(14, 0))
+        ttk.Label(note_row, text="PENCIL NOTES", style="Kicker.TLabel").pack(anchor="w")
+        ttk.Label(note_row, text="Temporary colors · your hypotheses", style="Muted.TLabel").pack(
+            anchor="w", pady=(3, 6)
         )
-        self.note_picker.pack(side=LEFT, padx=6)
-        self.note_picker.bind("<<ComboboxSelected>>", lambda _: self._set_mark())
-        self.used_button = ttk.Button(note_row, text="Used clue ✓", command=self._toggle_used)
+        self.note_color = StringVar(self.root, "None")
+        palette = ttk.Frame(note_row, style="App.TFrame")
+        palette.pack(fill=X)
+        self.note_buttons: dict[str, ttk.Radiobutton] = {}
+        for column, (color, value) in enumerate(MARK_COLORS.items()):
+            palette.columnconfigure(column, weight=1, uniform="notes")
+            note_button = ttk.Radiobutton(
+                palette,
+                text=MARK_LABELS[color],
+                value=color,
+                variable=self.note_color,
+                style=theme.note_style(self.root, color, value),
+                command=self._set_mark,
+            )
+            note_button.grid(row=0, column=column, sticky="ew", padx=(0 if column == 0 else 3, 0))
+            self.note_buttons[color] = note_button
+        self.note_help_label = ttk.Label(note_row, text="", style="Muted.TLabel", wraplength=300)
+        self.note_help_label.pack(fill=X, pady=(6, 4))
+        ttk.Label(
+            note_row,
+            text="Notes never submit a verdict or reveal a card.",
+            style="Muted.TLabel",
+            wraplength=300,
+        ).pack(anchor="w")
+        note_actions = ttk.Frame(note_row, style="App.TFrame")
+        note_actions.pack(fill=X, pady=(6, 0))
+        self.used_button = ttk.Button(note_actions, text="Used clue ✓", command=self._toggle_used)
         self.used_button.pack(side=LEFT)
+        self.clear_note_button = ttk.Button(
+            note_actions, text="Clear note", style="Quiet.TButton", command=self._clear_note
+        )
+        self.clear_note_button.pack(side=RIGHT)
 
         ttk.Separator(sidebar).pack(fill=X, pady=12)
         ttk.Label(sidebar, text="Deduction & Trace", style="Muted.TLabel").pack(
@@ -396,6 +368,13 @@ class MainWindow:
             session_row, text="Restart Case", style="Action.TButton", command=self._restart
         )
         self.restart_button.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=2)
+        self.generate_button = ttk.Button(
+            sidebar,
+            text="Generate Puzzle…",
+            style="Action.TButton",
+            command=lambda: show_generator(self.root, self._generate_puzzle),
+        )
+        self.generate_button.pack(fill=X, pady=(4, 0))
 
         ttk.Label(sidebar, text="PUBLIC CLUES", style="Kicker.TLabel").pack(
             anchor="w", pady=(16, 6)
@@ -482,7 +461,10 @@ class MainWindow:
         self.session.hints += 1
         self.session.persist()
         snapshot = self._state
-        self._start_task("hint", lambda: self.agent.next_hint(snapshot), snapshot.token)
+        if self._hint_cache is not None and self._hint_cache.token == snapshot.token:
+            self._handle_hint(replace(self._hint_cache, queries=()))
+            return
+        self._start_task("clue_hint", lambda: find_clue_hint(snapshot, self.agent), snapshot.token)
 
     def _auto_solve(self) -> None:
         if self._busy:
@@ -518,10 +500,29 @@ class MainWindow:
             self.root,
             self._progress_store.data["levels"] if self._progress_store else {},
             self._load_level,
+            generate=self._generate_puzzle if not self._busy else None,
+        )
+
+    def _generate_puzzle(self, size: int, seed: int) -> None:
+        if self._busy:
+            return
+        snapshot = self._state
+        cancel = threading.Event()
+
+        def should_cancel() -> bool:
+            return cancel.is_set() or self.engine.get_public_state().token != snapshot.token
+
+        self._start_task(
+            "generate",
+            lambda: write_generated_puzzle(
+                size, seed, SOURCE / "puzzles" / "generated", should_cancel=should_cancel
+            ),
+            snapshot.token,
+            cancel_event=cancel,
         )
 
     def _load_level(self, key: str) -> None:
-        if key not in {level.key for level in LEVELS}:
+        if level_for_key(key) is None:
             raise ValueError("Unknown case")
         self._load_path(SOURCE / "puzzles" / key, key)
 
@@ -583,6 +584,7 @@ class MainWindow:
         self._cancel_task()
         self._selected_id = None
         self._last_solve = None
+        self._hint_cache = None
         self._verdict_context = None
         self._close_trace()
         if self._result_window is not None and self._result_window.winfo_exists():
@@ -631,6 +633,12 @@ class MainWindow:
         self.session.persist()
         self._render_state(self._state)
 
+    def _clear_note(self) -> None:
+        if self._busy or self._selected_id is None:
+            return
+        self.note_color.set("None")
+        self._set_mark()
+
     def _toggle_used(self) -> None:
         if self._busy:
             return
@@ -673,6 +681,7 @@ class MainWindow:
         if self._result_window is not None and self._result_window.winfo_exists():
             self._result_window.destroy()
         window = Toplevel(self.root)
+        window.configure(background=self._BASE)
         self._result_window = window
         complete = all(c.status is not None for c in self._state.characters)
         window.title("Case Results" if complete else "Session Details")
@@ -719,15 +728,18 @@ class MainWindow:
         detail_button = ttk.Button(panel, text="Show SAT details ▾", command=toggle)
         detail_button.pack(anchor="w", pady=10)
         if complete:
-            next_level = next(
-                (i + 1 for i, level in enumerate(LEVELS) if level.key == self._level_key),
-                len(LEVELS),
+            current_index = next(
+                (i for i, level in enumerate(LEVELS) if level.key == self._level_key), len(LEVELS)
             )
-            if next_level < len(LEVELS) and LEVELS[next_level].difficulty != "Practice":
+            next_level = next(
+                (level for level in LEVELS[current_index + 1 :] if level.difficulty != "Practice"),
+                None,
+            )
+            if next_level is not None:
                 ttk.Button(
                     panel,
                     text="Play next case →",
-                    command=lambda: self._load_level(LEVELS[next_level].key),
+                    command=lambda: self._load_level(next_level.key),
                 ).pack(anchor="w")
             else:
                 ttk.Button(panel, text="Return to Case Library", command=self._load).pack(
@@ -781,6 +793,12 @@ class MainWindow:
                 self._active_task = None
                 self._cancel_event = None
                 if isinstance(result, Exception):
+                    if kind == "generate":
+                        self.status_label.configure(
+                            text=f"Could not generate puzzle: {result}. Current case kept."
+                        )
+                        self._show_error("Could not generate puzzle", result)
+                        continue
                     self.session.metrics_partial = True
                     context = self._verdict_context if kind == "verdict" else None
                     self._verdict_context = None
@@ -832,8 +850,11 @@ class MainWindow:
                     context = self._verdict_context
                     self._verdict_context = None
                     self._handle_verdict(result, context)
-                elif kind == "hint" and isinstance(result, HintResult):
-                    self._handle_hint(result)
+                elif kind == "clue_hint" and isinstance(result, tuple):
+                    hint, support = result
+                    self._handle_clue_hint(hint, support)
+                elif kind == "generate" and isinstance(result, Path):
+                    self._load_level(f"generated/{result.name}")
                 elif kind == "solve" and isinstance(result, AutoSolveResult):
                     self._handle_solve(result)
         except queue.Empty:
@@ -1017,6 +1038,28 @@ class MainWindow:
             self._toast_window.destroy()
         self._toast_window = None
 
+    def _handle_clue_hint(self, result: HintResult, support: tuple[str, ...]) -> None:
+        if result.token != self._state.token:
+            return
+        if result.character_id is None or result.status is None:
+            self._handle_hint(result)
+            return
+        self.session.queries.extend(result.queries)
+        self.session.persist()
+        self._hint_cache = result
+        owners = tuple(
+            c.id for c in self._state.characters if c.clue is not None and c.clue.id in support
+        )
+        self._selected_id = owners[0] if owners else None
+        self._render_state(self._state)
+        self.board.pulse(owners)
+        self.status_label.configure(
+            text=(
+                "Clue hint: combine the highlighted public clues. "
+                "Press Show Verdict if you still need the answer."
+            )
+        )
+
     def _handle_hint(self, result: HintResult) -> None:
         if result.token != self._state.token:
             return
@@ -1036,7 +1079,8 @@ class MainWindow:
             self._selected_id = result.character_id
             self.board.pulse((result.character_id,))
             self.status_label.configure(
-                text=f"Hint: {result.character_id} is forced {result.status.value.title()}."
+                text=f"Hint: {next(c.name for c in self._state.characters if c.id == result.character_id)}"
+                f" ({result.character_id}) is forced {result.status.value.title()}."
             )
             self._render_state(self._state)
 
@@ -1146,15 +1190,23 @@ class MainWindow:
         self.criminal_button.configure(state="normal" if can_mark else "disabled")
         self.innocent_button.configure(state="normal" if can_mark else "disabled")
         self.hint_button.configure(state="disabled" if self._busy else "normal")
+        self.hint_button.configure(text="Show Verdict" if self._hint_cache else "Clue Hint")
         self.solve_button.configure(state="disabled" if self._busy else "normal")
         can_trace = not self._busy and (bool(self.session.steps) or self._last_solve is not None)
         self.view_trace_button.configure(state="normal" if can_trace else "disabled")
         self.save_trace_button.configure(state="normal" if can_trace else "disabled")
-        self.note_picker.configure(state="readonly" if selected and not self._busy else "disabled")
+        for note_button in self.note_buttons.values():
+            note_button.configure(state="normal" if selected and not self._busy else "disabled")
+        self.clear_note_button.configure(
+            state="normal"
+            if selected and selected.id in self.session.marks and not self._busy
+            else "disabled"
+        )
         self.used_button.configure(
             state="normal" if selected and selected.clue and not self._busy else "disabled"
         )
         self.results_button.configure(state="disabled" if self._busy else "normal")
+        self.generate_button.configure(state="disabled" if self._busy else "normal")
 
     @staticmethod
     def _show_error(title: str, error: Exception) -> None:

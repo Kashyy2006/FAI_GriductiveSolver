@@ -7,6 +7,9 @@
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
 
+- `crossroads.json`: màn chính cần kết hợp ba clue, không có FACT; UNIQUE và mỗi
+  bước progressive có đúng một forced verdict. `example_01.json` dùng cho Practice.
+
 ## Nhật ký AI
 
 

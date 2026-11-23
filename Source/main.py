@@ -14,14 +14,14 @@ from solver.dpll import DPLLSolver
 def main() -> None:
     """Create the canonical logic stack and open the GUI."""
     source_dir = Path(__file__).resolve().parent
-    puzzle = load_puzzle(source_dir / "puzzles" / "3x3" / "museum_shift.json")
+    puzzle = load_puzzle(source_dir / "puzzles" / "3x3" / "crossroads.json")
     encoder = CNFEncoder()
     solver = DPLLSolver()
     agent = DeductiveAgent(encoder, solver)
     engine = GameEngine(puzzle, agent.verify_verdict)
     root = Tk()
     window = MainWindow(root, engine, agent)
-    window.enable_progress("3x3/museum_shift.json")
+    window.enable_progress("3x3/crossroads.json")
     root.mainloop()
 
 

@@ -3,7 +3,8 @@
 ## Phụ trách và công việc
 
 - Phụ trách: TV1.
-- Bổ sung puzzle 4x4 theo schema; chưa có dữ liệu 4x4.
+- Puzzle 4x4 theo schema; `archive_case.json` cần kết hợp nhiều clue, không có FACT,
+  UNIQUE và có đúng một forced verdict ở mỗi bước. `example_01.json` là Practice.
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
 

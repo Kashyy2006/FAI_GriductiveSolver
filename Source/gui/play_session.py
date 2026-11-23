@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from threading import RLock
@@ -26,6 +27,12 @@ from game.models import (
 
 SOURCE = Path(__file__).resolve().parents[1]
 MARK_COLORS = {"Amber": "#d58b28", "Blue": "#3a78ad", "Purple": "#8857aa"}
+MARK_LABELS = {"Amber": "Review", "Blue": "Maybe Innocent", "Purple": "Maybe Criminal"}
+MARK_HELP = {
+    "Amber": "Review this card later or compare its clue with other clues.",
+    "Blue": "Your hypothesis: this person may be Innocent. Check the public clues.",
+    "Purple": "Your hypothesis: this person may be Criminal. Check the public clues.",
+}
 
 
 @dataclass(frozen=True)
@@ -39,9 +46,9 @@ class Level:
 
 
 LEVELS = (
-    Level("3x3/example_01.json", "Museum Opening", "Easy", "3 × 3 · Follow a clue chain."),
+    Level("3x3/example_01.json", "Museum Opening", "Practice", "3 × 3 · Introductory FACT chain."),
     Level("3x3/museum_shift.json", "Museum Shift", "Easy", "3 × 3 · Meet the museum staff."),
-    Level("4x4/example_01.json", "City Detectives", "Medium", "4 × 4 · A longer clue chain."),
+    Level("4x4/example_01.json", "City Detectives", "Practice", "4 × 4 · FACT-chain practice."),
     Level("4x4/night_market.json", "Night Market", "Medium", "4 × 4 · Investigate the market."),
     Level(
         "3x3/demo_forced_unknown.json",
@@ -55,7 +62,58 @@ LEVELS = (
         "Practice",
         "3 × 3 · Learn why deduction can stop without a forced move.",
     ),
+    Level(
+        "3x3/crossroads.json",
+        "Crossroads",
+        "Easy",
+        "3 × 3 · Combine inequalities; one forced move at every step. No FACTs.",
+    ),
+    Level(
+        "4x4/archive_case.json",
+        "Archive Case",
+        "Medium",
+        "4 × 4 · Three stages require combining public clues. No FACTs.",
+    ),
+    Level(
+        "5x5/harbor_case.json",
+        "Harbor Case",
+        "Hard",
+        "5 × 5 · Four stages combine clues; a single progressive path. No FACTs.",
+    ),
 )
+
+
+def level_for_key(key: str | None) -> Level | None:
+    for level in LEVELS:
+        if key == level.key:
+            return level
+    if not isinstance(key, str):
+        return None
+    match = re.fullmatch(
+        r"generated/generated_(?:(?P<version>v2)_)?(?P<size>[345])x(?P=size)"
+        r"_seed_(?P<seed>0|[1-9][0-9]{0,9})\.json",
+        key,
+    )
+    if match is None or int(match["seed"]) > 2**31 - 1:
+        return None
+    size = int(match["size"])
+    version = " v2" if match["version"] else ""
+    return Level(
+        key,
+        f"Generated{version} {size}×{size} · Seed {match['seed']}",
+        "Generated",
+        f"{size * size} cards · Fixed size · UNIQUE · One forced move per step · No FACTs."
+        + (" Varied opening clues (generator v2)." if version else " Original generator."),
+    )
+
+
+def available_levels() -> tuple[Level, ...]:
+    generated = []
+    for path in sorted((SOURCE / "puzzles" / "generated").glob("*.json")):
+        level = level_for_key(f"generated/{path.name}")
+        if level is not None:
+            generated.append(level)
+    return LEVELS + tuple(generated)
 
 
 def query_from_dict(data: dict[str, Any]) -> SATQuery:
@@ -92,9 +150,11 @@ class ProgressStore:
                 not isinstance(data, dict)
                 or data.get("version") != 1
                 or not isinstance(data.get("levels"), dict)
-                or data.get("last_level") not in (None, *(level.key for level in LEVELS))
+                or (
+                    data.get("last_level") is not None and level_for_key(data["last_level"]) is None
+                )
                 or any(
-                    key not in {level.key for level in LEVELS} or not isinstance(record, dict)
+                    level_for_key(key) is None or not isinstance(record, dict)
                     for key, record in data.get("levels", {}).items()
                 )
             ):

@@ -9,6 +9,19 @@
 
 ## Regression trải nghiệm chơi
 
+- `test_generator.py`: size/seed, tái lập, một forced verdict mỗi bước, UNIQUE đối
+  chiếu evaluator vét cạn 3×3 không thêm initial units, tất cả màn chính progressive
+  SOLVED, cụm bắt buộc kết hợp clue, deadline/cancel/lỗi và key lưu màn an toàn.
+- Bộ kiểm tra v2 bao phủ cả năm kiểu mở đầu và bốn vùng hình học trên nhiều seed,
+  nhãn mở đầu hỗn hợp, cấu trúc clue khác nhau và hai hướng verdict. Vét cạn 3×3
+  đối chiếu evaluator độc lập cho từng kiểu; file và tiến độ v1 được giữ riêng khi sinh v2.
+- `test_clue_hints.py`: support đủ và không bỏ từng clue được, chỉ dùng public state,
+  không mutate, không đổi nghĩa active_clue_ids v1, SAT ledger đếm đúng calls thực.
+- Controller và widget thật kiểm tra Hint hai cấp, bỏ kết quả cũ, reset cấp sau reveal,
+  form Generate, nạp/resume màn sinh và giữ màn hiện tại khi generation lỗi.
+- Pencil Notes kiểm tra chọn/xóa qua nút thật, ý nghĩa màu được hiển thị, không gọi
+  verdict/reveal hoặc tăng bộ đếm; thanh cuộn đổi rãnh theo nền thẻ và vẫn kéo được.
+
 - `test_player_session.py`: khôi phục từ hành động công khai qua verifier thật,
   chống reveal từ verdict lưu sai, không lưu hidden labels/assignment, snapshot
   chỉ thêm một reveal mỗi bước, file lỗi/I/O, tên tiếng Anh và định dạng clue.

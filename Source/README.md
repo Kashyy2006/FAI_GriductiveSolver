@@ -7,6 +7,16 @@
 - Chạy lệnh Python từ thư mục này, dùng import tuyệt đối theo API v1.
 - --preview đã bị gỡ khỏi main.py; không dùng hướng dẫn preview tĩnh cũ.
 
+## Hint và màn tự sinh
+
+- Hint lần đầu highlight clue hỗ trợ; lần tiếp theo trên cùng board mới nêu
+  nhân vật/verdict. Sau reveal/load/restart trở về cấp đầu.
+- Trong Case Library hoặc sidebar, chọn `Generate Puzzle…`, size 3×3/4×4/5×5 và seed.
+  Màn giữ kích thước cố định, được kiểm tra UNIQUE và đúng một forced move mỗi bước.
+- CLI từ Source/: `python -m game.generator --size 4 --seed 123`.
+- Mặc định mở Crossroads, một trong ba màn kết hợp nhiều clue mới; FACT-chain
+  chuyển sang Practice. Mọi màn chính phải UNIQUE và progressive SOLVED.
+
 ## Trạng thái kiểm tra hiện tại
 
 - Engine, core/parity Encoder, regions/evaluator, DPLL/uniqueness, Agent/trace

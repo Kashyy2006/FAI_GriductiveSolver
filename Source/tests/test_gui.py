@@ -10,6 +10,7 @@ import pytest
 
 from agent.agent import DeductiveAgent
 from game.engine import GameEngine
+from game.generator import write_generated_puzzle
 from game.models import (
     Clue,
     ClueType,
@@ -122,6 +123,7 @@ def ui(monkeypatch: pytest.MonkeyPatch) -> MainWindow:
             "board",
             "puzzle_title",
             "progress_label",
+            "progress_bar",
             "selected_label",
             "clue_label",
             "status_label",
@@ -134,12 +136,16 @@ def ui(monkeypatch: pytest.MonkeyPatch) -> MainWindow:
             "view_trace_button",
             "save_trace_button",
             "note_color",
-            "note_picker",
+            "note_help_label",
+            "selected_note_label",
+            "clear_note_button",
             "used_button",
             "clock_label",
             "results_button",
+            "generate_button",
         ):
             setattr(window, name, Widget())
+        window.note_buttons = {color: Widget() for color in ("Amber", "Blue", "Purple")}
 
     monkeypatch.setattr(MainWindow, "_configure_window", lambda self: None)
     monkeypatch.setattr(MainWindow, "_build_layout", build)
@@ -445,9 +451,13 @@ def test_contradicted_verdict_and_hint_preserve_state_and_highlight_on_accept(
     ui._request_hint()
     run_task(ui)
     assert ui.engine.get_public_state() == initial
+    assert ui._selected_id == "A1"
+    assert ui.board.highlighted == ("A1",)
+    assert "forced Innocent" not in ui.status_label.values["text"]
+    ui._request_hint()
     assert ui._selected_id == "B1"
     assert ui.board.highlighted == ("B1",)
-    assert "Hint: B1 is forced Innocent." in ui.status_label.values["text"]
+    assert "Ben (B1) is forced Innocent." in ui.status_label.values["text"]
 
     ui._submit(Status.CRIMINAL)
     run_task(ui)
@@ -648,7 +658,7 @@ def test_hint_rejection_and_auto_solve_metrics_count_each_call_once(ui: MainWind
 def test_library_replaces_file_explorer(ui: MainWindow, monkeypatch: pytest.MonkeyPatch) -> None:
     seen = []
     monkeypatch.setattr(
-        "gui.main_window.show_library", lambda root, records, choose: seen.append(choose)
+        "gui.main_window.show_library", lambda root, records, choose, **kwargs: seen.append(choose)
     )
     ui._load()
     seen[0](LEVELS[2].key)
@@ -674,3 +684,89 @@ def test_bad_resume_resets_partial_restoration_and_keeps_saved_record(
     assert len(ui.session.snapshots) == 1
     assert "saved record was kept" in ui.status_label.values["text"]
     assert store.data["levels"][LEVELS[0].key]["moves"] == record["moves"]
+
+
+def test_hint_stages_do_not_reveal_or_double_count_sat_and_reset_after_reveal(
+    ui: MainWindow,
+) -> None:
+    before = ui.engine.get_public_state()
+    ui._request_hint()
+    run_task(ui)
+    assert ui._hint_cache is not None
+    assert ui._selected_id == "A1" and ui.board.highlighted == ("A1",)
+    assert "B1" not in ui.status_label.values["text"]
+    assert "Innocent" not in ui.status_label.values["text"]
+    assert ui.hint_button.values["text"] == "Show Verdict"
+    first_calls = len(ui.session.queries)
+    assert first_calls > 0 and ui.session.hints == 1
+    ui._request_hint()
+    assert ui._selected_id == "B1"
+    assert "Innocent" in ui.status_label.values["text"]
+    assert len(ui.session.queries) == first_calls and ui.session.hints == 2
+    assert ui.engine.get_public_state() == before
+    ui._submit(Status.INNOCENT)
+    run_task(ui)
+    assert ui._hint_cache is None and ui.hint_button.values["text"] == "Clue Hint"
+
+
+def test_restart_discards_pending_or_cached_clue_hint(ui: MainWindow) -> None:
+    ui._request_hint()
+    ui._restart()
+    restarted = ui.engine.get_public_state()
+    run_task(ui)
+    assert ui._hint_cache is None and ui._state == restarted
+    ui._request_hint()
+    run_task(ui)
+    assert ui._hint_cache is not None
+    ui._restart()
+    assert ui._hint_cache is None and ui.session.hints == 0
+
+
+def test_generation_loads_only_current_result_and_can_resume_generated_case(
+    ui: MainWindow,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    generated = write_generated_puzzle(5, 123, tmp_path)
+    monkeypatch.setattr("gui.main_window.write_generated_puzzle", lambda *args, **kwargs: generated)
+    original_load = ui._load_path
+    monkeypatch.setattr(ui, "_load_path", lambda path, key=None: original_load(generated, key))
+    ui._generate_puzzle(5, 123)
+    run_task(ui)
+    assert ui._state.size == 5
+    assert ui._level_key == "generated/generated_v2_5x5_seed_123.json"
+    assert ui.puzzle_title.values["text"] == "Generated v2 5×5 · Seed 123"
+    ui._progress_store = ProgressStore(tmp_path / "progress.json")
+    ui._attach_progress()
+    ui._request_hint()
+    run_task(ui)
+    ui._request_hint()
+    ui._submit(ui._hint_cache.status)
+    run_task(ui)
+    saved = ui.engine.get_public_state()
+    ui._load_level(ui._level_key)
+    run_task(ui)
+    assert ui.engine.get_public_state().characters == saved.characters
+    assert ui.engine.get_public_state().token.session_id != saved.token.session_id
+    assert ui._hint_cache is None
+
+
+def test_generation_failure_and_old_result_keep_current_game(
+    ui: MainWindow,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    initial = ui.engine.get_public_state()
+    monkeypatch.setattr(
+        "gui.main_window.write_generated_puzzle",
+        lambda *args, **kwargs: (_ for _ in ()).throw(SolverTimeout("generation")),
+    )
+    ui._generate_puzzle(3, 1)
+    run_task(ui)
+    assert ui.engine.get_public_state() == initial
+    assert "Current case kept" in ui.status_label.values["text"]
+    assert not ui.session.metrics_partial
+    ui._generate_puzzle(3, 2)
+    ui._restart()
+    current = ui.engine.get_public_state()
+    run_task(ui)
+    assert ui.engine.get_public_state() == current and ui._state == current

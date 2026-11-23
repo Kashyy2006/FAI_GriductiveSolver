@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "puzzle_id": "crossroads",
+  "size": 3,
+  "characters": [
+    {
+      "id": "A1",
+      "name": "Alice",
+      "profession": "Guide",
+      "row": 0,
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_A1",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "B1",
+            "B3"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "B1",
+      "name": "Ben",
+      "profession": "Baker",
+      "row": 0,
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_B1",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A1",
+            "C2",
+            "B3"
+          ]
+        },
+        "k": 0
+      }
+    },
+    {
+      "id": "C1",
+      "name": "Chloe",
+      "profession": "Doctor",
+      "row": 0,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_C1",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A2",
+            "C2",
+            "C3"
+          ]
+        },
+        "k": 0
+      }
+    },
+    {
+      "id": "A2",
+      "name": "David",
+      "profession": "Baker",
+      "row": 1,
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_A2",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "B1",
+            "C1"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "B2",
+      "name": "Emma",
+      "profession": "Pilot",
+      "row": 1,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_B2",
+        "type": "ODD",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A1",
+            "A2",
+            "A3"
+          ]
+        }
+      }
+    },
+    {
+      "id": "C2",
+      "name": "Felix",
+      "profession": "Guide",
+      "row": 1,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_C2",
+        "type": "AT_MOST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "B3",
+            "C1"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "A3",
+      "name": "Grace",
+      "profession": "Archivist",
+      "row": 2,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_A3",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A1",
+            "A2",
+            "C2"
+          ]
+        },
+        "k": 0
+      }
+    },
+    {
+      "id": "B3",
+      "name": "Henry",
+      "profession": "Archivist",
+      "row": 2,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_B3",
+        "type": "EVEN",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "C2",
+            "A2",
+            "C1"
+          ]
+        }
+      }
+    },
+    {
+      "id": "C3",
+      "name": "Iris",
+      "profession": "Archivist",
+      "row": 2,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_C3",
+        "type": "EVEN",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "C2",
+            "A2",
+            "B2"
+          ]
+        }
+      }
+    }
+  ],
+  "initially_revealed": [
+    "A1",
+    "A2",
+    "C2"
+  ]
+}

@@ -9,6 +9,12 @@
 
 ## Hành vi đã triển khai
 
+- `hints.find_clue_hint` giữ nguyên API `next_hint`, trả thêm tuple clue hỗ trợ riêng.
+  Phân tích loại bỏ clue trên snapshot sao chép, giữ unit verdict đã biết và chỉ dùng
+  dữ liệu công khai. Tập hỗ trợ đủ chứng minh target và không bỏ tiếp được từng clue;
+  không gọi đó là tập có số phần tử nhỏ nhất. REMARK không tham gia suy luận.
+  `HintResult.active_clue_ids` vẫn giữ nghĩa v1; mọi SAT call phân tích được ghi đúng một lần.
+
 - Mỗi phép suy luận gọi `encoder.encode(state)` mới. Không cache KB/proof giữa
   các snapshot. Consistency được kiểm tra trước mọi phép entailment.
 - `classify_all`: chỉ phân loại ô chưa mở; KB UNSAT trả INCONSISTENT với map rỗng.

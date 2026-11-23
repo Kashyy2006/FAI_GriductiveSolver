@@ -9,10 +9,12 @@ import pytest
 from agent.agent import DeductiveAgent
 from game.engine import GameEngine
 from game.puzzle_loader import load_puzzle
+from gui import theme
 from gui.board_view import BoardView
-from gui.dialogs import show_help, show_library, show_replay
+from gui.clue_text import format_clue
+from gui.dialogs import show_generator, show_help, show_library, show_replay
 from gui.main_window import MainWindow
-from gui.play_session import LEVELS, MARK_COLORS, SOURCE, PlaySession
+from gui.play_session import LEVELS, MARK_COLORS, SOURCE, PlaySession, available_levels
 from logic.cnf_encoder import CNFEncoder
 from solver.dpll import DPLLSolver
 
@@ -186,7 +188,7 @@ def test_library_filter_and_help_illustrations(root: Tk) -> None:
     root.update()
     tree = next(c for c in descendants(library) if isinstance(c, ttk.Treeview))
     combo = next(c for c in descendants(library) if isinstance(c, ttk.Combobox))
-    assert len(tree.get_children()) == len(LEVELS)
+    assert tree.get_children() == tuple(level.key for level in available_levels())
     combo.set("Medium")
     combo.event_generate("<<ComboboxSelected>>")
     root.update()
@@ -194,7 +196,7 @@ def test_library_filter_and_help_illustrations(root: Tk) -> None:
         level.key for level in LEVELS if level.difficulty == "Medium"
     )
     button(library, "Play / Continue").invoke()
-    assert selected == [LEVELS[2].key]
+    assert selected == [next(level.key for level in LEVELS if level.difficulty == "Medium")]
     help_window = show_help(root)
     notebook = next(c for c in descendants(help_window) if isinstance(c, ttk.Notebook))
     notebook.select(1)
@@ -208,3 +210,124 @@ def test_library_filter_and_help_illustrations(root: Tk) -> None:
     assert amber_counts[0] == 8
     assert amber_counts[1] == 2
     assert amber_counts[-1] == 0
+
+
+def test_generator_form_validates_seed_and_passes_fixed_size(root: Tk) -> None:
+    selected = []
+    dialog = show_generator(root, lambda size, seed: selected.append((size, seed)))
+    root.update()
+    combo = next(c for c in descendants(dialog) if isinstance(c, ttk.Combobox))
+    entry = next(c for c in descendants(dialog) if type(c) is ttk.Entry)
+    combo.set("5 × 5")
+    entry.delete(0, "end")
+    entry.insert(0, "-1")
+    button(dialog, "Generate & Play").invoke()
+    assert selected == [] and dialog.winfo_exists()
+    entry.delete(0, "end")
+    entry.insert(0, "31415")
+    button(dialog, "Generate & Play").invoke()
+    assert selected == [(5, 31415)] and not dialog.winfo_exists()
+
+
+def test_long_card_clue_scrolls_to_last_line_without_changing_game(root: Tk) -> None:
+    agent = DeductiveAgent(CNFEncoder(), DPLLSolver())
+    engine = GameEngine(load_puzzle(SOURCE / "puzzles/5x5/harbor_case.json"), agent.verify_verdict)
+    result = agent.auto_solve(engine)
+    before = engine.get_public_state()
+    window = MainWindow(root, engine, agent)
+    root.geometry("990x680")
+    root.deiconify()
+    root.update()
+    last = result.steps[-1].character_id
+    character = next(c for c in before.characters if c.id == last)
+    label = window.board._card_labels[last]["clue"]
+    viewport = window.board._clue_views[last]
+    scrollbar = window.board._clue_scrollbars[last]
+    assert label.cget("text") == format_clue(character.clue, before)
+    board_canvas = window.board._canvas
+    assert board_canvas.yview()[1] < 1
+    board_scroll = window.board._board_scrollbar
+    board_scroll.tk.call(board_scroll.cget("command"), "moveto", 1)
+    root.update()
+    bottom_card = window.board._buttons["E5"]
+    assert bottom_card.winfo_rooty() >= board_canvas.winfo_rooty()
+    assert (
+        bottom_card.winfo_rooty() + bottom_card.winfo_height()
+        <= board_canvas.winfo_rooty() + board_canvas.winfo_height()
+    )
+    assert viewport.winfo_height() >= Font(font=label.cget("font")).metrics("linespace")
+    assert viewport.yview()[1] < 1
+    assert scrollbar.winfo_ismapped()
+    scrollbar.tk.call(scrollbar.cget("command"), "moveto", 1)
+    root.update()
+    assert viewport.yview()[0] > 0 and viewport.yview()[1] >= 0.999
+    assert viewport.canvasy(viewport.winfo_height()) >= viewport.bbox("all")[3] - 1
+    label.event_generate("<MouseWheel>", delta=120)
+    root.update()
+    assert viewport.yview()[1] < 1
+    position = viewport.yview()
+    board_position = board_canvas.yview()
+    window._select_cell(last)
+    root.update()
+    assert viewport.yview() == position
+    assert board_canvas.yview() == board_position
+    assert engine.get_public_state() == before
+    engine.restart()
+    window.refresh()
+    root.update()
+    assert label.cget("text") == "Clue locked"
+    assert viewport.yview() == (0.0, 1.0)
+    assert not scrollbar.winfo_ismapped()
+    assert board_canvas.yview()[0] == 0
+
+
+def test_pencil_note_buttons_explain_their_roles_and_never_submit_a_verdict(root: Tk) -> None:
+    engine, agent = stack()
+    window = MainWindow(root, engine, agent)
+    root.deiconify()
+    root.update()
+    before = engine.get_public_state()
+    window._select_cell("B1")
+    for color, text in (
+        ("Blue", "Maybe Innocent"),
+        ("Purple", "Maybe Criminal"),
+        ("Amber", "Review"),
+    ):
+        note = window.note_buttons[color]
+        assert note.cget("text") == text
+        note.invoke()
+        root.update()
+        assert window.session.marks == {"B1": color}
+        assert text in window.selected_note_label.cget("text")
+        assert window.note_help_label.cget("text")
+        assert note.instate(["selected"])
+        assert engine.get_public_state() == before
+        assert window.session.hints == window.session.rejected == 0
+    window._busy = True
+    window._update_controls()
+    window.note_buttons["Purple"].invoke()
+    assert window.session.marks == {"B1": "Amber"}
+    window._busy = False
+    window._update_controls()
+    window.clear_note_button.invoke()
+    assert window.session.marks == {}
+    assert window.selected_note_label.cget("text") == "No pencil note"
+    assert engine.get_public_state() == before
+
+
+def test_scrollbar_tracks_match_their_current_surfaces(root: Tk) -> None:
+    engine, agent = stack()
+    window = MainWindow(root, engine, agent)
+    root.update()
+    styles = ttk.Style(root)
+    board = window.board
+    assert styles.lookup(board._board_scrollbar.cget("style"), "troughcolor") == theme.PAGE
+    for cell, fill in (("A1", BoardView.INNOCENT_FILL), ("B1", BoardView.CARD)):
+        scroll = board._clue_scrollbars[cell]
+        assert styles.lookup(scroll.cget("style"), "troughcolor") == fill
+        assert styles.lookup(scroll.cget("style"), "background") != fill
+    board.highlight(("B1",))
+    scroll = board._clue_scrollbars["B1"]
+    assert styles.lookup(scroll.cget("style"), "troughcolor") == BoardView.HIGHLIGHT_FILL
+    board.set_notes({"B1": "Blue"}, set())
+    assert styles.lookup(scroll.cget("style"), "troughcolor") == BoardView.HIGHLIGHT_FILL

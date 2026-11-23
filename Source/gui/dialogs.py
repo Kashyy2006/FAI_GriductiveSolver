@@ -1,23 +1,29 @@
 """Level library, public replay, illustrated glossary and static player guide."""
 
 from collections.abc import Callable, Sequence
+from secrets import randbelow
 from tkinter import BOTH, LEFT, Canvas, StringVar, Text, Toplevel, X, ttk
 from typing import Any
 
 from game.models import DeductionStep, PublicCharacter, PublicState, Region, RegionType, StateToken
+from gui import theme
 from gui.board_view import BoardView
 from gui.clue_text import format_clue
-from gui.play_session import LEVELS
+from gui.play_session import available_levels
 from logic.regions import resolve_region
 
 
 def show_library(
-    parent: Any, records: dict[str, Any], open_level: Callable[[str], None]
+    parent: Any,
+    records: dict[str, Any],
+    open_level: Callable[[str], None],
+    generate: Callable[[int, int], None] | None = None,
 ) -> Toplevel:
     window = Toplevel(parent)
+    window.configure(background=theme.PAGE)
     window.title("Case Library")
-    window.geometry("760x470")
-    window.minsize(620, 400)
+    window.geometry("820x520")
+    window.minsize(700, 460)
     panel = ttk.Frame(window, padding=18)
     panel.pack(fill=BOTH, expand=True)
     ttk.Label(panel, text="Choose a case", font=("Segoe UI", 18, "bold")).pack(anchor="w")
@@ -28,25 +34,37 @@ def show_library(
     filter_box = ttk.Combobox(
         panel,
         textvariable=difficulty,
-        values=("All", "Easy", "Medium", "Practice"),
+        values=("All", "Easy", "Medium", "Hard", "Practice", "Generated"),
         state="readonly",
         width=18,
     )
     filter_box.pack(anchor="w", pady=(0, 10))
-    tree = ttk.Treeview(panel, columns=("difficulty", "progress"), show="tree headings", height=7)
+    list_panel = ttk.Frame(panel)
+    list_panel.pack(fill=BOTH, expand=True)
+    tree = ttk.Treeview(
+        list_panel, columns=("difficulty", "progress"), show="tree headings", height=7
+    )
     tree.heading("#0", text="Case")
     tree.heading("difficulty", text="Difficulty")
     tree.heading("progress", text="Progress")
     tree.column("#0", width=300)
     tree.column("difficulty", width=90)
     tree.column("progress", width=140)
-    tree.pack(fill=BOTH, expand=True)
+    list_scroll = ttk.Scrollbar(
+        list_panel,
+        orient="vertical",
+        command=tree.yview,
+        style=theme.scrollbar_style(window, theme.CARD),
+    )
+    list_scroll.pack(side="right", fill="y")
+    tree.configure(yscrollcommand=list_scroll.set)
+    tree.pack(side=LEFT, fill=BOTH, expand=True)
     description = ttk.Label(panel, wraplength=670)
     description.pack(fill=X, pady=10)
 
     def populate(_event: object = None) -> None:
         tree.delete(*tree.get_children())
-        for level in LEVELS:
+        for level in available_levels():
             if difficulty.get() not in ("All", level.difficulty):
                 continue
             record = records.get(level.key, {})
@@ -65,7 +83,9 @@ def show_library(
 
     def describe(_event: object = None) -> None:
         selection = tree.selection()
-        level = next((level for level in LEVELS if selection and level.key == selection[0]), None)
+        level = next(
+            (level for level in available_levels() if selection and level.key == selection[0]), None
+        )
         description.configure(text=level.description if level else "Select a case.")
 
     def choose(_event: object = None) -> None:
@@ -78,8 +98,61 @@ def show_library(
     filter_box.bind("<<ComboboxSelected>>", populate)
     tree.bind("<<TreeviewSelect>>", describe)
     tree.bind("<Double-1>", choose)
-    ttk.Button(panel, text="Play / Continue", command=choose).pack(anchor="e")
+    actions = ttk.Frame(panel)
+    actions.pack(fill=X)
+    if generate is not None:
+
+        def create() -> None:
+            window.destroy()
+            show_generator(parent, generate)
+
+        ttk.Button(actions, text="Generate Puzzle…", command=create).pack(side=LEFT)
+    ttk.Button(actions, text="Play / Continue", command=choose).pack(side="right")
     populate()
+    return window
+
+
+def show_generator(parent: Any, generate: Callable[[int, int], None]) -> Toplevel:
+    window = Toplevel(parent)
+    window.configure(background=theme.PAGE)
+    window.title("Generate Puzzle")
+    window.geometry("560x420")
+    window.minsize(560, 420)
+    panel = ttk.Frame(window, padding=22)
+    panel.pack(fill=BOTH, expand=True)
+    ttk.Label(panel, text="Generate a new case", font=("Segoe UI", 17, "bold")).pack(anchor="w")
+    ttk.Label(
+        panel,
+        text=(
+            "Fixed board size. Same version, size and seed reproduce the case.\n"
+            "Verified UNIQUE, with exactly one forced move at every step.\n"
+            "Varied relations, counts and parity; no FACT chains."
+        ),
+        wraplength=510,
+    ).pack(anchor="w", pady=12)
+    ttk.Label(panel, text="Board size").pack(anchor="w")
+    size = StringVar(window, "3 × 3")
+    ttk.Combobox(
+        panel, textvariable=size, values=("3 × 3", "4 × 4", "5 × 5"), state="readonly", width=12
+    ).pack(anchor="w", pady=(2, 8))
+    ttk.Label(panel, text="Seed (0–2147483647)").pack(anchor="w")
+    seed = StringVar(window, str(randbelow(2**31)))
+    ttk.Entry(panel, textvariable=seed).pack(fill=X, pady=(2, 6))
+    error = ttk.Label(panel, foreground="#c92f28")
+    error.pack(anchor="w")
+
+    def create() -> None:
+        try:
+            value = int(seed.get())
+            if not 0 <= value <= 2**31 - 1:
+                raise ValueError
+        except ValueError:
+            error.configure(text="Enter an integer from 0 to 2147483647.")
+            return
+        generate(int(size.get()[0]), value)
+        window.destroy()
+
+    ttk.Button(panel, text="Generate & Play", command=create).pack(anchor="e", pady=(8, 0))
     return window
 
 
@@ -88,6 +161,7 @@ def show_replay(
 ) -> Toplevel:
     """The viewer has no Engine reference and cannot reveal or submit anything."""
     window = Toplevel(parent)
+    window.configure(background=theme.PAGE)
     window.title("Public Replay")
     window.geometry("1120x760")
     window.minsize(950, 650)
@@ -98,8 +172,31 @@ def show_replay(
     counter.pack(side=LEFT, padx=14)
     body = ttk.Frame(window)
     body.pack(fill=BOTH, expand=True)
-    info = Text(body, width=34, wrap="word", padx=12, pady=12, font=("Segoe UI", 11))
-    info.pack(side="right", fill="y")
+    info_panel = ttk.Frame(body)
+    info_panel.pack(side="right", fill="y", padx=(8, 12), pady=(4, 12))
+    info = Text(
+        info_panel,
+        width=34,
+        wrap="word",
+        padx=16,
+        pady=16,
+        font=("Segoe UI", -13),
+        bg=theme.CARD,
+        fg=theme.INK,
+        relief="flat",
+        bd=0,
+        highlightthickness=1,
+        highlightbackground=theme.LINE,
+    )
+    info_scroll = ttk.Scrollbar(
+        info_panel,
+        orient="vertical",
+        command=info.yview,
+        style=theme.scrollbar_style(window, theme.CARD),
+    )
+    info_scroll.pack(side="right", fill="y")
+    info.configure(yscrollcommand=info_scroll.set)
+    info.pack(fill=BOTH, expand=True)
 
     def inspect(character_id: str) -> None:
         state = snapshots[position]
@@ -165,6 +262,7 @@ def show_replay(
 
 def show_help(parent: Any) -> Toplevel:
     window = Toplevel(parent)
+    window.configure(background=theme.PAGE)
     window.title("? How to Play & Glossary")
     window.geometry("820x690")
     notebook = ttk.Notebook(window)
@@ -191,12 +289,16 @@ def show_help(parent: Any) -> Toplevel:
         (
             "4 · Submit and repeat",
             "Only a proved verdict opens a card and its next clue. "
-            "A rejected verdict or Hint opens nothing. A Remark is story text, not evidence.",
+            "First Hint highlights useful public clues; press it again on the same board "
+            "to see a person and verdict. Neither Hint nor a rejected verdict opens cards. "
+            "A Remark is story text, not evidence.",
         ),
         (
             "Your own notes",
-            "Use Temporary color on a selected card and Used clue on a public "
-            "clue. These are reminders only: they never change proof, verdicts, or reveals. "
+            "Pencil colors have labels: Amber = Review, Blue = Maybe Innocent, "
+            "Purple = Maybe Criminal. Clear note removes a pencil mark; Used clue crosses "
+            "off a public clue. These are personal notes and guesses; they never change "
+            "proof, verdicts, or reveals. "
             "Replay lets you inspect earlier public snapshots without changing the game.",
         ),
     )
@@ -255,7 +357,7 @@ def show_help(parent: Any) -> Toplevel:
     for index, (title, region, endpoints, explanation) in enumerate(examples):
         row = ttk.Frame(glossary)
         row.pack(fill=X, pady=3)
-        canvas = Canvas(row, width=155, height=94, highlightthickness=0)
+        canvas = Canvas(row, width=155, height=94, highlightthickness=0, bg=theme.PAGE)
         canvas.pack(side=LEFT, padx=(0, 12))
         cells = set(resolve_region(region, state))
         for cell in state.characters:

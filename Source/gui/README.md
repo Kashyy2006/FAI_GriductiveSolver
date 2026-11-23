@@ -3,7 +3,7 @@
 ## Phụ trách và công việc
 
 - Phụ trách: TV5.
-- Tkinter/ttk, board tự co theo khung không dùng thanh cuộn, thẻ bo góc, verdict thủ công,
+- Tkinter/ttk, board tự co chiều rộng và cuộn dọc khi cần, thẻ bo góc, verdict thủ công,
   highlight, Load/Restart/Hint/Auto Solve; chỉ luồng chính cập nhật widget, queue + after cho việc nền.
 - `python main.py` mở GUI theo luồng game thật với puzzle 3×3 mặc định.
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
@@ -11,16 +11,36 @@
 
 ## Chơi, ghi chú và tiếp tục
 
-- `Case Library` thay hộp chọn file bằng thư viện sáu màn, lọc Easy / Medium / Practice.
+- `Case Library` thay hộp chọn file bằng thư viện màn, lọc Easy / Medium / Hard / Practice / Generated.
   Độ khó là phân loại biên soạn, không phải chỉ số SAT; các màn Practice có thể dừng
   khi thiếu dữ kiện và được ghi rõ trong mô tả. Hai ví dụ có cùng puzzle_id được lưu
   riêng theo đường dẫn màn để không ghi đè tiến độ.
+- Màn chính mới: Crossroads (3×3), Archive Case (4×4), Harbor Case (5×5); không có FACT,
+  cần kết hợp ba clue ở các giai đoạn và có đúng một forced verdict mỗi bước.
+  Hai FACT-chain cũ chuyển sang Practice; mọi màn chính phải UNIQUE và progressive SOLVED.
+- `Generate Puzzle…` cho chọn kích thước cố định 3×3 / 4×4 / 5×5 và seed nguyên
+  0..2147483647. Worker sinh và kiểm tra UNIQUE + đúng một nước đi mỗi bước rồi mới
+  ghi file/nạp Engine. Cùng phiên bản/size/seed tái lập màn; các màn sinh xuất hiện trong thư viện
+  và hỗ trợ resume/replay như màn có sẵn. Đổi màn/restart/đóng app loại kết quả worker cũ.
+- Màn sinh mới hiển thị `Generated v2`: năm kiểu mở đầu, ba họ kết hợp bất đẳng thức,
+  cả hai hướng Criminal/Innocent và clue vùng hình học. Givens có cả hai trạng thái;
+  số thẻ mở sẵn tùy tổ hợp mẫu. Màn/tiến độ của bộ sinh cũ vẫn dùng tên/key cũ.
+- Hint có hai cấp theo token: lần đầu highlight các thẻ có clue hỗ trợ và không chỉ
+  target/verdict; lần tiếp theo (`Show Verdict`) mới nêu nhân vật và trạng thái.
+  Chọn thẻ hoặc verdict bị từ chối không nâng version; reveal/load/restart xóa cấp cũ.
+  Bấm cấp 2 chỉ dùng kết quả hiển thị đã chứng minh trên cùng token, không đếm lại
+  SAT calls; Engine luôn chứng minh lại nếu người chơi submit. Cả hai lần bấm đều
+  được tính là một lần yêu cầu Hint, không thay KB/verdict/reveal. Resume bắt đầu ở cấp 1.
 - Các màn dùng tên tiếng Anh. `clue_text.py` chỉ định dạng clue công khai: FACT,
   SAME/DIFFERENT và tham chiếu vùng hiển thị tên người; REMARK giữ nguyên văn bản.
   Vùng một người diễn đạt trực tiếp (ví dụ `Tom is Criminal`); vùng nhiều người
   dùng câu đếm nhóm, không coi tên người là địa điểm sau chữ `in`.
-- Chọn thẻ rồi dùng `Temporary color` để tô toàn bộ khung viền, `Used clue` để làm mờ và gạch
-  clue công khai. Chọn None / Restore clue để bỏ dấu. Các ghi chú chỉ thuộc GUI,
+- `Pencil Notes` thay danh sách tên màu bằng ba nút có ý nghĩa: vàng `Review`
+  (xem lại), xanh `Maybe Innocent`, tím `Maybe Criminal`. Chọn thẻ rồi bấm một nút
+  để tô toàn bộ khung viền; nhãn ghi chú và lời hướng dẫn hiện ngay bên dưới.
+  `Clear note` xóa ghi chú màu; `Used clue` / `Restore clue` gạch hoặc phục hồi
+  clue công khai. Các màu xanh/tím là phỏng đoán cá nhân, không phải verdict đã chứng minh.
+  Key lưu Amber/Blue/Purple giữ nguyên để đọc được tiến độ cũ. Các ghi chú chỉ thuộc GUI,
   không xóa clue khỏi KB, không tạo verdict và không reveal thẻ. Khi highlight,
   viền ngoài màu hổ phách vẫn hiện cùng khung màu tạm và nền trạng thái của thẻ.
 - `play_session.py` ghi các receipt ACCEPTED từ Engine, snapshot công khai và
@@ -43,9 +63,15 @@
   AutoSolveResult hoàn tất giả.
 - Nút `?` cạnh `CASE NOTES` mở hướng dẫn tĩnh chọn clue → đọc highlight → tự chứng minh → submit,
   kèm glossary minh họa neighbors tám hướng, giao common neighbors, parity,
-  hàng/cột và vùng rỗng. Sidebar cuộn độc lập khi cửa sổ thấp; board không cuộn.
+  hàng/cột và vùng rỗng. Sidebar và board cuộn độc lập khi cửa sổ thấp.
 
 ## Tác vụ, bố cục, highlight và trace
+
+- `theme.py` dùng chung nền giấy sáng, bề mặt thẻ, chữ xanh mực, đường viền nhẹ,
+  nút hành động và thanh tiến độ. Library, form Generate, Replay và Help dùng cùng theme.
+- Thanh cuộn board/sidebar/library/replay có rãnh cùng màu nền; thanh clue theo
+  đúng nền thẻ hiện tại (Criminal/Innocent/highlight). Tay kéo tối hơn, có phản hồi
+  hover/pressed, bỏ mũi tên và viền nổi. Cuộn kéo/con lăn vẫn hoạt động như trước.
 
 - Bố cục 2 cột thích ứng (`1280×820`, tối thiểu `990×680`): board căn giữa, thẻ dùng
   font theo pixel (`-px`) tự co giãn theo kích thước thẻ để không cắt chữ trên board
@@ -58,6 +84,12 @@
   `COMMON_NEIGHBORS` và vùng rỗng).
 - `BoardView._update_card` cập nhật đủ `id`, `name`, `profession` và `clue` để nạp
   puzzle mới cùng kích thước không giữ lại thông tin nhân vật cũ.
+- Clue trên thẻ tự xuống dòng và có vùng cuộn dọc riêng. Khi nội dung dài, dùng
+  con lăn chuột hoặc thanh kéo bên phải clue để đọc tới dòng cuối, kể cả bàn 5×5.
+  Thẻ có chiều cao tối thiểu 160 px; con lăn trên phần khác của thẻ hoặc thanh kéo
+  bên phải board cho phép đi tới các hàng dưới thay vì ép thẻ thấp đến mất nội dung.
+  Chọn thẻ/đánh dấu không làm mất vị trí cuộn; clue mới hoặc restart về đầu.
+  Cuộn chỉ thay cách hiển thị, không sửa public state, KB, verdict hoặc reveal.
 - Auto Solve gắn với session đã bấm nút và có cancellation Event riêng. Load/Restart
   hủy tác vụ cũ, hủy hoạt ảnh/toast cũ; worker khởi động trễ hoặc đang tính SAT không
   được reveal phiên mới.
