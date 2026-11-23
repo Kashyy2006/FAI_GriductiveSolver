@@ -10,3 +10,4 @@ Source/outputs/player_progress.json
 Source/outputs/player_progress.tmp
 Source/puzzles/generated/*.json
 Source/puzzles/generated/.generating_*.tmp
+dist/
