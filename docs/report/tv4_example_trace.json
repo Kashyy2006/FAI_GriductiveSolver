@@ -1,0 +1,1593 @@
+[
+  {
+    "active_clue_ids": [
+      "clue_A1"
+    ],
+    "character_id": "B1",
+    "newly_revealed_clue": {
+      "first": null,
+      "id": "clue_B1",
+      "k": null,
+      "person": null,
+      "region": {
+        "cell": null,
+        "cells": [],
+        "first": "A1",
+        "index": null,
+        "kind": "COMMON_NEIGHBORS",
+        "second": "C3"
+      },
+      "second": null,
+      "status": null,
+      "text": null,
+      "type": "ODD"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 5.6900084018707275e-05
+        }
+      },
+      {
+        "assumptions": [
+          -2
+        ],
+        "purpose": "ASSUME_INNOCENT:B1",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 2,
+          "runtime_seconds": 2.620008308440447e-05
+        }
+      },
+      {
+        "assumptions": [
+          2
+        ],
+        "purpose": "ASSUME_CRIMINAL:B1",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 1.4499993994832039e-05
+        }
+      },
+      {
+        "assumptions": [
+          -3
+        ],
+        "purpose": "ASSUME_INNOCENT:C1",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 2,
+          "runtime_seconds": 1.4899997040629387e-05
+        }
+      },
+      {
+        "assumptions": [
+          3
+        ],
+        "purpose": "ASSUME_CRIMINAL:C1",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 1.1800089851021767e-05
+        }
+      },
+      {
+        "assumptions": [
+          -4
+        ],
+        "purpose": "ASSUME_INNOCENT:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.6900012269616127e-05
+        }
+      },
+      {
+        "assumptions": [
+          4
+        ],
+        "purpose": "ASSUME_CRIMINAL:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.6000005416572094e-05
+        }
+      },
+      {
+        "assumptions": [
+          -5
+        ],
+        "purpose": "ASSUME_INNOCENT:B2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.7200014553964138e-05
+        }
+      },
+      {
+        "assumptions": [
+          5
+        ],
+        "purpose": "ASSUME_CRIMINAL:B2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.6400008462369442e-05
+        }
+      },
+      {
+        "assumptions": [
+          -6
+        ],
+        "purpose": "ASSUME_INNOCENT:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 2.5400076992809772e-05
+        }
+      },
+      {
+        "assumptions": [
+          6
+        ],
+        "purpose": "ASSUME_CRIMINAL:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.7900019884109497e-05
+        }
+      },
+      {
+        "assumptions": [
+          -7
+        ],
+        "purpose": "ASSUME_INNOCENT:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.6999896615743637e-05
+        }
+      },
+      {
+        "assumptions": [
+          7
+        ],
+        "purpose": "ASSUME_CRIMINAL:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.5900004655122757e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.6200006939470768e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.5900004655122757e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.6000005416572094e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.6000005416572094e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 2.0200037397444248e-05
+        }
+      },
+      {
+        "assumptions": [
+          -2
+        ],
+        "purpose": "ASSUME_INNOCENT:B1",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 2,
+          "runtime_seconds": 1.6000005416572094e-05
+        }
+      },
+      {
+        "assumptions": [
+          2
+        ],
+        "purpose": "ASSUME_CRIMINAL:B1",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 1.1599971912801266e-05
+        }
+      }
+    ],
+    "step": 1,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 1
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 0
+    },
+    "verdict": "INNOCENT"
+  },
+  {
+    "active_clue_ids": [
+      "clue_A1",
+      "clue_B1"
+    ],
+    "character_id": "C1",
+    "newly_revealed_clue": {
+      "first": null,
+      "id": "clue_C1",
+      "k": 0,
+      "person": null,
+      "region": {
+        "cell": null,
+        "cells": [],
+        "first": null,
+        "index": 2,
+        "kind": "COLUMN",
+        "second": null
+      },
+      "second": null,
+      "status": null,
+      "text": null,
+      "type": "AT_MOST"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.8799986466765404e-05
+        }
+      },
+      {
+        "assumptions": [
+          -3
+        ],
+        "purpose": "ASSUME_INNOCENT:C1",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 2.3099943064153194e-05
+        }
+      },
+      {
+        "assumptions": [
+          3
+        ],
+        "purpose": "ASSUME_CRIMINAL:C1",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 1.5199999324977398e-05
+        }
+      },
+      {
+        "assumptions": [
+          -4
+        ],
+        "purpose": "ASSUME_INNOCENT:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.2900057956576347e-05
+        }
+      },
+      {
+        "assumptions": [
+          4
+        ],
+        "purpose": "ASSUME_CRIMINAL:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.3300061002373695e-05
+        }
+      },
+      {
+        "assumptions": [
+          -5
+        ],
+        "purpose": "ASSUME_INNOCENT:B2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 1.479999627918005e-05
+        }
+      },
+      {
+        "assumptions": [
+          5
+        ],
+        "purpose": "ASSUME_CRIMINAL:B2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 1.880002673715353e-05
+        }
+      },
+      {
+        "assumptions": [
+          -6
+        ],
+        "purpose": "ASSUME_INNOCENT:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.3700064048171043e-05
+        }
+      },
+      {
+        "assumptions": [
+          6
+        ],
+        "purpose": "ASSUME_CRIMINAL:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.3400061763823032e-05
+        }
+      },
+      {
+        "assumptions": [
+          -7
+        ],
+        "purpose": "ASSUME_INNOCENT:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.3399945348501205e-05
+        }
+      },
+      {
+        "assumptions": [
+          7
+        ],
+        "purpose": "ASSUME_CRIMINAL:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.2799940779805183e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.3799948394298553e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.429995220154524e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.429995220154524e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 2.389994915574789e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 3.15000070258975e-05
+        }
+      },
+      {
+        "assumptions": [
+          -3
+        ],
+        "purpose": "ASSUME_INNOCENT:C1",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 3,
+          "runtime_seconds": 6.680004298686981e-05
+        }
+      },
+      {
+        "assumptions": [
+          3
+        ],
+        "purpose": "ASSUME_CRIMINAL:C1",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 1.71000137925148e-05
+        }
+      }
+    ],
+    "step": 2,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 2
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 1
+    },
+    "verdict": "INNOCENT"
+  },
+  {
+    "active_clue_ids": [
+      "clue_A1",
+      "clue_B1",
+      "clue_C1"
+    ],
+    "character_id": "B2",
+    "newly_revealed_clue": {
+      "first": "A2",
+      "id": "clue_B2",
+      "k": null,
+      "person": null,
+      "region": null,
+      "second": "B2",
+      "status": null,
+      "text": null,
+      "type": "SAME"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 4.0899962186813354e-05
+        }
+      },
+      {
+        "assumptions": [
+          -4
+        ],
+        "purpose": "ASSUME_INNOCENT:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 3.9599952287971973e-05
+        }
+      },
+      {
+        "assumptions": [
+          4
+        ],
+        "purpose": "ASSUME_CRIMINAL:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 3.709993325173855e-05
+        }
+      },
+      {
+        "assumptions": [
+          -5
+        ],
+        "purpose": "ASSUME_INNOCENT:B2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 2.0400038920342922e-05
+        }
+      },
+      {
+        "assumptions": [
+          5
+        ],
+        "purpose": "ASSUME_CRIMINAL:B2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 5,
+          "runtime_seconds": 3.190001007169485e-05
+        }
+      },
+      {
+        "assumptions": [
+          -6
+        ],
+        "purpose": "ASSUME_INNOCENT:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 5,
+          "runtime_seconds": 3.300001844763756e-05
+        }
+      },
+      {
+        "assumptions": [
+          6
+        ],
+        "purpose": "ASSUME_CRIMINAL:C2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 1.950003206729889e-05
+        }
+      },
+      {
+        "assumptions": [
+          -7
+        ],
+        "purpose": "ASSUME_INNOCENT:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 3.650004509836435e-05
+        }
+      },
+      {
+        "assumptions": [
+          7
+        ],
+        "purpose": "ASSUME_CRIMINAL:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 3.6499928683042526e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 3.8199941627681255e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 3.799994010478258e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 5,
+          "runtime_seconds": 3.430002834647894e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 2.0700041204690933e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 4.190008621662855e-05
+        }
+      },
+      {
+        "assumptions": [
+          -5
+        ],
+        "purpose": "ASSUME_INNOCENT:B2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 2.159993164241314e-05
+        }
+      },
+      {
+        "assumptions": [
+          5
+        ],
+        "purpose": "ASSUME_CRIMINAL:B2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 5,
+          "runtime_seconds": 3.3899908885359764e-05
+        }
+      }
+    ],
+    "step": 3,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 3
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 2
+    },
+    "verdict": "CRIMINAL"
+  },
+  {
+    "active_clue_ids": [
+      "clue_A1",
+      "clue_B1",
+      "clue_B2",
+      "clue_C1"
+    ],
+    "character_id": "A2",
+    "newly_revealed_clue": {
+      "first": "A2",
+      "id": "clue_A2",
+      "k": null,
+      "person": null,
+      "region": null,
+      "second": "A3",
+      "status": null,
+      "text": null,
+      "type": "SAME"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 5.070003680884838e-05
+        }
+      },
+      {
+        "assumptions": [
+          -4
+        ],
+        "purpose": "ASSUME_INNOCENT:A2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 4.449998959898949e-05
+        }
+      },
+      {
+        "assumptions": [
+          4
+        ],
+        "purpose": "ASSUME_CRIMINAL:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 4.7200010158121586e-05
+        }
+      },
+      {
+        "assumptions": [
+          -6
+        ],
+        "purpose": "ASSUME_INNOCENT:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 4.549999721348286e-05
+        }
+      },
+      {
+        "assumptions": [
+          6
+        ],
+        "purpose": "ASSUME_CRIMINAL:C2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 2.450007013976574e-05
+        }
+      },
+      {
+        "assumptions": [
+          -7
+        ],
+        "purpose": "ASSUME_INNOCENT:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 6.640003994107246e-05
+        }
+      },
+      {
+        "assumptions": [
+          7
+        ],
+        "purpose": "ASSUME_CRIMINAL:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 5.139992572367191e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 5.040003452450037e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 5.0600036047399044e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 4.680000711232424e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 2.410006709396839e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 4.9200025387108326e-05
+        }
+      },
+      {
+        "assumptions": [
+          -4
+        ],
+        "purpose": "ASSUME_INNOCENT:A2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 4.630000330507755e-05
+        }
+      },
+      {
+        "assumptions": [
+          4
+        ],
+        "purpose": "ASSUME_CRIMINAL:A2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 4.509999416768551e-05
+        }
+      }
+    ],
+    "step": 4,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 4
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 3
+    },
+    "verdict": "CRIMINAL"
+  },
+  {
+    "active_clue_ids": [
+      "clue_A1",
+      "clue_A2",
+      "clue_B1",
+      "clue_B2",
+      "clue_C1"
+    ],
+    "character_id": "C2",
+    "newly_revealed_clue": {
+      "first": "A3",
+      "id": "clue_C2",
+      "k": null,
+      "person": null,
+      "region": null,
+      "second": "B3",
+      "status": null,
+      "text": null,
+      "type": "DIFFERENT"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 6.759993266314268e-05
+        }
+      },
+      {
+        "assumptions": [
+          -6
+        ],
+        "purpose": "ASSUME_INNOCENT:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 6.740004755556583e-05
+        }
+      },
+      {
+        "assumptions": [
+          6
+        ],
+        "purpose": "ASSUME_CRIMINAL:C2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 3.060000017285347e-05
+        }
+      },
+      {
+        "assumptions": [
+          -7
+        ],
+        "purpose": "ASSUME_INNOCENT:A3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 5.7200086303055286e-05
+        }
+      },
+      {
+        "assumptions": [
+          7
+        ],
+        "purpose": "ASSUME_CRIMINAL:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 6.19000056758523e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 7.909990381449461e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 6.630003917962313e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 5.9299985878169537e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 2.9999995604157448e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 6.959994789212942e-05
+        }
+      },
+      {
+        "assumptions": [
+          -6
+        ],
+        "purpose": "ASSUME_INNOCENT:C2",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 7,
+          "runtime_seconds": 6.360001862049103e-05
+        }
+      },
+      {
+        "assumptions": [
+          6
+        ],
+        "purpose": "ASSUME_CRIMINAL:C2",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 3.15000070258975e-05
+        }
+      }
+    ],
+    "step": 5,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 5
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 4
+    },
+    "verdict": "INNOCENT"
+  },
+  {
+    "active_clue_ids": [
+      "clue_A1",
+      "clue_A2",
+      "clue_B1",
+      "clue_B2",
+      "clue_C1",
+      "clue_C2"
+    ],
+    "character_id": "A3",
+    "newly_revealed_clue": {
+      "first": null,
+      "id": "clue_A3",
+      "k": null,
+      "person": null,
+      "region": null,
+      "second": null,
+      "status": null,
+      "text": "Hôm nay trời đẹp, tan ca mình đi bộ về thôi.",
+      "type": "REMARK"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 9,
+          "runtime_seconds": 9.840005077421665e-05
+        }
+      },
+      {
+        "assumptions": [
+          -7
+        ],
+        "purpose": "ASSUME_INNOCENT:A3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 8.040003012865782e-05
+        }
+      },
+      {
+        "assumptions": [
+          7
+        ],
+        "purpose": "ASSUME_CRIMINAL:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 8.570007048547268e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 9.270000737160444e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 0.00010389997623860836
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 9.34000127017498e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 4.2599975131452084e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 9,
+          "runtime_seconds": 9.370001498609781e-05
+        }
+      },
+      {
+        "assumptions": [
+          -7
+        ],
+        "purpose": "ASSUME_INNOCENT:A3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 4,
+          "runtime_seconds": 7.559999357908964e-05
+        }
+      },
+      {
+        "assumptions": [
+          7
+        ],
+        "purpose": "ASSUME_CRIMINAL:A3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 8.319993503391743e-05
+        }
+      }
+    ],
+    "step": 6,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 6
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 5
+    },
+    "verdict": "CRIMINAL"
+  },
+  {
+    "active_clue_ids": [
+      "clue_A1",
+      "clue_A2",
+      "clue_B1",
+      "clue_B2",
+      "clue_C1",
+      "clue_C2"
+    ],
+    "character_id": "B3",
+    "newly_revealed_clue": {
+      "first": null,
+      "id": "clue_B3",
+      "k": null,
+      "person": null,
+      "region": null,
+      "second": null,
+      "status": null,
+      "text": "Sáng nay mình làm đổ cà phê lên tay áo.",
+      "type": "REMARK"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 9,
+          "runtime_seconds": 8.759996853768826e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 8.9599983766675e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 7.929990533739328e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 8.130003698170185e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 3.6800047382712364e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 9,
+          "runtime_seconds": 8.359993807971478e-05
+        }
+      },
+      {
+        "assumptions": [
+          -8
+        ],
+        "purpose": "ASSUME_INNOCENT:B3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 8.33999365568161e-05
+        }
+      },
+      {
+        "assumptions": [
+          8
+        ],
+        "purpose": "ASSUME_CRIMINAL:B3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 6,
+          "runtime_seconds": 7.960002403706312e-05
+        }
+      }
+    ],
+    "step": 7,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 7
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 6
+    },
+    "verdict": "INNOCENT"
+  },
+  {
+    "active_clue_ids": [
+      "clue_A1",
+      "clue_A2",
+      "clue_B1",
+      "clue_B2",
+      "clue_C1",
+      "clue_C2"
+    ],
+    "character_id": "C3",
+    "newly_revealed_clue": {
+      "first": null,
+      "id": "clue_C3",
+      "k": null,
+      "person": null,
+      "region": null,
+      "second": null,
+      "status": null,
+      "text": "Đứng cả buổi, giờ chỉ muốn ngồi tháo giày.",
+      "type": "REMARK"
+    },
+    "queries": [
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 9,
+          "runtime_seconds": 9.279989171773195e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 9.250000584870577e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 3.969995304942131e-05
+        }
+      },
+      {
+        "assumptions": [],
+        "purpose": "CONSISTENCY",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 9,
+          "runtime_seconds": 9.660003706812859e-05
+        }
+      },
+      {
+        "assumptions": [
+          -9
+        ],
+        "purpose": "ASSUME_INNOCENT:C3",
+        "result": "SAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 8,
+          "runtime_seconds": 9.839993435889482e-05
+        }
+      },
+      {
+        "assumptions": [
+          9
+        ],
+        "purpose": "ASSUME_CRIMINAL:C3",
+        "result": "UNSAT",
+        "stats": {
+          "backtracks": 0,
+          "decisions": 0,
+          "propagations": 0,
+          "runtime_seconds": 4.429998807609081e-05
+        }
+      }
+    ],
+    "step": 8,
+    "token_after": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 8
+    },
+    "token_before": {
+      "session_id": "293295d7-253b-4592-937c-f9db138b6486",
+      "version": 7
+    },
+    "verdict": "INNOCENT"
+  }
+]

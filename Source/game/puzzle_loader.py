@@ -28,8 +28,12 @@ SCHEMA_PATH = Path(__file__).resolve().parents[1] / "schemas" / "puzzle.schema.j
 
 def clue_from_dict(data: dict[str, Any]) -> Clue:
     """Convert one schema-validated clue; not a standalone validator."""
+    clue_type = ClueType(data["type"])
+    if clue_type == ClueType.REMARK:
+        return Clue(id=data["id"], type=clue_type, text=data["text"])
+
     values = dict(data)
-    values["type"] = ClueType(values["type"])
+    values["type"] = clue_type
     if "status" in values:
         values["status"] = Status(values["status"])
     if "region" in values:

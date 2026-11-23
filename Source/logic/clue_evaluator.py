@@ -12,7 +12,10 @@ def _validate_clue_fields(clue: Clue) -> None:
         raise ContractError("Expected a Clue with a ClueType tag")
     if not isinstance(clue.id, str) or not clue.id:
         raise ContractError("Clue ID must be a nonempty string")
+    if clue.type == ClueType.REMARK and (not isinstance(clue.text, str) or not clue.text.strip()):
+        raise ContractError("REMARK requires nonblank text")
     allowed_fields = {
+        ClueType.REMARK: ("text",),
         ClueType.FACT: ("person", "status"),
         ClueType.SAME: ("first", "second"),
         ClueType.DIFFERENT: ("first", "second"),
@@ -22,7 +25,7 @@ def _validate_clue_fields(clue: Clue) -> None:
         ClueType.EVEN: ("region",),
         ClueType.ODD: ("region",),
     }
-    for name in ("person", "status", "first", "second", "region", "k"):
+    for name in ("person", "status", "first", "second", "region", "k", "text"):
         if name not in allowed_fields[clue.type] and getattr(clue, name) is not None:
             raise ContractError(f"Unexpected {name} parameter for {clue.type.value}")
 
@@ -37,6 +40,8 @@ def evaluate_clue(clue: Clue, assignment: Mapping[str, Status], state: PublicSta
         or any(not isinstance(value, Status) for value in assignment.values())
     ):
         raise ContractError("Expected a complete assignment of Status values")
+    if clue.type == ClueType.REMARK:
+        return True
     if clue.type == ClueType.FACT:
         if (
             not isinstance(clue.person, str)

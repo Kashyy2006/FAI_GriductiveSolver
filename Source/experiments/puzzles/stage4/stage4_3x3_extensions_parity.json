@@ -1,0 +1,158 @@
+{
+  "characters": [
+    {
+      "clue": {
+        "id": "clue_A1",
+        "k": 1,
+        "region": {
+          "first": "A1",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "C3"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "id": "A1",
+      "name": "Alice",
+      "profession": "Analyst",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_B1",
+        "k": 1,
+        "region": {
+          "first": "B1",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "B3"
+        },
+        "type": "AT_MOST"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B1",
+      "name": "Ben",
+      "profession": "Archivist",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_C1",
+        "k": 2,
+        "region": {
+          "index": 0,
+          "kind": "COLUMN"
+        },
+        "type": "AT_LEAST"
+      },
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "id": "C1",
+      "name": "Claire",
+      "profession": "Chemist",
+      "row": 0
+    },
+    {
+      "clue": {
+        "first": "A1",
+        "id": "clue_A2",
+        "second": "C1",
+        "type": "SAME"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A2",
+      "name": "David",
+      "profession": "Courier",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_B2",
+        "region": {
+          "first": "A1",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "C1"
+        },
+        "type": "ODD"
+      },
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "id": "B2",
+      "name": "Emma",
+      "profession": "Detective",
+      "row": 1
+    },
+    {
+      "clue": {
+        "first": "A3",
+        "id": "clue_C2",
+        "second": "C3",
+        "type": "DIFFERENT"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C2",
+      "name": "Felix",
+      "profession": "Doctor",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_A3",
+        "region": {
+          "index": 2,
+          "kind": "COLUMN"
+        },
+        "type": "ODD"
+      },
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "id": "A3",
+      "name": "Grace",
+      "profession": "Engineer",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_B3",
+        "region": {
+          "index": 0,
+          "kind": "ROW"
+        },
+        "type": "EVEN"
+      },
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "id": "B3",
+      "name": "Henry",
+      "profession": "Journalist",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_C3",
+        "region": {
+          "first": "A3",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "C3"
+        },
+        "type": "EVEN"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C3",
+      "name": "Iris",
+      "profession": "Lawyer",
+      "row": 2
+    }
+  ],
+  "initially_revealed": [
+    "A1",
+    "C3"
+  ],
+  "puzzle_id": "stage4_3x3_extensions_parity",
+  "schema_version": "1.0",
+  "size": 3
+}

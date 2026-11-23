@@ -1,0 +1,141 @@
+{
+  "all_passed": true,
+  "as_of": "2026-11-22",
+  "cases": 11,
+  "diagnostics": {
+    "checks_passed": true,
+    "inconsistent_classifications": {},
+    "inconsistent_kb_status": "INCONSISTENT",
+    "inconsistent_loop": "INCONSISTENT",
+    "inconsistent_loop_queries": 1,
+    "inconsistent_proof": "INCONSISTENT",
+    "initial_classifications": {
+      "A2": "UNKNOWN",
+      "A3": "UNKNOWN",
+      "B1": "INNOCENT",
+      "B2": "UNKNOWN",
+      "B3": "UNKNOWN",
+      "C1": "INNOCENT",
+      "C2": "UNKNOWN",
+      "C3": "UNKNOWN"
+    },
+    "rejected_actions_leave_state_unchanged": true,
+    "source": "real dependencies; inconsistent PublicState is explicit fault injection",
+    "unforced_character_id": "A2",
+    "unforced_verdict": "NOT_PROVABLE",
+    "wrong_verdict": "CONTRADICTED"
+  },
+  "inputs": [
+    {
+      "path": "Source/puzzles/3x3/example_01.json",
+      "sha256": "ed64bac7e22fd432134a34fbd2fe5d90a26b8486360bb27c045b4378ac688b11"
+    },
+    {
+      "path": "Source/puzzles/4x4/example_01.json",
+      "sha256": "64df42718ff1a05ca34c2ad3630ae3740c501d099cdb8a3656d82eda95197e03"
+    },
+    {
+      "path": "Source/experiments/puzzles/synthetic_3x3_fact_chain.json",
+      "sha256": "2cd5ece00d099c764240d6bea353530cd45eeb3fdde148d61b009992c378d002"
+    },
+    {
+      "path": "Source/experiments/puzzles/synthetic_3x3_row_counts.json",
+      "sha256": "03230dd115d4912b62c1d8ea93d8af6b17e87ebd3a505eecf38145a21915acf4"
+    },
+    {
+      "path": "Source/experiments/puzzles/synthetic_3x3_stuck_unique.json",
+      "sha256": "b9d3927b5bac12821b761b405209412e7d039a64f280b8226d1ec3ae7a0db0f9"
+    },
+    {
+      "path": "Source/experiments/puzzles/synthetic_4x4_fact_chain.json",
+      "sha256": "4e17566a2f7ce7503f0db0907b06b2aed5f78ba9f89562671ace302bf83a7085"
+    },
+    {
+      "path": "Source/experiments/puzzles/synthetic_4x4_row_counts.json",
+      "sha256": "b46581d351a31e1c2ebdf43419782e93e29cb3780902fd95ca7db4a03cadc64c"
+    },
+    {
+      "path": "Source/experiments/puzzles/synthetic_4x4_stuck_unique.json",
+      "sha256": "2d1802261250833bba70c2d2f635368f86a80fad44c0fc39073bba2058ea839b"
+    },
+    {
+      "path": "Source/tests/fixtures/ambiguous.json",
+      "sha256": "74178cac0344439185365bb37733c305c5c0a12461d651c675305cd558710d46"
+    },
+    {
+      "path": "Source/puzzles/3x3/demo_forced_unknown.json",
+      "sha256": "fe4df4bb8a606d4c68f549dfefbc618f56617bee2da0dffc83afbfec292d5190"
+    },
+    {
+      "path": "Source/puzzles/3x3/demo_stuck.json",
+      "sha256": "a94c8f813a079735aba87f99bb8ac4f220cdb19ed48c54f1d573c6373cdbeaa8"
+    }
+  ],
+  "measurement": "solve only; initial classification and uniqueness calls are excluded",
+  "packages": {
+    "jsonschema": "4.24.0",
+    "pytest": "8.3.5",
+    "ruff": "0.11.13"
+  },
+  "platform": "Windows-10-10.0.19045-SP0",
+  "purpose": "TV4 acceptance, not a repeated performance benchmark or a new puzzle suite",
+  "python": "3.12.6 (tags/v3.12.6:a4a2d2b, Sep  6 2024, 20:11:23) [MSC v.1940 64 bit (AMD64)]",
+  "sat_timeout_seconds_per_call": 10.0,
+  "source_revision": "8384eee97e88e180bacb0c39a31f81081f6eff38",
+  "sources": [
+    {
+      "path": "Source/agent/agent.py",
+      "sha256": "aefe7b0c6a499c81dbffa352334283dd68190f10a229581339815ebd11ca7ceb"
+    },
+    {
+      "path": "Source/agent/trace.py",
+      "sha256": "7202ab70a38d3dc4fb265c9b5205fa1e460f058abdbd41344cd2923902d6e08f"
+    },
+    {
+      "path": "Source/game/models.py",
+      "sha256": "eec1c5afba1d8c7f4ff7e192257eaa2f16c3cf96706eb7d5ddbc68aa046ba76f"
+    },
+    {
+      "path": "Source/game/contracts.py",
+      "sha256": "ebae09dfec4fdcbed29ef5bb5929a29264bcc4fba60678f2d5e44c8da7ead472"
+    },
+    {
+      "path": "Source/game/engine.py",
+      "sha256": "de9d6fc2ef20cd562ff8490645e4a3c9c1e02dbb0b4c72fda33efbd869a0fffd"
+    },
+    {
+      "path": "Source/game/puzzle_loader.py",
+      "sha256": "06fcc555aa85f5540da51188622029b33f306a61e82f90e3f706a437d0eebccc"
+    },
+    {
+      "path": "Source/logic/cnf_encoder.py",
+      "sha256": "0b71c820e12be1f98ed594e5b3355ccef0e7b8ffc42fb610539b683e587a1537"
+    },
+    {
+      "path": "Source/logic/regions.py",
+      "sha256": "b9ac875473b610f44bdace8d79eaae84f66c9c4e81bcb302658ffe5c01237271"
+    },
+    {
+      "path": "Source/logic/clue_evaluator.py",
+      "sha256": "c683bec7cac81b632d0973b4ef0e111cfc450da3f25af14088247fd7c5b84398"
+    },
+    {
+      "path": "Source/solver/dpll.py",
+      "sha256": "6b9bd34d3b9075d7e084536fa2faae89ecb209a0e98ffb1cb7d2cf28c0130c14"
+    },
+    {
+      "path": "Source/solver/_timing.py",
+      "sha256": "bba2992b633af9f44a7ce22239f4fed9fc467d85a96222120d1ab1b5fcadfef1"
+    },
+    {
+      "path": "Source/solver/uniqueness.py",
+      "sha256": "ee44ecfb21b2d590f76af41baaba8b85d2522639c3264a54d3de88fdd2dcf46c"
+    },
+    {
+      "path": "Source/experiments/tv4_acceptance.py",
+      "sha256": "3974709586156eaf1da73e3a50db071cbe6ec82298952c8384b9b08af1ef3326"
+    }
+  ],
+  "timezone": "Asia/Saigon",
+  "uniqueness_timeout_seconds_total": 10.0
+}

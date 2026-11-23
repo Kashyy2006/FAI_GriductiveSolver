@@ -3,108 +3,172 @@
 ## Phụ trách và công việc
 
 - Phụ trách: TV5.
-- Tkinter/ttk, board tự co theo khung không dùng thanh cuộn, thẻ bo góc, verdict thủ công,
+- Tkinter/ttk, board tự co chiều rộng và cuộn dọc khi cần, thẻ bo góc, verdict thủ công,
   highlight, Load/Restart/Hint/Auto Solve; chỉ luồng chính cập nhật widget, queue + after cho việc nền.
-- `python main.py --preview` mở snapshot PublicState tĩnh; các nút gameplay bị khóa.
+- `python main.py` mở GUI theo luồng game thật với puzzle 3×3 mặc định.
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - GUI đã nối Engine/Encoder/DPLL/Agent thật; các API công khai vẫn giữ nguyên.
 
-## Tác vụ, reset và trace
+## Chơi, ghi chú và tiếp tục
 
+- `Case Library` thay hộp chọn file bằng thư viện màn, lọc Easy / Medium / Hard / Practice / Generated.
+  Độ khó là phân loại biên soạn, không phải chỉ số SAT; các màn Practice có thể dừng
+  khi thiếu dữ kiện và được ghi rõ trong mô tả. Hai ví dụ có cùng puzzle_id được lưu
+  riêng theo đường dẫn màn để không ghi đè tiến độ.
+- Màn chính mới: Crossroads (3×3), Archive Case (4×4), Harbor Case (5×5); không có FACT,
+  cần kết hợp ba clue ở các giai đoạn và có đúng một forced verdict mỗi bước.
+  Hai FACT-chain cũ chuyển sang Practice; mọi màn chính phải UNIQUE và progressive SOLVED.
+- `Generate Puzzle…` cho chọn kích thước cố định 3×3 / 4×4 / 5×5 và seed nguyên
+  0..2147483647. Worker sinh và kiểm tra UNIQUE + đúng một nước đi mỗi bước rồi mới
+  ghi file/nạp Engine. Cùng phiên bản/size/seed tái lập màn; các màn sinh xuất hiện trong thư viện
+  và hỗ trợ resume/replay như màn có sẵn. Đổi màn/restart/đóng app loại kết quả worker cũ.
+- Màn sinh mới hiển thị `Generated v2`: năm kiểu mở đầu, ba họ kết hợp bất đẳng thức,
+  cả hai hướng Criminal/Innocent và clue vùng hình học. Givens có cả hai trạng thái;
+  số thẻ mở sẵn tùy tổ hợp mẫu. Màn/tiến độ của bộ sinh cũ vẫn dùng tên/key cũ.
+- Hint có hai cấp theo token: lần đầu highlight các thẻ có clue hỗ trợ và không chỉ
+  target/verdict; lần tiếp theo (`Show Verdict`) mới nêu nhân vật và trạng thái.
+  Chọn thẻ hoặc verdict bị từ chối không nâng version; reveal/load/restart xóa cấp cũ.
+  Bấm cấp 2 chỉ dùng kết quả hiển thị đã chứng minh trên cùng token, không đếm lại
+  SAT calls; Engine luôn chứng minh lại nếu người chơi submit. Cả hai lần bấm đều
+  được tính là một lần yêu cầu Hint, không thay KB/verdict/reveal. Resume bắt đầu ở cấp 1.
+- Các màn dùng tên tiếng Anh. `clue_text.py` chỉ định dạng clue công khai: FACT,
+  SAME/DIFFERENT và tham chiếu vùng hiển thị tên người; REMARK giữ nguyên văn bản.
+  Vùng một người diễn đạt trực tiếp (ví dụ `Tom is Criminal`); vùng nhiều người
+  dùng câu đếm nhóm, không coi tên người là địa điểm sau chữ `in`.
+- `Pencil Notes` thay danh sách tên màu bằng ba nút có ý nghĩa: vàng `Review`
+  (xem lại), xanh `Maybe Innocent`, tím `Maybe Criminal`. Chọn thẻ rồi bấm một nút
+  để tô toàn bộ khung viền; nhãn ghi chú và lời hướng dẫn hiện ngay bên dưới.
+  `Clear note` xóa ghi chú màu; `Used clue` / `Restore clue` gạch hoặc phục hồi
+  clue công khai. Các màu xanh/tím là phỏng đoán cá nhân, không phải verdict đã chứng minh.
+  Key lưu Amber/Blue/Purple giữ nguyên để đọc được tiến độ cũ. Các ghi chú chỉ thuộc GUI,
+  không xóa clue khỏi KB, không tạo verdict và không reveal thẻ. Khi highlight,
+  viền ngoài màu hổ phách vẫn hiện cùng khung màu tạm và nền trạng thái của thẻ.
+- `play_session.py` ghi các receipt ACCEPTED từ Engine, snapshot công khai và
+  DeductionStep canonical. Nó không truy cập Puzzle/Character riêng tư. Khôi phục
+  qua worker gọi lại submit_verdict cho từng nước với token phiên mới; không dùng
+  bản lưu làm bằng chứng hoặc bypass verifier. Bản lưu lỗi được báo và giữ nguyên.
+- Tiến độ, thời gian, bộ đếm và ghi chú từng màn tự lưu nguyên tử vào
+  `Source/outputs/player_progress.json` (được gitignore). Lưu ngay sau thao tác và
+  mỗi 15 giây, khi đổi màn/đóng app. Thời gian không tính khoảng ứng dụng đã đóng;
+  dừng khi hoàn thành. Restart xóa tiến độ và bộ đếm của màn hiện tại.
+- `Case Results` hiện thời gian, số lần yêu cầu Hint, số verdict NOT_PROVABLE /
+  CONTRADICTED / INCONSISTENT và nút sang màn tiếp theo. `Show SAT details` chứa
+  calls/decisions/propagations/backtracks/runtime; calls của Auto Solve thay phần
+  ledger của chính run đó, không cộng trùng proof. Chi phí chứng minh lại khi resume
+  không tính vào thống kê chơi. Run bị ngắt/lỗi được ghi rõ metrics chưa đầy đủ.
+- `Replay` và `Save Trace…` dùng cả lịch sử thủ công và Auto Solve. Replay có
+  Previous/Next và phím trái/phải; board, clue và proof chỉ lấy từ snapshot đang
+  xem. Viewer không có tham chiếu Engine. Snapshot 0 không hiển thị clue tương lai.
+  Nếu Auto Solve lỗi sau reveal, chỉ receipt thực đã nhận được lưu; không tạo
+  AutoSolveResult hoàn tất giả.
+- Nút `?` cạnh `CASE NOTES` mở hướng dẫn tĩnh chọn clue → đọc highlight → tự chứng minh → submit,
+  kèm glossary minh họa neighbors tám hướng, giao common neighbors, parity,
+  hàng/cột và vùng rỗng. Sidebar và board cuộn độc lập khi cửa sổ thấp.
+
+## Tác vụ, bố cục, highlight và trace
+
+- `theme.py` dùng chung nền giấy sáng, bề mặt thẻ, chữ xanh mực, đường viền nhẹ,
+  nút hành động và thanh tiến độ. Library, form Generate, Replay và Help dùng cùng theme.
+- Thanh cuộn board/sidebar/library/replay có rãnh cùng màu nền; thanh clue theo
+  đúng nền thẻ hiện tại (Criminal/Innocent/highlight). Tay kéo tối hơn, có phản hồi
+  hover/pressed, bỏ mũi tên và viền nổi. Cuộn kéo/con lăn vẫn hoạt động như trước.
+
+- Bố cục 2 cột thích ứng (`1280×820`, tối thiểu `990×680`): board căn giữa, thẻ dùng
+  font theo pixel (`-px`) tự co giãn theo kích thước thẻ để không cắt chữ trên board
+  3×3/4×4 và màn hình Windows High-DPI; sidebar xếp nút theo cặp 2 cột và có thanh
+  cuộn để truy cập đủ `PUBLIC CLUES`, `STATUS` và kết quả ở cửa sổ thấp.
+- Highlight dùng màu vàng hổ phách (`#d58b28` / `#faebd2`) phân biệt rõ với thẻ
+  Criminal (đỏ) và Innocent (xanh); thẻ đã mở khi được highlight giữ nguyên nền
+  trạng thái và đổi viền sang vàng hổ phách. `_clue_cells` dùng trực tiếp ID ô cho
+  `FACT`/`SAME`/`DIFFERENT` và gọi `resolve_region` cho mọi loại vùng (kể cả
+  `COMMON_NEIGHBORS` và vùng rỗng).
+- `BoardView._update_card` cập nhật đủ `id`, `name`, `profession` và `clue` để nạp
+  puzzle mới cùng kích thước không giữ lại thông tin nhân vật cũ.
+- Clue trên thẻ tự xuống dòng và có vùng cuộn dọc riêng. Khi nội dung dài, dùng
+  con lăn chuột hoặc thanh kéo bên phải clue để đọc tới dòng cuối, kể cả bàn 5×5.
+  Thẻ có chiều cao tối thiểu 160 px; con lăn trên phần khác của thẻ hoặc thanh kéo
+  bên phải board cho phép đi tới các hàng dưới thay vì ép thẻ thấp đến mất nội dung.
+  Chọn thẻ/đánh dấu không làm mất vị trí cuộn; clue mới hoặc restart về đầu.
+  Cuộn chỉ thay cách hiển thị, không sửa public state, KB, verdict hoặc reveal.
 - Auto Solve gắn với session đã bấm nút và có cancellation Event riêng. Load/Restart
-  hủy tác vụ cũ; worker khởi động trễ hoặc đang tính SAT không được reveal phiên mới.
+  hủy tác vụ cũ, hủy hoạt ảnh/toast cũ; worker khởi động trễ hoặc đang tính SAT không
+  được reveal phiên mới.
 - Queue có task ID riêng: thông báo của worker cũ không được mở khóa controls,
   ghi lỗi hoặc thay kết quả của worker mới. Chỉ main thread cập nhật widget.
-- Reset xóa selection/highlight, sidebar clue, trace đã lưu trong bộ nhớ và đóng
-  cửa sổ trace cũ. refresh đọc lại clue của ô đang chọn từ PublicState hiện tại.
-- Sau Auto Solve, View Trace hiển thị accepted steps, clue trước/sau reveal và
-  mọi SAT call hoàn tất (kể cả kiểm tra cuối). Save Trace xuất steps JSON bằng
-  agent.trace.save_trace. Trace rỗng của STUCK vẫn có thể xem/lưu.
+- Lỗi dữ liệu (`PuzzleValidationError`, `SolutionMismatchError`) và `SolverTimeout`
+  được hiển thị tách biệt, cập nhật rõ `STATUS` và không bao giờ báo timeout là
+  UNSAT, STUCK hoặc hoàn thành; Load lỗi giữ nguyên game trước đó.
+- TV4 sửa thông báo sau merge ngày 22/11: khi lỗi giữa Auto Solve, đọc lại Engine
+  và báo số accepted reveal đã giữ so với token bắt đầu. Chỉ báo không đổi thẻ
+  khi version chưa tăng; không tạo partial trace giả. Sáu regression bao phủ lỗi
+  thường, timeout và lỗi dữ liệu trước/sau reveal. Toàn suite mới: 599 passed
+  trên Python 3.12.6; mốc Python 3.11 phía dưới là lần nghiệm thu trước đó.
+- Reset xóa selection/highlight, sidebar clue, toast, trace đã lưu trong bộ nhớ và
+  đóng cửa sổ trace cũ. `refresh` đọc lại clue của ô đang chọn từ `PublicState`.
+- `Replay` hiển thị snapshot và accepted step đang chọn. `Save Trace…` xuất steps
+  JSON bằng `agent.trace.save_trace`. Trace rỗng của STUCK vẫn có thể xem/lưu.
 - Nút trace bị khóa trước run/khi đang chạy/sau reset. Dialog hủy không ghi file;
   lỗi xuất file được hiển thị, không xóa kết quả. Đóng app cũng hủy worker.
 
 ## Kiểm tra
 
-Chạy từ Source/: `python -m pytest tests/test_gui.py tests/test_integration.py -q`.
-Controller test dùng widgets giả nhưng Engine/Encoder/DPLL/Agent thật; scheduler
-điều khiển tình huống queued worker và Event/Barrier cho worker đang chạy, không
-dùng sleep để tạo race. Đã smoke test Tkinter thật ở chế độ ẩn: Auto Solve 3x3,
-8 bước/105 calls, mở popup trace và Restart xóa sidebar/trace. Chưa đánh giá toàn
-bộ layout trực quan trên nhiều kích thước màn hình.
+Regression mới: `tests/test_player_session.py`, `tests/test_player_windows.py` và
+các ca controller trong `tests/test_gui.py` kiểm tra resume qua verifier, bản lưu
+bị sửa/lỗi I/O, ghi chú không đổi KB, đếm SAT, replay lùi không lộ clue, thư viện,
+glossary, kết quả và nút màn tiếp theo bằng Tkinter thật.
+
+Chạy từ `Source/`: `python -m pytest tests/test_gui.py tests/test_integration.py -q`.
+`tests/test_gui.py` gồm **21 test** (controller dùng Engine/Encoder/DPLL/Agent thật,
+race Load/Restart bằng scheduler & Event, highlight đủ mọi loại vùng, `SolverTimeout`
+và `SolutionMismatchError`, Load fixture lỗi, cùng test Tkinter thật trên board 3×3/4×4
+và kích thước `990×680`). Toàn bộ suite đạt **564 passed** trên môi trường sạch
+Python 3.11.9; Ruff check/format đạt. Chi tiết checklist nghiệm thu và ảnh chụp GUI
+thật tại `docs/tv5_stage4_acceptance.md` và `docs/report/tv5.md`.
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
+### 2026-11-08 — Dựng GUI và bố cục board
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Tạo board/thẻ, sidebar và thao tác gameplay theo API v1.
+- File thay đổi: `board_view.py`, `main_window.py`, `preview.py`.
+- Nội dung và lý do: Dựng board công khai, verdict, highlight, Hint, Auto Solve và preview tĩnh khi backend còn stub; điều chỉnh bố cục thẻ.
+- Kiểm tra: Ruff, compileall và preview 3×3 đạt theo nhật ký lúc thực hiện.
+- Còn thiếu: Preview tĩnh được bỏ khi nối backend thật.
 
-### 2026-11-08 — Xây dựng GUI và nối composition root
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Đọc contract, tài liệu phân công và triển khai giao diện GUI.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Tạo grid công khai, thẻ úp/mở, verdict, highlight, Load/Restart,
-  Hint và Auto Solve; đặt thao tác suy luận trong worker và chuyển kết quả về Tk qua queue/after.
-  Dựng composition root bằng các lớp canonical; không thêm model hay dependency mới.
-- Kiểm tra: `compileall` đạt; Ruff không chạy được vì môi trường hiện tại thiếu package `ruff`.
-- Còn thiếu: Engine, CNFEncoder, DPLLSolver và Agent vẫn là stub, nên chưa chạy được
-  GUI với luồng game end-to-end.
+### 2026-11-12 — Nối gameplay, reset và trace
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Chạy gameplay qua composition root và bảo vệ vòng đời worker.
+- File thay đổi: `main.py`, `main_window.py`, `board_view.py`, `preview.py`, README.
+- Nội dung và lý do: Nối stack thật; hủy worker cũ khi Load/Restart; xóa UI phiên cũ; xem/lưu trace và hoàn thiện phản hồi thao tác.
+- Kiểm tra: Có regression test GUI; smoke test 3×3 được ghi nhận trước đó.
+- Còn thiếu: Nghiệm thu trực tiếp các chỉnh sửa giao diện gần nhất.
 
-### 2026-11-08 — Sửa lint và format GUI
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Khắc phục lỗi Ruff còn lại khi chạy trong VS Code.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Sắp xếp import, bỏ import `PublicState` chưa dùng và áp dụng format Ruff.
-- Kiểm tra: Ruff check và format được chạy lại sau chỉnh sửa.
-- Còn thiếu: Backend chưa hoàn thiện để chạy game end-to-end.
+### 2026-11-14 — Nghiệm thu TV5 và rút gọn nhật ký
+- Thành viên: Phúc (TV5).
+- AI: Codex
+- Yêu cầu: Hoàn tất phần TV5 còn lại và giúp nhóm theo dõi lịch sử GUI.
+- File thay đổi: `README.md`, `../tests/test_gui.py`.
+- Nội dung và lý do: Gộp lịch sử chỉnh sửa GUI thành mốc ngắn; đồng bộ mock board với API hoạt ảnh.
+- Kiểm tra: 517 test đạt; Ruff check và format check đạt. Đã nghiệm thu thao tác gameplay và lưu trace JSON.
+- Còn thiếu: Chưa kiểm tra bố cục trên các kích thước màn hình khác.
 
-### 2026-11-08 — Thêm cửa sổ preview tĩnh
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Cho phép xem GUI trước khi các backend hoàn tất.
-- File thay đổi: `preview.py`.
-- Nội dung và lý do: Hiển thị board 3×3 bằng PublicState công khai; khóa toàn bộ thao tác
-  gameplay để preview không tạo kết quả giả.
-- Kiểm tra: Đang kiểm tra Ruff, cú pháp và khởi chạy cửa sổ preview.
-- Còn thiếu: Không kiểm thử luồng Engine/Agent trong chế độ preview.
+### 2026-11-14 — Rà soát tiêu chí bàn giao TV5
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Đối chiếu race/reset, thông báo worker, sidebar, trace và nghiệm thu thật.
+- File thay đổi: Không thay đổi file triển khai; chỉ append nhật ký README.
+- Nội dung và lý do: Đối chiếu controller với regression test và trace nghiệm thu; xác nhận hủy cooperative, session/task guard loại kết quả cũ.
+- Kiểm tra: Trace JSON 6 bước đọc hợp lệ; test mới không thu thập được do Python hiện tại thiếu `jsonschema`. Lần kiểm tra trước ghi nhận 517 test và thao tác GUI thật đạt.
+- Còn thiếu: Chưa kiểm tra layout 5×5/nhiều kích thước màn hình; cần chạy lại test trong môi trường đủ dependency.
 
-### 2026-11-08 — Đổi board sang thẻ nhân vật minh họa
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6 và image_gen
-- Yêu cầu: Chỉnh GUI theo ảnh tham khảo của người dùng.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Đổi sang palette giấy sáng, viền thẻ đậm, portrait, tên/nghề và clue
-  nằm trên thẻ; thêm cuộn dọc để board 4×4/5×5 dùng được trong cửa sổ.
-- Kiểm tra: Ruff check/format đạt.
-- Còn thiếu: Chưa mở lại preview sau lần đổi giao diện này.
+### 2026-11-20 — Nghiệm thu GUI thật và sửa lỗi hiển thị giai đoạn 4
 
-### 2026-11-08 — Sửa chẩn đoán kiểu của BoardView
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Xử lý các lỗi còn hiển thị trong VS Code Problems.
-- File thay đổi: `board_view.py`, `preview.py`.
-- Nội dung và lý do: Dùng kiểu Tkinter `Misc` cho master và kiểm tra các trường optional
-  trước khi định dạng clue/region.
-- Kiểm tra: Ruff check/format đạt.
-- Còn thiếu: Backend chưa hoàn thiện để chạy game end-to-end.
-
-### 2026-11-08 — Hoàn thiện preview thẻ minh họa
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Chỉnh GUI theo ảnh tham khảo và kiểm tra giao diện trực tiếp.
-- File thay đổi: `board_view.py`, `main_window.py`.
-- Nội dung và lý do: Dùng màu nền giấy, thẻ nhân vật có avatar/tên/nghề/clue và highlight; cuộn về đầu
-  board sau khi dựng lại; sửa tham chiếu màu và cách cập nhật màu widget Tk.
-- Kiểm tra: Ruff check, Ruff format, compileall và import Pillow đều đạt; mở `main.py --preview`
-  và quan sát được board 3×3 cùng sidebar.
-- Còn thiếu: Preview chỉ dùng PublicState tĩnh; gameplay phụ thuộc backend chưa hoàn thiện.
-
-### 2026-11-08 — Bo góc thẻ và fit board vào khung
-- Thành viên: Phúc (phân công TV5)
-- AI: Codex, GPT-6
-- Yêu cầu: Bo góc các ô và giữ toàn bộ board trong khung, không có thanh kéo.
-- File thay đổi: `board_view.py`, `preview.py`.
-- Nội dung và lý do: Vẽ nền thẻ bo góc trên Canvas; tính kích thước ô theo vùng khả dụng và co avatar,
-  chữ theo kích thước đó; bỏ scrollbar và xử lý cuộn chuột.
-- Kiểm tra: Ruff check, Ruff format, compileall đạt; đã xem preview 3×3, cả 9 ô nằm trong khung,
-  không có thanh kéo.
-- Còn thiếu: Chưa xem trực tiếp board 4×4/5×5; preview vẫn dùng PublicState tĩnh.
+- Thành viên: Phúc (TV5).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Nghiệm thu GUI thật (3×3/4×4, highlight, verdict, Hint, Auto Solve, trace, dữ liệu lỗi, Load/Restart) và ổn định giao diện.
+- File thay đổi: `board_view.py`, `main_window.py`, `README.md`.
+- Nội dung và lý do: Dùng font theo pixel (`-px`) và nút 2 cột tránh cắt chữ trên 4×4/High-DPI/`990×680`; sửa `BoardView._update_card` cập nhật `name`/`profession` khi nạp puzzle cùng kích thước; đổi màu highlight sang vàng hổ phách (hiện cả trên thẻ đã mở) và dùng đúng vùng `resolve_region`/ID trực tiếp; tách riêng thông báo `SolverTimeout` và `SolutionMismatchError`.
+- Kiểm tra: 21 test GUI (gồm Tkinter thật) và 564/564 test toàn suite đạt trên Python 3.11.9 sạch; Ruff check/format đạt; đã chụp và kiểm tra trực quan 11 ảnh thật.
+- Còn thiếu: Chưa có bộ puzzle 5×5 thực tế để nghiệm thu.

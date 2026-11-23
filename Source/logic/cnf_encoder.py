@@ -23,6 +23,8 @@ class CNFEncoder:
         if len({clue.id for clue in clues}) != len(clues):
             raise ContractError("Duplicate active clue IDs")
 
+        clues = [clue for clue in clues if clue.type != ClueType.REMARK]
+
         def variable_for(cell_id: str | None) -> int:
             if not isinstance(cell_id, str) or cell_id not in variable_map:
                 raise ContractError(f"Unknown clue character: {cell_id}")

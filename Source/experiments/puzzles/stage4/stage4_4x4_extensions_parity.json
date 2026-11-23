@@ -1,0 +1,284 @@
+{
+  "characters": [
+    {
+      "clue": {
+        "id": "clue_A1",
+        "k": 1,
+        "region": {
+          "first": "A1",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "C3"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "id": "A1",
+      "name": "Alice",
+      "profession": "Analyst",
+      "row": 0
+    },
+    {
+      "clue": {
+        "first": "B1",
+        "id": "clue_B1",
+        "second": "C1",
+        "type": "DIFFERENT"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B1",
+      "name": "Ben",
+      "profession": "Archivist",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_C1",
+        "k": 2,
+        "region": {
+          "index": 0,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "id": "C1",
+      "name": "Claire",
+      "profession": "Chemist",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_D1",
+        "region": {
+          "first": "B1",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "D1"
+        },
+        "type": "ODD"
+      },
+      "col": 3,
+      "hidden_status": "INNOCENT",
+      "id": "D1",
+      "name": "David",
+      "profession": "Courier",
+      "row": 0
+    },
+    {
+      "clue": {
+        "id": "clue_A2",
+        "region": {
+          "first": "D1",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "D3"
+        },
+        "type": "ODD"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A2",
+      "name": "Emma",
+      "profession": "Detective",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_B2",
+        "region": {
+          "first": "A1",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "C1"
+        },
+        "type": "ODD"
+      },
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "id": "B2",
+      "name": "Felix",
+      "profession": "Doctor",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_C2",
+        "region": {
+          "index": 1,
+          "kind": "ROW"
+        },
+        "type": "EVEN"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C2",
+      "name": "Grace",
+      "profession": "Engineer",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_D2",
+        "k": 1,
+        "region": {
+          "first": "B2",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "D2"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 3,
+      "hidden_status": "CRIMINAL",
+      "id": "D2",
+      "name": "Henry",
+      "profession": "Journalist",
+      "row": 1
+    },
+    {
+      "clue": {
+        "id": "clue_A3",
+        "k": 2,
+        "region": {
+          "index": 0,
+          "kind": "COLUMN"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "id": "A3",
+      "name": "Iris",
+      "profession": "Lawyer",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_B3",
+        "k": 2,
+        "region": {
+          "first": "A3",
+          "kind": "COMMON_NEIGHBORS",
+          "second": "C3"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "id": "B3",
+      "name": "Jack",
+      "profession": "Librarian",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_C3",
+        "region": {
+          "index": 2,
+          "kind": "ROW"
+        },
+        "type": "EVEN"
+      },
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "id": "C3",
+      "name": "Kate",
+      "profession": "Mechanic",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_D3",
+        "region": {
+          "index": 3,
+          "kind": "COLUMN"
+        },
+        "type": "EVEN"
+      },
+      "col": 3,
+      "hidden_status": "INNOCENT",
+      "id": "D3",
+      "name": "Liam",
+      "profession": "Nurse",
+      "row": 2
+    },
+    {
+      "clue": {
+        "id": "clue_A4",
+        "k": 2,
+        "region": {
+          "cells": [
+            "A3",
+            "B3"
+          ],
+          "kind": "EXPLICIT"
+        },
+        "type": "AT_LEAST"
+      },
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "id": "A4",
+      "name": "Maya",
+      "profession": "Pilot",
+      "row": 3
+    },
+    {
+      "clue": {
+        "id": "clue_B4",
+        "k": 0,
+        "region": {
+          "cells": [
+            "A4",
+            "B4"
+          ],
+          "kind": "EXPLICIT"
+        },
+        "type": "AT_MOST"
+      },
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "id": "B4",
+      "name": "Noah",
+      "profession": "Professor",
+      "row": 3
+    },
+    {
+      "clue": {
+        "first": "A1",
+        "id": "clue_C4",
+        "second": "B2",
+        "type": "SAME"
+      },
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "id": "C4",
+      "name": "Olga",
+      "profession": "Scientist",
+      "row": 3
+    },
+    {
+      "clue": {
+        "id": "clue_D4",
+        "k": 2,
+        "region": {
+          "index": 3,
+          "kind": "ROW"
+        },
+        "type": "EXACTLY"
+      },
+      "col": 3,
+      "hidden_status": "CRIMINAL",
+      "id": "D4",
+      "name": "Paul",
+      "profession": "Surveyor",
+      "row": 3
+    }
+  ],
+  "initially_revealed": [
+    "A1",
+    "D4",
+    "B4"
+  ],
+  "puzzle_id": "stage4_4x4_extensions_parity",
+  "schema_version": "1.0",
+  "size": 4
+}

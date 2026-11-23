@@ -3,13 +3,13 @@
 ## Phụ trách và công việc
 
 - Phụ trách: TV1.
-- Bổ sung puzzle 4x4 theo schema; chưa có dữ liệu 4x4.
+- Puzzle 4x4 theo schema; `archive_case.json` cần kết hợp nhiều clue, không có FACT,
+  UNIQUE và có đúng một forced verdict ở mỗi bước. `example_01.json` là Practice.
 - Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
 - Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
 
 ### 2026-11-07 — Hoàn thành TV1 giai đoạn 2
 - Thành viên: TV1 — Dương Thiên Phú.

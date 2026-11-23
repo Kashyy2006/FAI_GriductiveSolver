@@ -22,6 +22,9 @@ Không tạo bộ class hoặc enum riêng để né API.
 - PublicState.characters luôn đủ N*N ô row-major; token không phải bằng chứng.
 - Dataclass frozen ngăn thay field; dict/list bên trong vẫn mutable, phải xem là
   read-only và copy sâu khi xử lý. Không chia sẻ container với trạng thái private.
+- ClueType.REMARK dùng Clue.text là chuỗi có ký tự không phải khoảng trắng;
+  không có person/status/first/second/region/k. Đây là narrative, không phải
+  ràng buộc logic hay một extension; không phân tích text để suy luận.
 
 ## TV1 — loader và Engine
 
@@ -72,6 +75,9 @@ Encode rebuild mỗi snapshot, clue theo ID, known status theo row-major. Chỉ 
 đã mở, unit status đã biết; primary count=N*N, clause_count=len(cnf).
 CNF=[] là True, CNF có [] là False, không literal 0.
 Cardinality dùng tổ hợp trực tiếp; parity cấm assignment sai parity.
+REMARK được validate nhưng không sinh clause; evaluator trả True dưới mọi
+assignment hợp lệ. active_clue_ids chỉ gồm ID clue logic đang encode, sắp theo
+ID, loại REMARK. Unit status công khai của thẻ REMARK vẫn được thêm bình thường.
 
 ## TV3 — DPLL và uniqueness
 
@@ -123,7 +129,8 @@ verify_verdict kiểm tra ID chưa mở, consistency rồi entailment; Unknown -
 NOT_PROVABLE, opposite forced -> CONTRADICTED, requested forced -> ACCEPTED.
 
 Hint chọn ô forced đầu row-major; nếu không có hoặc inconsistent thì
-character_id/status=None. active_clue_ids là toàn bộ clue public đang dùng,
+character_id/status=None. active_clue_ids là toàn bộ clue logic public đang dùng
+(không gồm REMARK),
 không được trình bày như minimal explanation. Hint không mutate state.
 
 Auto Solve submit từng verdict với token; mỗi ACCEPTED tạo DeductionStep,
@@ -143,6 +150,9 @@ lấy từ queries toàn run, không cộng thêm queries lồng nhau lần nữ
 
 DeductionStep chứa token_before/after, active_clue_ids trước reveal, verdict,
 newly_revealed_clue (chỉ lấy sau ACCEPTED). Không có SAT assignment ẩn trong log.
+Nếu thẻ vừa mở chứa REMARK, newly_revealed_clue vẫn giữ type/text đầy đủ dù ID
+đó không xuất hiện trong active_clue_ids của các bước sau. REMARK chưa mở vẫn
+ẩn trong PublicState như mọi clue khác; uniqueness cũng không thêm ràng buộc từ text.
 save_trace ghi UTF-8 JSON array; Enum -> .value, tuple -> array, các tên field
 đúng dataclass, indent=2, sort_keys=True; tạo parent nếu cần, không sửa steps.
 
@@ -163,11 +173,50 @@ public snapshot. Chọn clue dùng resolver để highlight, FACT/binary dùng I
 Tk widget chỉ main thread. Load/Restart trong lúc solve phải loại kết quả token
 cũ; engine bảo vệ state, GUI bỏ result thuộc phiên khác. Hiển thị lỗi/timeout
 riêng, không gọi đó là UNSAT, STUCK hoặc kết quả hoàn thành.
+Nếu Auto Solve lỗi sau accepted reveal, GUI refresh từ Engine và báo số reveal
+đã được giữ kể từ token khởi chạy. Không báo board unchanged hoặc tạo trace
+hoàn tất giả; model v1 chưa trả partial AutoSolveResult khi exception.
+
+## Bổ sung: Hint hai cấp và sinh puzzle
+
+Các model, Protocol và chữ ký v1 ở trên giữ nguyên. Helper bổ sung:
+
+```python
+find_clue_hint(state: PublicState, agent: DeductiveAgent) -> tuple[HintResult, tuple[str, ...]]
+generate_puzzle(size: int, seed: int, *, timeout_seconds: float = 20.0,
+                should_cancel: CancelCheck | None = None) -> Puzzle
+write_generated_puzzle(size: int, seed: int, directory: Path,
+                       *, should_cancel: CancelCheck | None = None) -> Path
+```
+
+- `agent.hints.find_clue_hint` chỉ dùng public snapshot. HintResult.active_clue_ids
+  vẫn là toàn bộ clue logic công khai; tuple thứ hai mới là tập hỗ trợ đã kiểm chứng.
+  Phân tích loại clue trên bản sao bằng REMARK tautology, giữ nguyên verdict công khai.
+  Tập hỗ trợ không cam kết có số phần tử nhỏ nhất; queries chứa mọi call thực tế.
+- GUI cấp 1 highlight chủ thẻ của clue hỗ trợ, không hiện target/verdict; cấp 2
+  mới hiện nhân vật/verdict. Cache chỉ phục vụ hiển thị trên cùng token, không cấp
+  quyền reveal; Engine vẫn tự chứng minh khi submit. Cache bị bỏ sau reveal/load/restart.
+- `game.generator` là authoring/validation private: size chỉ 3/4/5, seed nguyên
+  0..2147483647, kích thước không đổi khi chơi. Cùng phiên bản/size/seed tái lập cùng puzzle.
+  Kiểm tra UNIQUE dùng full clues không thêm hidden labels; kiểm tra progressive
+  dùng Agent/Engine thật, bắt buộc đúng một forced verdict ở mỗi bước chưa hoàn thành
+  và KB cuối consistent. Timeout/cancel/lỗi không trả puzzle dự phòng chưa chứng nhận.
+- Bộ sinh v2 dùng puzzle_id/file `generated_v2_<size>x<size>_seed_<seed>` để tách
+  khỏi file/tiến độ v1. JSON vẫn là schema 1.0; model, signature và dependency không đổi.
+- Worker GUI nhận Path sau khi ghi JSON v1 nguyên tử, không nhận private labels.
+  Chỉ main thread nạp màn vào Engine sau kiểm tra task/session. File sinh nằm trong
+  puzzles/generated; progress và replay vẫn chỉ ghi hành động/thông tin đã công khai.
 
 ## Thực nghiệm
 
-`python -m experiments.benchmark` là entry point, hiện raise NotImplementedError.
-Chỉ benchmark sau tích hợp. CSV ít nhất: puzzle_id, outcome, primary_count,
+`python -m experiments.benchmark` là entry point đo hệ thống đã tích hợp.
+`python -m experiments.phase3` chạy riêng nhóm bình thường, dữ liệu lỗi và timeout
+để tái lập bộ nghiệm thu TV3 giai đoạn 3. CSV ít nhất: puzzle_id, outcome, primary_count,
 auxiliary_count_initial/max/final, clauses_initial/max/final, sat_calls, decisions,
 propagations, backtracks, deduction_steps, runtime_seconds, error. Runtime không
 gồm render GUI, uniqueness đo riêng. Ghi môi trường và bộ puzzle, lỗi và timeout.
+
+Runner bổ sung trace_query_count và query_count_matches cho run hoàn tất; đối
+chiếu theo thứ tự assumptions/status/stats với ledger tại Solver. Run lỗi trước
+khi trả kết quả để hai trường trace trống; không giả có trace hoàn tất. CSV vẫn
+giữ actual calls, failed_sat_calls và metrics_partial cho lỗi/timeout.

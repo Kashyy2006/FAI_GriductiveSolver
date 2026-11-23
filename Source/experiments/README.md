@@ -11,13 +11,21 @@
 
 ```powershell
 python -m experiments.make_suite
+python -m experiments.make_stage4_suite
 python -m experiments.benchmark --mode uniqueness --repeats 3 --timeout 10
 python -m experiments.benchmark --mode all --repeats 3 --timeout 10
+python -m experiments.phase3 --repeats 3 --timeout 10
+python -m experiments.phase4 --repeats 5 --timeout 10
 ```
 
-Chỉ chạy mode all/solve để nghiệm thu hệ thống khi Engine đã tích hợp. Hiện Engine
-TV1 còn stub, nên nghiệm thu thật mới chạy mode uniqueness. Runner sẽ ghi ERROR
-và trả exit code 1 khi gặp stub; không giả SOLVED. Exit code 2 là lỗi cấu hình/I/O.
+Backend thật đã tích hợp từ integration_v1 commit 23de657. Lệnh benchmark dùng
+cho từng phép đo; lệnh phase3 chạy riêng nhóm normal/errors/timeouts và lưu kết
+quả trong results/phase3/. File trực tiếp trong results/ là snapshot uniqueness
+09/11, không bị ghi đè bởi nghiệm thu giai đoạn 3.
+
+benchmark trả exit code 1 nếu có ERROR/TIMEOUT, code 2 nếu cấu hình/I/O lỗi.
+phase3 trả 0 khi mọi outcome đúng kỳ vọng, 1 nếu có mismatch, 2 nếu cấu hình/I/O
+lỗi. Các ERROR/TIMEOUT dự kiến vẫn giữ nguyên trong CSV, không đổi thành SOLVED.
 
 CLI: `--puzzles` nhận nhiều file/thư mục, `--output` chọn thư mục kết quả,
 `--mode all|solve|uniqueness`, `--repeats`, `--timeout`, `--no-charts`.
@@ -32,6 +40,9 @@ timeout_seconds=None; CLI dùng giới hạn dương theo giây.
 - Runtime từng phase gồm encode/Engine/verifier, không gồm load/render/export.
 - SAT calls đếm tại wrapper Solver, gồm calls từ Engine verifier và call ném lỗi;
   không cộng lại queries trong trace. Counters là tổng calls đã hoàn tất.
+- Run hoàn tất đối chiếu trace với ledger Solver theo thứ tự assumptions/result/stats;
+  CSV ghi trace_query_count và query_count_matches. Query trùng hoặc sai nội dung
+  khiến runner báo ERROR. Run ném exception trước khi có kết quả để trường trace trống.
 - Nếu một SAT call lỗi, failed_sat_calls tăng; metrics_partial=True báo counters
   không gồm phần chưa được Solver trả về. Số accepted reveal trước lỗi vẫn giữ lại.
 - Auxiliary/clauses ghi initial/max/final của các snapshot encode hoàn tất; khi
@@ -49,14 +60,71 @@ stuck_unique. Đây là sanity suite, chưa đại diện độ khó/hiệu năn
 stuck_unique có full-clue unique nhưng Agent không thể tiến từ trạng thái ban đầu.
 Không dùng kết quả với fake Engine trong test làm số liệu thực nghiệm thật.
 
-Bản bàn giao và phân tích: docs/report/tv3.md. Core Encoder đang dùng nguyên code
-TV2 commit 23955a5; chưa hỗ trợ CNF parity. Không tự sửa thuật toán của TV1/TV2/TV4.
+Bản bàn giao mới: docs/report/tv3_phase3.md. Base integration_v1 đã có parity và
+bản sửa Agent/GUI; không nhận phần việc của TV1/TV2/TV4/TV5 là code mới của TV3.
+
+## Nghiệm thu giai đoạn 3
+
+- normal: 9 đầu vào loader chấp nhận (gồm fixture ambiguous), 3 repeats, hai phase;
+  54 row, toàn bộ trace khớp actual calls, tổng 3.903 calls.
+- errors: 2 fixture dữ liệu sai, 3 repeats, hai phase; giữ 12 row ERROR.
+- timeouts: cùng 9 đầu vào normal với budget 1e-12 giây; giữ 54 row TIMEOUT trước SAT.
+- Timeout giữa SAT/verifier và sau accepted reveal được kiểm tra tự động bằng
+  backend thật và đồng hồ kiểm soát; không dùng runtime của test làm số liệu đo.
+- environment.json ghi môi trường và hash inputs/backend; biểu đồ dùng median
+  theo puzzle/phase/outcome, CSV giữ tất cả repeats. Chưa đánh giá puzzle khó/stress 5x5.
+
+## Đối chiếu suy luận TV4 — 20/11/2026
+
+TV4 (Tùng) phụ trách riêng `tv4_acceptance.py`, dùng backend thật và đầu vào
+đang có; runner benchmark hiệu năng của TV3 ở trên giữ nguyên.
+
+```powershell
+python -m experiments.tv4_acceptance --as-of 2026-11-20 --output ../docs/report
+```
+
+`--output` phải là thư mục có README; lệnh ghi đè ba artifact TV4: `tv4_cases.csv`,
+`tv4_environment.json`, `tv4_example_trace.json`. `--as-of` là ngày do người chạy
+nhập. Mặc định `--sat-timeout 10` giới hạn mỗi SAT call; uniqueness có budget
+tổng riêng cùng giá trị. Calls chỉ tính auto_solve, không cộng phân loại ban đầu
+hoặc uniqueness. Cả thứ tự assumptions/result/stats và số queries phải khớp
+ledger thực tế. Kết quả: 11/11 ca đạt; đây là một lượt acceptance, chưa phải
+benchmark runtime lặp nhiều lần. Metadata ghi môi trường, HEAD nền và source/input
+hash để kiểm chứng cả nội dung chưa commit.
+
+Runner giữ row ERROR cùng loại exception và trả exit 1 khi thất bại, không giả
+SAT/UNSAT; example trace cũ được xóa nếu run ví dụ không trả result. Không xuất
+hidden assignment. KB inconsistent ở diagnostics là fault injection PublicState,
+không phải fixture sai được loader chấp nhận. Kiểm tra riêng budget `1e-12` đã
+giữ đủ 11 row ERROR/SolverTimeout và exit 1.
+
+Phân tích và hướng dẫn tái lập: [báo cáo TV4](../../docs/report/tv4.md).
+
+## Nghiệm thu giai đoạn 4
+
+- Cấu hình chốt (`experiments.phase4`): 16 puzzle hợp lệ (4 puzzle chung `Source/puzzles/`,
+  6 synthetic baseline, 5 puzzle extensions/branching tại `experiments/puzzles/stage4/`,
+  1 fixture ambiguous) + 2 fixture lỗi; `repeats=5`, `timeout=10.0s` (`1e-12`s cho profile
+  `timeouts`), tách riêng hai phase `solve` và `uniqueness`.
+- Kết quả tại `results/phase4/`: 340 row CSV (160 `normal` khớp 100% query/calls với
+  10.390 actual SAT calls, 20 `errors`, 160 `timeouts`), `combined_summary.md`,
+  `acceptance.json` (`passed=true`) và 3 biểu đồ phân tích (`runtime_by_size_and_phase.png`,
+  `dpll_work_and_clauses.png`, `sat_calls_and_outcomes.png`).
+- Chi tiết thuật toán và phân tích hiệu năng: `docs/report/tv3_phase4.md`.
+
+## TV4 cập nhật nghiệm thu sau merge — 22/11/2026
+
+Runner dùng phân loại thật để chọn ô UNKNOWN cho chẩn đoán NOT_PROVABLE,
+không cố định C1 theo puzzle cũ. Với museum_shift hiện tại, ô này là A2.
+CSV/metadata/trace ở docs/report đã tạo lại bằng `--as-of 2026-11-22`:
+11/11 ca đạt, khớp cả số lượng và thứ tự SAT queries. Bộ đường dẫn giữ nguyên,
+nhưng example_01 hiện là museum_shift; xem input/source hash để phân biệt với
+kết quả cũ. Không ghi đè benchmark phase3/phase4 của TV3.
 
 ## Nhật ký AI
 
-Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo phải append mục theo AGENTS.md.
-
 ### 2026-11-09 — Xây runner và đo uniqueness
+
 - Thành viên: TV3 (Mạnh, theo phân công).
 - AI: Codex.
 - Yêu cầu: Tổng hợp việc xây dựng và kiểm chứng phần thực nghiệm TV3.
@@ -64,3 +132,23 @@ Chưa có mục nhật ký trong bộ khung mới. Các lượt AI tiếp theo p
 - Nội dung và lý do: Codex viết CLI và wrapper đo Encoder/Solver/Engine; xuất CSV, metadata, summary và biểu đồ. Đếm actual SAT calls, giữ row lỗi/timeout và số reveal trước lỗi; đánh dấu thống kê chưa đầy đủ. Error không xuất private exception payload. Generator tạo sáu puzzle synthetic tái lập được, dùng schema hiện có.
 - Kiểm tra: Test accounting chạy Agent/DPLL thật với Engine fake được đánh dấu rõ. Benchmark production chỉ đo uniqueness bằng Encoder/DPLL thật: 7 puzzle, 3 repeats, 21 lượt UNIQUE, 0 lỗi/timeout. Đã kiểm tra nguồn số liệu và hash inputs/backend; lượt ghi log chỉ sửa tài liệu.
 - Còn thiếu: Benchmark solve/all với GameEngine thật sau tích hợp TV1; bổ sung puzzle khó và không dùng sanity suite để kết luận hiệu năng tổng quát.
+
+### 2026-11-14 — Ghi nhận runner nghiệm thu giai đoạn 3
+
+- Thành viên: TV3 (Mạnh, theo phân công).
+- AI: Codex.
+- Yêu cầu: Tổng hợp đúng các thay đổi benchmark TV3 đã triển khai.
+- File thay đổi: benchmark.py, phase3.py ở lượt triển khai; README.md ở lượt tài liệu này.
+- Nội dung và lý do: Codex bổ sung ledger để so sánh thứ tự assumptions/result/stats với trace và actual calls; thêm trace_query_count/query_count_matches, giữ trường trace trống khi run chưa hoàn tất. Tạo runner ba profile normal/errors/timeouts, acceptance.json và biểu đồ median theo puzzle/phase/outcome. Giữ dữ liệu lỗi/timeout, không coi timeout là UNSAT; không đổi API solver hoặc dependency.
+- Kiểm tra: Kết quả trước đó: 531 test và Ruff check/format đạt; 120 row benchmark, 54/54 normal khớp query. Lượt này đối chiếu README, không đo lại thời gian.
+- Còn thiếu: Bộ puzzle khó/stress 5x5 cho nghiên cứu tiếp; bộ nghiệm thu hiện tại không đủ kết luận hiệu năng tổng quát.
+
+### 2026-11-21 — Hoàn thiện bộ puzzle, runner và biểu đồ giai đoạn 4
+
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Chốt cấu hình benchmark, chạy giải/uniqueness riêng, giữ lỗi/timeout và xuất bảng, biểu đồ cho deadline 21/11.
+- File thay đổi: `make_stage4_suite.py`, `phase4.py`, `README.md`.
+- Nội dung và lý do: Thêm 5 puzzle 3×3/4×4 dùng Parity, `COMMON_NEIGHBORS` và branching; thêm runner `phase4.py` (`repeats=5`, `timeout=10s`) xuất CSV, `combined_summary.md`, `acceptance.json` và 3 biểu đồ phân tích.
+- Kiểm tra: `python -m experiments.phase4 --repeats 5 --timeout 10` đạt `passed=True` (340 row, 160/160 normal khớp trace/calls); 564 test và Ruff đạt trên Python 3.11.9.
+- Còn thiếu: Chưa push lên remote.

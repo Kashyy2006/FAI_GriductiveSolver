@@ -14,7 +14,7 @@ SOURCE = Path(__file__).resolve().parents[1]
 
 @pytest.fixture
 def raw():
-    return json.loads((SOURCE / "puzzles/3x3/example_01.json").read_text())
+    return json.loads((SOURCE / "puzzles/3x3/example_01.json").read_text(encoding="utf-8"))
 
 
 @pytest.mark.parametrize(
@@ -67,14 +67,60 @@ def test_invalid_data(raw, mode):
     assert raw == before
 
 
+@pytest.mark.parametrize(
+    "fields",
+    [
+        pytest.param(
+            {"type": "EVEN", "region": {"kind": "EXPLICIT", "cells": []}, "k": 0},
+            id="parity-forbids-k",
+        ),
+        pytest.param(
+            {
+                "type": "AT_MOST",
+                "region": {"kind": "COMMON_NEIGHBORS", "first": "A1", "second": "C1"},
+                "k": 3,
+            },
+            id="k-exceeds-two-common-neighbors",
+        ),
+        pytest.param(
+            {
+                "type": "AT_LEAST",
+                "region": {"kind": "COMMON_NEIGHBORS", "first": "A1", "second": "A1"},
+                "k": 0,
+            },
+            id="identical-endpoints",
+        ),
+        pytest.param(
+            {
+                "type": "AT_LEAST",
+                "region": {"kind": "COMMON_NEIGHBORS", "first": "A1", "second": "D1"},
+                "k": 0,
+            },
+            id="endpoint-outside-board",
+        ),
+    ],
+)
+def test_loader_rejects_invalid_extension_clues(raw: dict, fields: dict) -> None:
+    character = raw["characters"][0]
+    character["clue"] = {"id": character["clue"]["id"], **fields}
+    before = copy.deepcopy(raw)
+    with pytest.raises(PuzzleValidationError):
+        puzzle_from_dict(raw)
+    assert raw == before
+
+
 def test_loader_normalizes_order_and_detaches_data(raw):
     raw["characters"].reverse()
     before = copy.deepcopy(raw)
     puzzle = puzzle_from_dict(raw)
     assert raw == before
     assert puzzle.characters[0].id == "A1"
-    raw["characters"][-1]["clue"]["person"] = "C3"
-    assert puzzle.characters[0].clue.person == "B1"
+    expected_clue = copy.deepcopy(puzzle.characters[0].clue)
+    raw_clue = raw["characters"][-1]["clue"]
+    raw_clue["id"] = "changed_after_load"
+    if "region" in raw_clue:
+        raw_clue["region"]["index"] = 1
+    assert puzzle.characters[0].clue == expected_clue
 
 
 @pytest.mark.parametrize("payload", [b"{", b"\xff", b"[]", b"null"])

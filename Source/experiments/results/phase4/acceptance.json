@@ -1,0 +1,59 @@
+{
+  "passed": true,
+  "repeats": 5,
+  "timeout_seconds": 10.0,
+  "timeout_profile_seconds": 1e-12,
+  "normal_puzzle_count": 16,
+  "invalid_fixture_count": 2,
+  "analytical_charts": [
+    "runtime_by_size_and_phase.png",
+    "dpll_work_and_clauses.png",
+    "sat_calls_and_outcomes.png"
+  ],
+  "profiles": {
+    "normal": {
+      "passed": true,
+      "rows": 160,
+      "timeout_seconds": 10.0,
+      "outcomes": {
+        "solve:SOLVED": 55,
+        "solve:STUCK": 25,
+        "uniqueness:MULTIPLE": 10,
+        "uniqueness:UNIQUE": 70
+      },
+      "query_matches": 160,
+      "actual_sat_calls": 10390,
+      "mismatches": []
+    },
+    "errors": {
+      "passed": true,
+      "rows": 20,
+      "timeout_seconds": 10.0,
+      "outcomes": {
+        "solve:ERROR": 10,
+        "uniqueness:ERROR": 10
+      },
+      "query_matches": 0,
+      "actual_sat_calls": 0,
+      "mismatches": []
+    },
+    "timeouts": {
+      "passed": true,
+      "rows": 160,
+      "timeout_seconds": 1e-12,
+      "outcomes": {
+        "solve:TIMEOUT": 80,
+        "uniqueness:TIMEOUT": 80
+      },
+      "query_matches": 0,
+      "actual_sat_calls": 0,
+      "mismatches": []
+    }
+  },
+  "notes": [
+    "Locked Stage 4 benchmark combines shared repo 3x3/4x4 puzzles, synthetic baselines, and TV3 Stage 4 extension/branching puzzles.",
+    "Solve and uniqueness are measured independently on the exact same ordered input list.",
+    "Expected invalid-input ERROR rows and TIMEOUT rows remain intact in each profile CSV.",
+    "Mid-SAT, mid-verifier, and second-uniqueness-call timeouts are verified separately via controlled-clock tests."
+  ]
+}

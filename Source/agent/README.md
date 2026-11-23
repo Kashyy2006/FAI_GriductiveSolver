@@ -9,6 +9,12 @@
 
 ## Hành vi đã triển khai
 
+- `hints.find_clue_hint` giữ nguyên API `next_hint`, trả thêm tuple clue hỗ trợ riêng.
+  Phân tích loại bỏ clue trên snapshot sao chép, giữ unit verdict đã biết và chỉ dùng
+  dữ liệu công khai. Tập hỗ trợ đủ chứng minh target và không bỏ tiếp được từng clue;
+  không gọi đó là tập có số phần tử nhỏ nhất. REMARK không tham gia suy luận.
+  `HintResult.active_clue_ids` vẫn giữ nghĩa v1; mọi SAT call phân tích được ghi đúng một lần.
+
 - Mỗi phép suy luận gọi `encoder.encode(state)` mới. Không cache KB/proof giữa
   các snapshot. Consistency được kiểm tra trước mọi phép entailment.
 - `classify_all`: chỉ phân loại ô chưa mở; KB UNSAT trả INCONSISTENT với map rỗng.
@@ -84,7 +90,7 @@ python -m ruff check . --no-cache
 python -m ruff format --check . --no-cache
 ```
 
-Kết quả: 58 test TV4 và 16 test contract có sẵn (74 tổng), đạt trên Python
+Nghiệm thu TV4 ban đầu: 58 test TV4 và 16 test contract (74 tổng), trên Python
 3.12.6/Windows. Target nhóm vẫn Python 3.11; cần chạy lại trên interpreter đó.
 Sandbox Windows chặn tmp_path của pytest; nghiệm thu dùng chạy ngoài sandbox
 với --basetemp trỏ vào thư mục test riêng trong .venv. Lỗi môi trường ban đầu
@@ -95,12 +101,71 @@ dùng bảng phản hồi được lập sẵn, không triển khai DPLL thay TV
 Engine/CNF/DPLL/Agent thật tại tests/test_integration.py kiểm tra cả proof deepcopy,
 verifier cùng/khác Agent và các SAT calls có nội dung giống nhau. Regression 3x3:
 8 bước, 105 calls thực tế và 105 queries; 4x4: 15 bước, 301/301.
-Kết quả toàn project sau sửa tích hợp: 517 test đạt trên Python 3.12.6/Windows;
+Kết quả toàn project tại lần sửa tích hợp trước: 517 test đạt trên Python 3.12.6/Windows;
 cần chạy runtime lại trên Python 3.11 theo target nhóm.
+
+## Nghiệm thu TV4 — mốc 14/11/2026
+
+Phần sửa lõi ở commit `23de657` giữ nguyên: query accounting theo từng submit,
+Engine được deepcopy proof, worker GUI gắn với session và save_trace dùng được
+qua GUI. Lần nghiệm thu này bổ sung năm ca dùng toàn bộ backend thật trong
+tests/test_integration.py; không đổi Model, Protocol hoặc dependency.
+
+| Tiêu chí | Kiểm chứng |
+|---|---|
+| Không đoán | Kiểm tra SAT(KB) và entailment độc lập trước từng reveal, chọn forced đầu row-major |
+| Trace đúng | Đối chiếu từng step với snapshot/receipt: token, active clues, verdict và clue mới |
+| Query đúng | So sánh thứ tự assumptions, kết quả và stats với calls Solver thực tế: 3x3 có 8 bước, 105/105 calls |
+| Ownership | Receipt proof được deepcopy, snapshot/proof cũ không đổi sau reveal và Restart |
+| Hủy session | Bốn ca Load/Restart sau khi có proof, trước commit, verifier cùng/khác Agent: CANCELLED, không reveal, 20/20 calls |
+| GUI handoff | Trace copy xuất JSON, controller xem/lưu được; reset xóa dữ liệu của phiên trước |
+
+Chạy từ Source/:
+
+```powershell
+python -m pytest tests/test_agent.py tests/test_trace.py tests/test_integration.py tests/test_gui.py -q
+python -m pytest tests -q -p no:cacheprovider
+python -m ruff check . --no-cache
+python -m ruff format --check . --no-cache
+```
+
+Kết quả thực thi lại: 522 test toàn project đạt (89 ca nhóm Agent/trace/integration/GUI).
+Native Tk smoke ở chế độ ẩn xác nhận Auto Solve, View Trace, Save Trace xuất
+JSON qua controller và Restart xóa sidebar/trace. Runtime Python 3.12.6/Windows;
+chưa thay thế kiểm thử runtime Python 3.11. Các phần AI note không chỉnh sửa.
+
+## Nghiệm thu giai đoạn 4 và bàn giao báo cáo — 20/11/2026
+
+- `tests/test_tv4_stage4.py` bổ sung 7 ca dùng backend thật: thay dữ liệu ẩn mà
+  giữ nguyên thông tin công khai, KB inconsistent, hủy sau reveal và hai run
+  đồng thời dùng chung Agent/DPLL nhưng tách query ledger theo session.
+- Toàn bộ project: **565 passed** trên Python 3.12.6/Windows; Ruff check và
+  format check đạt. Target Python 3.11 vẫn cần nghiệm thu trên interpreter đó.
+- `python -m experiments.tv4_acceptance --as-of 2026-11-20 --output ../docs/report`
+  chạy từ Source/; 11/11 ca khớp outcome, uniqueness và query ledger thực tế.
+- [Báo cáo TV4](../../docs/report/tv4.md) trình bày KB, entailment, loop, token,
+  trace, ví dụ 3x3 và giới hạn. CSV/metadata/trace mẫu ở cùng thư mục báo cáo.
+- Đây là nghiệm thu chức năng và số calls; benchmark hiệu năng lặp thuộc TV3.
+  Không đổi production Agent/API hoặc thêm nhật ký AI trong lượt này.
+
+## TV4 chốt các phần sau merge — 22/11/2026
+
+- Đã sửa fixture đọc JSON bằng UTF-8; test cần chuỗi FACT dùng demo chain riêng,
+  không thay puzzle museum_shift đang dùng. Không bỏ hoặc nới kiểm tra entailment.
+- Contract REMARK được thống nhất: narrative không tạo clause hoặc active ID;
+  khi reveal, trace giữ nguyên type/text. Thêm `tests/test_remark.py` với 5 ca.
+- GUI báo số accepted reveal được giữ nếu lỗi giữa Auto Solve; 6 regression
+  kiểm tra lỗi thường/timeout/lỗi dữ liệu trước và sau reveal. Không tạo trace giả.
+- Runner chọn ô UNKNOWN từ phân loại thực tế. Đã tạo lại CSV/metadata/trace
+  ngày 22/11; 11/11 ca khớp outcome, uniqueness và query ledger.
+- Toàn suite hiện tại **599 passed**, Ruff check/format đạt trên Python 3.12.6;
+  target Python 3.11 chưa chạy lại trong lượt này. Báo cáo TV4 đã cập nhật ví dụ
+  museum_shift và các phần bàn giao trong [tv4.md](../../docs/report/tv4.md).
 
 ## Nhật ký AI
 
-Các lượt AI phải append mục theo AGENTS.md.
+
+Chỉ bổ sung nhật ký khi người dùng yêu cầu rõ, theo AGENTS.md.
 
 ### 2026-11-08 — Đề xuất triển khai TV4 đến mốc 09/11
 - Thành viên: TV4 (Tùng).

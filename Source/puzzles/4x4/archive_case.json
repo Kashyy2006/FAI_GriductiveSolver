@@ -1,0 +1,346 @@
+{
+  "schema_version": "1.0",
+  "puzzle_id": "archive_case",
+  "size": 4,
+  "characters": [
+    {
+      "id": "A1",
+      "name": "Alice",
+      "profession": "Doctor",
+      "row": 0,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_A1",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "B3",
+            "A3"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "B1",
+      "name": "Ben",
+      "profession": "Guide",
+      "row": 0,
+      "col": 1,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_B1",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "C3",
+            "D3",
+            "A4"
+          ]
+        },
+        "k": 2
+      }
+    },
+    {
+      "id": "C1",
+      "name": "Chloe",
+      "profession": "Engineer",
+      "row": 0,
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_C1",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "B3",
+            "C4"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "D1",
+      "name": "David",
+      "profession": "Doctor",
+      "row": 0,
+      "col": 3,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_D1",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "D2",
+            "D3",
+            "C1",
+            "A1",
+            "C3",
+            "B2",
+            "B4"
+          ]
+        },
+        "k": 7
+      }
+    },
+    {
+      "id": "A2",
+      "name": "Emma",
+      "profession": "Librarian",
+      "row": 1,
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_A2",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A1",
+            "C1",
+            "D1"
+          ]
+        },
+        "k": 3
+      }
+    },
+    {
+      "id": "B2",
+      "name": "Felix",
+      "profession": "Doctor",
+      "row": 1,
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_B2",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "C2",
+            "D1"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "C2",
+      "name": "Grace",
+      "profession": "Doctor",
+      "row": 1,
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_C2",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A1",
+            "B2",
+            "A2"
+          ]
+        },
+        "k": 2
+      }
+    },
+    {
+      "id": "D2",
+      "name": "Henry",
+      "profession": "Librarian",
+      "row": 1,
+      "col": 3,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_D2",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "D4",
+            "B1"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "A3",
+      "name": "Iris",
+      "profession": "Doctor",
+      "row": 2,
+      "col": 0,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_A3",
+        "type": "AT_MOST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A2",
+            "D1"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "B3",
+      "name": "Jack",
+      "profession": "Engineer",
+      "row": 2,
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_B3",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "D2",
+            "C3",
+            "C4"
+          ]
+        },
+        "k": 2
+      }
+    },
+    {
+      "id": "C3",
+      "name": "Kate",
+      "profession": "Pilot",
+      "row": 2,
+      "col": 2,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_C3",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "C2",
+            "A2"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "D3",
+      "name": "Lily",
+      "profession": "Doctor",
+      "row": 2,
+      "col": 3,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_D3",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "D4",
+            "A4"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "A4",
+      "name": "Mia",
+      "profession": "Pilot",
+      "row": 3,
+      "col": 0,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_A4",
+        "type": "AT_MOST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "C4",
+            "A3"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "B4",
+      "name": "Noah",
+      "profession": "Librarian",
+      "row": 3,
+      "col": 1,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_B4",
+        "type": "AT_MOST",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "B1",
+            "A4"
+          ]
+        },
+        "k": 1
+      }
+    },
+    {
+      "id": "C4",
+      "name": "Oliver",
+      "profession": "Pilot",
+      "row": 3,
+      "col": 2,
+      "hidden_status": "INNOCENT",
+      "clue": {
+        "id": "clue_C4",
+        "type": "ODD",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "B2",
+            "D2",
+            "A3"
+          ]
+        }
+      }
+    },
+    {
+      "id": "D4",
+      "name": "Paul",
+      "profession": "Librarian",
+      "row": 3,
+      "col": 3,
+      "hidden_status": "CRIMINAL",
+      "clue": {
+        "id": "clue_D4",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "EXPLICIT",
+          "cells": [
+            "A1",
+            "B4",
+            "B1"
+          ]
+        },
+        "k": 2
+      }
+    }
+  ],
+  "initially_revealed": [
+    "D2",
+    "D3",
+    "C1",
+    "A1",
+    "C3",
+    "B2",
+    "B4"
+  ]
+}

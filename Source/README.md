@@ -2,20 +2,38 @@
 
 ## Phụ trách và công việc
 
-- Phụ trách: Cả nhóm, TV5 điều phối.
-- Mã nguồn Python; chạy lệnh từ đây. main.py là composition root, không phải game hoàn chỉnh.
-- Xem thử giao diện tĩnh bằng `python main.py --preview`; thao tác game bị khóa.
-- Đọc AGENTS.md, docs/interfaces.md và docs/puzzle_format.md trước khi làm.
-- Model/API v1 đã định nghĩa; phần thuật toán chưa triển khai sẽ raise NotImplementedError.
+- Cả nhóm; TV5 điều phối tích hợp. Mỗi thành viên chịu trách nhiệm module mình.
+- main.py là composition root nối loader, Encoder, DPLL, Agent, Engine và GUI.
+- Chạy lệnh Python từ thư mục này, dùng import tuyệt đối theo API v1.
+- --preview đã bị gỡ khỏi main.py; không dùng hướng dẫn preview tĩnh cũ.
 
-## Backend trên branch TV3
+## Hint và màn tự sinh
 
-- DPLL và uniqueness đã triển khai theo API v1, không dùng solver ngoài.
-- Core Encoder được tích hợp nguyên trạng từ TV2 commit 23955a5; parity chưa encode.
-- Agent/trace dùng implementation TV4 trên main. Engine và GUI còn stub.
-- Chạy uniqueness: `python -m experiments.benchmark --mode uniqueness --repeats 3`.
-- Chạy toàn bộ test: `python -m pytest tests -q -p no:cacheprovider`.
-- Hướng dẫn chi tiết và số liệu: `../docs/report/tv3.md`.
+- Hint lần đầu highlight clue hỗ trợ; lần tiếp theo trên cùng board mới nêu
+  nhân vật/verdict. Sau reveal/load/restart trở về cấp đầu.
+- Trong Case Library hoặc sidebar, chọn `Generate Puzzle…`, size 3×3/4×4/5×5 và seed.
+  Màn giữ kích thước cố định, được kiểm tra UNIQUE và đúng một forced move mỗi bước.
+- CLI từ Source/: `python -m game.generator --size 4 --seed 123`.
+- Mặc định mở Crossroads, một trong ba màn kết hợp nhiều clue mới; FACT-chain
+  chuyển sang Practice. Mọi màn chính phải UNIQUE và progressive SOLVED.
+
+## Trạng thái kiểm tra hiện tại
+
+- Engine, core/parity Encoder, regions/evaluator, DPLL/uniqueness, Agent/trace
+  và GUI đã triển khai đầy đủ theo contract v1.
+- Kiểm tra trên môi trường ảo Python 3.11.9 sạch ngày 20/11/2026: **564 passed**,
+  Ruff check/format (41 file Python), `pip check` và `main.py` Tkinter thật đạt.
+- Checklist nghiệm thu GUI & báo cáo TV5: [tv5_stage4_acceptance.md](../docs/tv5_stage4_acceptance.md)
+  và [tv5.md](../docs/report/tv5.md).
+- Lệnh chạy ứng dụng: `python main.py`.
+- Lệnh test: `python -m pytest tests -q -p no:cacheprovider`.
+- Lệnh lint/format: `python -m ruff check . --no-cache` và `python -m ruff format --check . --no-cache`.
+- Runner benchmark: `python -m experiments.benchmark --mode all --repeats 3`.
+- Runner nghiệm thu: `python -m experiments.phase3 --repeats 3 --timeout 10` (giai đoạn 3),
+  `python -m experiments.phase4 --repeats 5 --timeout 10` (giai đoạn 4).
+- Kết quả giai đoạn 4 (Python 3.11.9): **564 passed**, Ruff check/format và `pip check` đạt;
+  kết quả lưu tại `experiments/results/phase4/` và báo cáo tại `../docs/report/tv3_phase4.md`.
+- Kết quả trong `experiments/results/phase3/` là snapshot giai đoạn 3.
 
 ## Nhật ký AI
 
@@ -50,3 +68,56 @@
 - Nội dung và lý do: Codex cập nhật hướng dẫn chạy solver, uniqueness và benchmark; phân biệt phần TV3 đã triển khai với Engine/GUI còn stub. Dẫn tới báo cáo và số liệu thực tế để nhóm kiểm tra.
 - Kiểm tra: Đối chiếu lệnh với CLI và kết quả đã chạy trên Python 3.11.0; lượt này chỉ bổ sung Markdown.
 - Còn thiếu: Chạy lại luồng game sau tích hợp Engine/GUI thật.
+
+### 2026-11-12 — Gỡ chế độ preview giao diện tĩnh
+
+- Thành viên: Phúc (TV5).
+- AI: Codex, GPT-6.
+- Yêu cầu: Bỏ preview tĩnh vì dự án chuyển sang chạy luồng game chính.
+- File thay đổi: `main.py`, `gui/preview.py`, `README.md`.
+- Nội dung và lý do: Bỏ cờ `--preview` và module tạo PublicState tĩnh; giữ composition root kết nối loader, Engine, Agent và GUI. Cập nhật hướng dẫn trạng thái backend theo nhánh đã tích hợp.
+- Kiểm tra: Chưa chạy test hoặc Ruff.
+- Còn thiếu: Chưa kiểm tra khởi chạy GUI sau khi gỡ preview.
+
+### 2026-11-14 — Đồng bộ hướng dẫn chạy bản tích hợp TV3
+
+- Thành viên: TV3 (Mạnh, theo phân công).
+- AI: Codex.
+- Yêu cầu: Ghi lại trạng thái hiện tại sau phần việc TV3 deadline 14/11.
+- File thay đổi: README.md trong Source/.
+- Nội dung và lý do: Thay mô tả Engine/GUI stub bằng trạng thái bản tích hợp; cập nhật lệnh main.py, experiments.phase3, kết quả kiểm tra và liên kết báo cáo. Không thay đổi mã nguồn trong lượt cập nhật README này.
+- Kiểm tra: Đối chiếu hướng dẫn với entry point hiện có và kết quả triển khai trước: 531 test, 120 row benchmark; không chạy lại suite.
+- # Còn thiếu: Nghiệm thu GUI thủ công cùng nhóm; không tự commit/push.
+
+### 2026-11-14 — Cập nhật nghiệm thu GUI
+
+- Thành viên: Phúc (TV5).
+- AI: Codex.
+- Yêu cầu: Cập nhật trạng thái kiểm tra sau khi nghiệm thu TV5.
+- File thay đổi: `README.md`.
+- Nội dung và lý do: Ghi kết quả mới nhất của bộ test và Ruff để README tổng hợp khớp trạng thái hiện tại.
+- Kiểm tra: 517 test đạt; Ruff check và format check đạt.
+- Còn thiếu: Chưa rà bố cục GUI ở các kích thước màn hình khác.
+
+<<<<<<< HEAD
+
+### 2026-11-21 — Cập nhật trạng thái TV3 giai đoạn 4
+
+- Thành viên: Mạnh (TV3).
+- AI: Gemini.
+- Yêu cầu: Cập nhật lệnh chạy và kết quả kiểm tra TV3 giai đoạn 4.
+- File thay đổi: `README.md`.
+- Nội dung và lý do: Thêm lệnh `experiments.phase4` và đường dẫn kết quả/báo cáo giai đoạn 4.
+- Kiểm tra: 564 test, Ruff check/format và `pip check` đạt trên Python 3.11.9.
+- # Còn thiếu: Chưa push lên remote.
+
+### 2026-11-20 — Đồng bộ trạng thái kiểm tra môi trường sạch TV5
+
+- Thành viên: Phúc (TV5).
+- AI: Antigravity (Gemini).
+- Yêu cầu: Hoàn thiện README và nghiệm thu chạy sạch giai đoạn 4.
+- File thay đổi: `README.md`.
+- Nội dung và lý do: Cập nhật kết quả kiểm tra trên venv Python 3.11.9 sạch và bổ sung liên kết tới checklist/báo cáo TV5.
+- Kiểm tra: 564/564 test đạt, Ruff check/format 41 file, `pip check` và smoke test `main.py` đạt trên Python 3.11.9.
+- Còn thiếu: Không.
+  > > > > > > > origin/feature/GUI

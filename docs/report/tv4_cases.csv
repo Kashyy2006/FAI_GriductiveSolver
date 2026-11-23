@@ -1,0 +1,12 @@
+group,puzzle_path,puzzle_id,size,initial_known,initial_criminal,initial_innocent,initial_unknown,outcome,deduction_steps,actual_sat_calls,trace_queries,query_order_matches,decisions,propagations,backtracks,uniqueness,expected_outcome,expected_uniqueness,checks_passed,error_type
+shared_phase3,puzzles/3x3/example_01.json,museum_shift,3,1,0,2,6,SOLVED,8,105,105,True,0,472,0,UNIQUE,SOLVED,UNIQUE,True,
+shared_phase3,puzzles/4x4/example_01.json,example_4x4_chain,4,1,0,1,14,SOLVED,15,301,301,True,0,1856,0,UNIQUE,SOLVED,UNIQUE,True,
+shared_phase3,experiments/puzzles/synthetic_3x3_fact_chain.json,synthetic_3x3_fact_chain,3,1,0,1,7,SOLVED,8,105,105,True,0,393,0,UNIQUE,SOLVED,UNIQUE,True,
+shared_phase3,experiments/puzzles/synthetic_3x3_row_counts.json,synthetic_3x3_row_counts,3,1,0,3,5,SOLVED,8,105,105,True,0,469,0,UNIQUE,SOLVED,UNIQUE,True,
+shared_phase3,experiments/puzzles/synthetic_3x3_stuck_unique.json,synthetic_3x3_stuck_unique,3,1,0,0,8,STUCK,0,17,17,True,0,17,0,UNIQUE,STUCK,UNIQUE,True,
+shared_phase3,experiments/puzzles/synthetic_4x4_fact_chain.json,synthetic_4x4_fact_chain,4,1,0,1,14,SOLVED,15,301,301,True,0,1856,0,UNIQUE,SOLVED,UNIQUE,True,
+shared_phase3,experiments/puzzles/synthetic_4x4_row_counts.json,synthetic_4x4_row_counts,4,1,0,4,11,SOLVED,15,301,301,True,0,2265,0,UNIQUE,SOLVED,UNIQUE,True,
+shared_phase3,experiments/puzzles/synthetic_4x4_stuck_unique.json,synthetic_4x4_stuck_unique,4,1,0,0,15,STUCK,0,31,31,True,0,31,0,UNIQUE,STUCK,UNIQUE,True,
+shared_phase3,tests/fixtures/ambiguous.json,fixture_ambiguous,3,1,0,0,8,STUCK,0,17,17,True,0,17,0,MULTIPLE,STUCK,MULTIPLE,True,
+demo,puzzles/3x3/demo_forced_unknown.json,demo_3x3_forced_unknown,3,1,0,1,7,SOLVED,8,105,105,True,0,393,0,UNIQUE,SOLVED,UNIQUE,True,
+demo,puzzles/3x3/demo_stuck.json,demo_3x3_stuck,3,1,0,1,7,STUCK,1,35,35,True,0,64,0,MULTIPLE,STUCK,MULTIPLE,True,
