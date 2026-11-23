@@ -177,6 +177,36 @@ Nếu Auto Solve lỗi sau accepted reveal, GUI refresh từ Engine và báo s�
 đã được giữ kể từ token khởi chạy. Không báo board unchanged hoặc tạo trace
 hoàn tất giả; model v1 chưa trả partial AutoSolveResult khi exception.
 
+## Bổ sung: Hint hai cấp và sinh puzzle
+
+Các model, Protocol và chữ ký v1 ở trên giữ nguyên. Helper bổ sung:
+
+```python
+find_clue_hint(state: PublicState, agent: DeductiveAgent) -> tuple[HintResult, tuple[str, ...]]
+generate_puzzle(size: int, seed: int, *, timeout_seconds: float = 20.0,
+                should_cancel: CancelCheck | None = None) -> Puzzle
+write_generated_puzzle(size: int, seed: int, directory: Path,
+                       *, should_cancel: CancelCheck | None = None) -> Path
+```
+
+- `agent.hints.find_clue_hint` chỉ dùng public snapshot. HintResult.active_clue_ids
+  vẫn là toàn bộ clue logic công khai; tuple thứ hai mới là tập hỗ trợ đã kiểm chứng.
+  Phân tích loại clue trên bản sao bằng REMARK tautology, giữ nguyên verdict công khai.
+  Tập hỗ trợ không cam kết có số phần tử nhỏ nhất; queries chứa mọi call thực tế.
+- GUI cấp 1 highlight chủ thẻ của clue hỗ trợ, không hiện target/verdict; cấp 2
+  mới hiện nhân vật/verdict. Cache chỉ phục vụ hiển thị trên cùng token, không cấp
+  quyền reveal; Engine vẫn tự chứng minh khi submit. Cache bị bỏ sau reveal/load/restart.
+- `game.generator` là authoring/validation private: size chỉ 3/4/5, seed nguyên
+  0..2147483647, kích thước không đổi khi chơi. Cùng phiên bản/size/seed tái lập cùng puzzle.
+  Kiểm tra UNIQUE dùng full clues không thêm hidden labels; kiểm tra progressive
+  dùng Agent/Engine thật, bắt buộc đúng một forced verdict ở mỗi bước chưa hoàn thành
+  và KB cuối consistent. Timeout/cancel/lỗi không trả puzzle dự phòng chưa chứng nhận.
+- Bộ sinh v2 dùng puzzle_id/file `generated_v2_<size>x<size>_seed_<seed>` để tách
+  khỏi file/tiến độ v1. JSON vẫn là schema 1.0; model, signature và dependency không đổi.
+- Worker GUI nhận Path sau khi ghi JSON v1 nguyên tử, không nhận private labels.
+  Chỉ main thread nạp màn vào Engine sau kiểm tra task/session. File sinh nằm trong
+  puzzles/generated; progress và replay vẫn chỉ ghi hành động/thông tin đã công khai.
+
 ## Thực nghiệm
 
 `python -m experiments.benchmark` là entry point đo hệ thống đã tích hợp.
