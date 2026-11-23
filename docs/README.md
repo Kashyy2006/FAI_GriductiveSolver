@@ -13,8 +13,9 @@
   phương pháp đo, số liệu thật và giới hạn.
 - [interfaces.md](interfaces.md): giữ API v1; cập nhật mô tả entry point benchmark
   và hai trường đối chiếu trace_query_count/query_count_matches.
-- [README gốc](../README.md): trạng thái hiện tại và bảng tóm tắt câu hỏi/yêu cầu
-  của người dùng về TV3. Chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
+- [README gốc](../README.md): giới thiệu dự án, cài đặt và cách chơi.
+- [AI_LOG.md](../AI_LOG.md): nhật ký và ghi nhận kiểm tra trước đây từ README gốc.
+  Chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
 
 ## Kiểm tra giai đoạn 2 và lịch sử
 

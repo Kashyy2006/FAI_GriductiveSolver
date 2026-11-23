@@ -1,10 +1,12 @@
 # Chỉ mục lịch sử AI
 
-Chỉ mục này tổng hợp các mục đang tồn tại trong README, không tạo nhật ký
+Chỉ mục này tổng hợp các mục lịch sử trong README và AI_LOG.md, không tạo nhật ký
 mới và không phục dựng các prompt/sự kiện đã bị xóa. Các ghi nhận tại nhiều
 thư mục về cùng công việc được giữ riêng vì mỗi module có lịch sử cục bộ.
 
-Đã rà 29 README, 26 file có lịch sử, tổng 66 mục có ngày. Những lượt AI mới
+Thống kê ở lần lập chỉ mục trước: 29 README, 26 file có lịch sử, tổng 66 mục
+có ngày. Nhật ký từ README gốc đã chuyển sang [AI_LOG.md](../AI_LOG.md);
+nhật ký module vẫn nằm trong README tương ứng. Những lượt AI mới
 chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
 
 ## Quy tắc thứ tự
@@ -34,9 +36,9 @@ chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
 | Ngày | Thành viên ghi trong mục | Nội dung | Nguồn |
 |---|---|---|---|
 | 2026-11-05 | TV4 (Tùng). | Phân công giai đoạn xây dựng module nền tảng | [docs/README.md](../docs/README.md) |
-| 2026-11-06 | TV2. | Hoàn thiện validation và kiểm thử regions/evaluator | [README.md](../README.md) |
-| 2026-11-06 | TV2. | Mã hóa CNF cho ba clue cơ bản | [README.md](../README.md) |
-| 2026-11-06 | TV2. | Hoàn thiện CNF encoder cho sáu clue core | [README.md](../README.md) |
+| 2026-11-06 | TV2. | Hoàn thiện validation và kiểm thử regions/evaluator | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-06 | TV2. | Mã hóa CNF cho ba clue cơ bản | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-06 | TV2. | Hoàn thiện CNF encoder cho sáu clue core | [AI_LOG.md](../AI_LOG.md) |
 | 2026-11-06 | TV2; | Kiểm tra đầu vào vùng và ngữ nghĩa clue | [Source/logic/README.md](../Source/logic/README.md) |
 | 2026-11-06 | TV2. | Triển khai encoder cho ba clue cơ bản | [Source/logic/README.md](../Source/logic/README.md) |
 | 2026-11-06 | TV2. | Hoàn thiện CNF encoder cho sáu clue core | [Source/logic/README.md](../Source/logic/README.md) |
@@ -48,7 +50,7 @@ chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
 | 2026-11-07 | TV1 — Dương Thiên Phú. | Hoàn thành TV1 giai đoạn 2 | [Source/tests/README.md](../Source/tests/README.md) |
 | 2026-11-07 | TV1 — Dương Thiên Phú. | Hoàn thành TV1 giai đoạn 2 | [Source/tests/fixtures/README.md](../Source/tests/fixtures/README.md) |
 | 2026-11-07 | TV1 — Dương Thiên Phú. | Hoàn thành TV1 giai đoạn 2 | [docs/README.md](../docs/README.md) |
-| 2026-11-08 | TV4 (Tùng). | Cập nhật tiến độ bàn giao TV4 | [README.md](../README.md) |
+| 2026-11-08 | TV4 (Tùng). | Cập nhật tiến độ bàn giao TV4 | [AI_LOG.md](../AI_LOG.md) |
 | 2026-11-08 | Phúc | Nối composition root cho GUI | [Source/README.md](../Source/README.md) |
 | 2026-11-08 | Phúc (phân công TV5) | Thêm chế độ xem trước giao diện | [Source/README.md](../Source/README.md) |
 | 2026-11-08 | TV4 (Tùng). | Đề xuất triển khai TV4 đến mốc 09/11 | [Source/agent/README.md](../Source/agent/README.md) |
@@ -58,10 +60,10 @@ chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
 | 2026-11-08 | Phúc (phân công TV5) | Tạo bộ avatar cho thẻ nhân vật | [Source/gui/assets/README.md](../Source/gui/assets/README.md) |
 | 2026-11-08 | TV4 (Tùng). | Kiểm thử nghiệm thu Deductive Agent | [Source/tests/README.md](../Source/tests/README.md) |
 | 2026-11-08 | TV4 (Tùng). | Cập nhật kết quả nghiệm thu TV4 | [docs/README.md](../docs/README.md) |
-| 2026-11-09 | TV3 (Mạnh). | Đọc các branch và làm rõ phần việc TV3 | [README.md](../README.md) |
-| 2026-11-09 | TV3 (Mạnh). | Chọn branch nền cho TV3 | [README.md](../README.md) |
-| 2026-11-09 | TV3 (Mạnh). | Hướng dẫn bước đầu triển khai DPLL | [README.md](../README.md) |
-| 2026-11-09 | TV3 (Mạnh). | Tổng hợp hỗ trợ AI cho phần TV3 | [README.md](../README.md) |
+| 2026-11-09 | TV3 (Mạnh). | Đọc các branch và làm rõ phần việc TV3 | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-09 | TV3 (Mạnh). | Chọn branch nền cho TV3 | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-09 | TV3 (Mạnh). | Hướng dẫn bước đầu triển khai DPLL | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-09 | TV3 (Mạnh). | Tổng hợp hỗ trợ AI cho phần TV3 | [AI_LOG.md](../AI_LOG.md) |
 | 2026-11-09 | TV3 (Mạnh, theo phân công). | Tổng hợp tài liệu chạy backend TV3 | [Source/README.md](../Source/README.md) |
 | 2026-11-09 | TV3 (Mạnh, theo phân công). | Xây runner và đo uniqueness | [Source/experiments/README.md](../Source/experiments/README.md) |
 | 2026-11-09 | TV3 (Mạnh, assigned module owner). | Synthetic suite generation | [Source/experiments/puzzles/README.md](../Source/experiments/puzzles/README.md) |
@@ -71,16 +73,16 @@ chỉ ghi nhật ký khi người dùng yêu cầu rõ theo AGENTS.md.
 | 2026-11-09 | TV3 (Mạnh, theo phân công). | Triển khai DPLL và uniqueness với Codex | [Source/solver/README.md](../Source/solver/README.md) |
 | 2026-11-09 | TV3 (Mạnh, theo phân công). | Bổ sung kiểm thử TV3 và tích hợp test TV2 | [Source/tests/README.md](../Source/tests/README.md) |
 | 2026-11-09 | TV3 (Mạnh, theo phân công). | Soạn phần thuật toán và thực nghiệm TV3 | [docs/report/README.md](../docs/report/README.md) |
-| 2026-11-12 | Phúc (TV5). | Gỡ chế độ preview giao diện tĩnh | [README.md](../README.md) |
-| 2026-11-12 | TV2. | Bổ sung và nghiệm thu kiểm thử Parity | [README.md](../README.md) |
+| 2026-11-12 | Phúc (TV5). | Gỡ chế độ preview giao diện tĩnh | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-12 | TV2. | Bổ sung và nghiệm thu kiểm thử Parity | [AI_LOG.md](../AI_LOG.md) |
 | 2026-11-12 | Phúc (TV5). | Gỡ chế độ preview giao diện tĩnh | [Source/README.md](../Source/README.md) |
 | 2026-11-12 | Phúc (TV5). | Nối gameplay, reset và trace | [Source/gui/README.md](../Source/gui/README.md) |
 | 2026-11-12 | TV1 — Dương Thiên Phú. | TV1 nghiệm thu giai đoạn 3 | [Source/puzzles/3x3/README.md](../Source/puzzles/3x3/README.md) |
 | 2026-11-12 | TV1 — Dương Thiên Phú. | TV1 nghiệm thu giai đoạn 3 | [Source/tests/README.md](../Source/tests/README.md) |
 | 2026-11-12 | TV1 — Dương Thiên Phú. | TV1 nghiệm thu giai đoạn 3 | [docs/README.md](../docs/README.md) |
-| 2026-11-13 | TV3 (Mạnh, theo phân công). | Đối chiếu phần TV3 với phân công giai đoạn 3 | [README.md](../README.md) |
-| 2026-11-14 | TV3 (Mạnh, theo phân công). | Tổng hợp công việc TV3 và câu hỏi đã trao đổi | [README.md](../README.md) |
-| 2026-11-14 | Phúc (TV5). | Đồng bộ trạng thái nghiệm thu | [README.md](../README.md) |
+| 2026-11-13 | TV3 (Mạnh, theo phân công). | Đối chiếu phần TV3 với phân công giai đoạn 3 | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-14 | TV3 (Mạnh, theo phân công). | Tổng hợp công việc TV3 và câu hỏi đã trao đổi | [AI_LOG.md](../AI_LOG.md) |
+| 2026-11-14 | Phúc (TV5). | Đồng bộ trạng thái nghiệm thu | [AI_LOG.md](../AI_LOG.md) |
 | 2026-11-14 | TV3 (Mạnh, theo phân công). | Đồng bộ hướng dẫn chạy bản tích hợp TV3 | [Source/README.md](../Source/README.md) |
 | 2026-11-14 | Phúc (TV5). | Cập nhật nghiệm thu GUI | [Source/README.md](../Source/README.md) |
 | 2026-11-14 | TV3 (Mạnh, theo phân công). | Ghi nhận runner nghiệm thu giai đoạn 3 | [Source/experiments/README.md](../Source/experiments/README.md) |

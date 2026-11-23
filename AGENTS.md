@@ -51,11 +51,12 @@ Người dùng đã cho phép thiết lập các định nghĩa v1 trong lần t
 Theo yêu cầu người dùng, toàn bộ nhật ký cũ đã xóa; không tái tạo lịch sử cũ
 hoặc ghi mục khởi tạo mới trong lần reset này. Những lượt dùng AI tiếp theo:
 
-1. Chỉ ghi hoặc cập nhật nhật ký AI trong README khi người dùng yêu cầu rõ cho
-   lượt/prompt đó. Không tự động ghi sau mỗi lượt trao đổi hoặc sửa code. Khi
-   được yêu cầu, append vào mục `Nhật ký AI` của README ở từng thư mục có file
-   trực tiếp thay đổi; không ghi đè lịch sử. Sửa log đơn thuần không tạo chuỗi
-   log đệ quy.
+1. Chỉ ghi hoặc cập nhật nhật ký AI khi người dùng yêu cầu rõ cho lượt/prompt đó.
+   Không tự động ghi sau mỗi lượt trao đổi hoặc sửa code. Nhật ký cấp dự án
+   nằm trong `AI_LOG.md`; README.md gốc dành cho mô tả, cài đặt và cách chơi.
+   Khi được yêu cầu, append vào mục `Nhật ký AI` trong `AI_LOG.md` cho cấp
+   dự án hoặc README của từng module có file trực tiếp thay đổi; không ghi đè
+   lịch sử. Sửa log đơn thuần không tạo chuỗi log đệ quy.
 2. Ghi ngày Asia/Saigon, thành viên, công cụ/model nếu biết, yêu cầu, file đổi,
    nội dung/lý do, kiểm tra đã chạy và phần còn thiếu. Không bịa danh tính.
 3. Lượt chỉ trao đổi cũng chỉ ghi khi người dùng yêu cầu rõ; khi ghi thì dùng
